@@ -205,6 +205,32 @@ void ESPADFSpeaker::volume_down() {
     this->set_volume(current_volume - 10);
 }
 
+void ESPADFSpeaker::handle_mode_button() {
+    if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
+        ESP_LOGI(TAG, "Mode button, speaker stopped");
+        this->play_url("http://streaming.tdiradio.com:8000/house.mp3");
+    } else {
+        ESP_LOGI(TAG, "State is stopping");
+        this->cleanup_audio_pipeline();
+        this->stop();
+    }
+}
+
+void ESPADFSpeaker::handle_play_button() {
+    ESP_LOGI(TAG, "Play button action");
+    // Add code to play
+}
+
+void ESPADFSpeaker::handle_set_button() {
+    ESP_LOGI(TAG, "Set button action");
+    // Add code to handle set action
+}
+
+void ESPADFSpeaker::handle_rec_button() {
+    ESP_LOGI(TAG, "Record button action");
+    // Add code to start recording
+}
+
 void ESPADFSpeaker::initialize_audio_pipeline() {
     esp_err_t ret;
 
