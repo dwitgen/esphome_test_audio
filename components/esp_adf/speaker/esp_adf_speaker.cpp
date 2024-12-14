@@ -16,6 +16,10 @@
 #include <filter_resample.h>
 #include <i2s_stream.h>
 #include <raw_stream.h>
+#include "esp_http_client.h"
+#include "http_stream.h"
+#include "audio_pipeline.h"
+#include "mp3_decoder.h"
 
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
