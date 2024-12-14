@@ -231,6 +231,58 @@ void ESPADFSpeaker::handle_rec_button() {
     // Add code to start recording
 }
 
+void ESPADFSpeaker::handle_button_event(int32_t id, int32_t event_type) {
+    ESP_LOGI(TAG, "Handle Button event received: id=%d", id);
+    if (event_type != 1 && event_type != 3) { // Only process the event if the event_type is 1 click action or 3 long press action
+        ESP_LOGI(TAG, "Ignoring event with type: %d", event_type);
+        return;
+    }
+    uint32_t current_time = millis();
+    static uint32_t last_button_press[7] = {0};
+    uint32_t debounce_time = 200;
+
+    if (id == BUTTON_MODE_ID) {
+        debounce_time = 500;
+    }
+
+    if (current_time - last_button_press[id] > debounce_time) {
+        switch (id) {
+            case 0:
+                ESP_LOGI(TAG, "Unkonw Button detected");
+                //volume_down();
+                break;
+            case 1:
+                ESP_LOGI(TAG, "Record button detected");
+                handle_rec_button();
+                break;
+            case 2:
+                ESP_LOGI(TAG, "Set button detected");
+                handle_set_button();
+                break;
+            case 3:
+                ESP_LOGI(TAG, "Play button detected");
+                handle_play_button();
+                break;
+            case 4:
+                ESP_LOGI(TAG, "Mode button detected");
+                handle_mode_button();
+                break;
+            case 5:
+                ESP_LOGI(TAG, "Volume down detected");
+                volume_down();
+                break;
+            case 6:
+                ESP_LOGI(TAG, "Volume up detected");
+                volume_up();
+                break;
+            default:
+                ESP_LOGW(TAG, "Unhandled button event id: %d", id);
+                break;
+        }
+        last_button_press[id] = current_time;
+    }
+}
+
 void ESPADFSpeaker::initialize_audio_pipeline() {
     esp_err_t ret;
 
