@@ -65,6 +65,9 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
+    audio_init_var = await cg.get_variable("audio_init")
+    cg.add(var.set_audio_init(audio_init_var))
+
     cg.add_define("USE_ESP_ADF")
 
     cg.add_platformio_option("build_unflags", "-Wl,--end-group")
