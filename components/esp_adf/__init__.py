@@ -3,7 +3,6 @@ import os
 import esphome.config_validation as cv
 import esphome.codegen as cg
 import esphome.final_validate as fv
-from ..audio_init import AudioInit
 
 from esphome.components import esp32
 
