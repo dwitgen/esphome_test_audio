@@ -65,7 +65,7 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
-    audio_init_var = cg.new_Pvariable(cg.declare_id(AudioInit))
+    audio_init_var = cg.new_Pvariable(cg.new_id(), cg.global_ns.class_("AudioInit"))
     cg.add(var.set_audio_init(audio_init_var))
 
     cg.add_define("USE_ESP_ADF")
