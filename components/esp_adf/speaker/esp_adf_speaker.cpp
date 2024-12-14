@@ -172,6 +172,30 @@ void ESPADFSpeaker::volume_down() {
     this->set_volume(current_volume - 10);
 }
 
+void ESPADFSpeaker::initialize_audio_pipeline() {
+    esp_err_t ret;
+
+    ret = configure_resample_filter(&this->http_filter_);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error initializing resample filter: %s", esp_err_to_name(ret));
+        return;
+    }
+
+    ret = configure_i2s_stream_writer_http(&this->i2s_stream_writer_http_);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error initializing I2S stream writer for HTTP: %s", esp_err_to_name(ret));
+        return;
+    }
+
+    ret = configure_i2s_stream_writer_raw(&this->i2s_stream_writer_raw_);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error initializing I2S stream writer for raw: %s", esp_err_to_name(ret));
+        return;
+    }
+
+    ESP_LOGI(TAG, "Audio pipeline and elements initialized successfully");
+}
+
 void ESPADFSpeaker::setup() {
   ESP_LOGCONFIG(TAG, "Setting up ESP ADF Speaker...");
 
