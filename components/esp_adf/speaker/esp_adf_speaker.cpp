@@ -24,7 +24,6 @@
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
 #include <board.h>
-#include "audio_init.h" 
 #endif
 
 namespace esphome {
