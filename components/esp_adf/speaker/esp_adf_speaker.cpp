@@ -120,6 +120,39 @@ esp_err_t configure_i2s_stream_writer_raw(audio_element_handle_t *i2s_stream_wri
     return ESP_OK;
 }
 
+// Function to configure resample filter
+esp_err_t configure_resample_filter(audio_element_handle_t *filter) {
+    rsp_filter_cfg_t rsp_cfg = {
+        .src_rate = 44100,
+        .src_ch = 2,
+        .dest_rate = 44100,
+        .dest_bits = 16,
+        .dest_ch = 1,
+        .src_bits = 16,
+        .mode = RESAMPLE_DECODE_MODE,
+        .max_indata_bytes = RSP_FILTER_BUFFER_BYTE,
+        .out_len_bytes = RSP_FILTER_BUFFER_BYTE,
+        .type = ESP_RESAMPLE_TYPE_AUTO,
+        .complexity = 2,
+        .down_ch_idx = 0,
+        .prefer_flag = ESP_RSP_PREFER_TYPE_SPEED,
+        .out_rb_size = RSP_FILTER_RINGBUFFER_SIZE,
+        .task_stack = RSP_FILTER_TASK_STACK,
+        .task_core = RSP_FILTER_TASK_CORE,
+        .task_prio = RSP_FILTER_TASK_PRIO,
+        .stack_in_ext = true,
+    };
+
+    *filter = rsp_filter_init(&rsp_cfg);
+    if (*filter == NULL) {
+        ESP_LOGE(TAG, "Failed to initialize resample filter");
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "Resample filter initialized");
+    return ESP_OK;
+}
+
 // Define ADC configuration added for button controls, maybe not correct to have in speaker config
 #define ADC_WIDTH_BIT    ADC_WIDTH_BIT_12
 #define ADC_ATTEN        ADC_ATTEN_DB_12
