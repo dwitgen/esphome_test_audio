@@ -3,6 +3,7 @@ import os
 import esphome.config_validation as cv
 import esphome.codegen as cg
 import esphome.final_validate as fv
+from ..audio_init import AudioInit
 
 from esphome.components import esp32
 
@@ -64,9 +65,6 @@ CONFIG_SCHEMA = cv.All(
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-
-    audio_init_var = cg.new_Pvariable(cg.new_id(), cg.global_ns.class_("AudioInit"))
-    cg.add(var.set_audio_init(audio_init_var))
 
     cg.add_define("USE_ESP_ADF")
 
