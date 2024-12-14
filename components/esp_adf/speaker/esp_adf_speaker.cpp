@@ -32,6 +32,94 @@ namespace esp_adf {
 static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
+esp_err_t configure_i2s_stream_writer_http(audio_element_handle_t *i2s_stream_writer) {
+    i2s_driver_config_t i2s_config = {
+        .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_TX),
+        .sample_rate = 44100,
+        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+        .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
+        .communication_format = I2S_COMM_FORMAT_STAND_I2S,
+        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
+        .dma_buf_count = 8,
+        .dma_buf_len = 1024,
+        .use_apll = false,
+        .tx_desc_auto_clear = true,
+        .fixed_mclk = 0,
+        .mclk_multiple = I2S_MCLK_MULTIPLE_256,
+        .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT,
+    };
+
+    i2s_stream_cfg_t i2s_cfg = {
+        .type = AUDIO_STREAM_WRITER,
+        .i2s_config = i2s_config,
+        .i2s_port = I2S_NUM_0,
+        .use_alc = false,
+        .volume = 0,
+        .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE,
+        .task_stack = I2S_STREAM_TASK_STACK,
+        .task_core = I2S_STREAM_TASK_CORE,
+        .task_prio = I2S_STREAM_TASK_PRIO,
+        .stack_in_ext = false,
+        .multi_out_num = 0,
+        .uninstall_drv = true,
+        .need_expand = false,
+        .expand_src_bits = I2S_BITS_PER_SAMPLE_16BIT,
+    };
+
+    *i2s_stream_writer = i2s_stream_init(&i2s_cfg);
+    if (*i2s_stream_writer == NULL) {
+        ESP_LOGE(TAG, "Failed to initialize I2S stream writer for HTTP");
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "I2S stream writer for HTTP initialized");
+    return ESP_OK;
+}
+
+esp_err_t configure_i2s_stream_writer_raw(audio_element_handle_t *i2s_stream_writer) {
+    i2s_driver_config_t i2s_config = {
+        .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_TX),
+        .sample_rate = 16000,
+        .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
+        .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
+        .communication_format = I2S_COMM_FORMAT_STAND_I2S,
+        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
+        .dma_buf_count = 8,
+        .dma_buf_len = 1024,
+        .use_apll = false,
+        .tx_desc_auto_clear = true,
+        .fixed_mclk = 0,
+        .mclk_multiple = I2S_MCLK_MULTIPLE_256,
+        .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT,
+    };
+
+    i2s_stream_cfg_t i2s_cfg = {
+        .type = AUDIO_STREAM_WRITER,
+        .i2s_config = i2s_config,
+        .i2s_port = I2S_NUM_0,
+        .use_alc = false,
+        .volume = 0,
+        .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE,
+        .task_stack = I2S_STREAM_TASK_STACK,
+        .task_core = I2S_STREAM_TASK_CORE,
+        .task_prio = I2S_STREAM_TASK_PRIO,
+        .stack_in_ext = false,
+        .multi_out_num = 0,
+        .uninstall_drv = true,
+        .need_expand = false,
+        .expand_src_bits = I2S_BITS_PER_SAMPLE_16BIT,
+    };
+
+    *i2s_stream_writer = i2s_stream_init(&i2s_cfg);
+    if (*i2s_stream_writer == NULL) {
+        ESP_LOGE(TAG, "Failed to initialize I2S stream writer for raw");
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "I2S stream writer for raw initialized");
+    return ESP_OK;
+}
+
 // Define ADC configuration added for button controls, maybe not correct to have in speaker config
 #define ADC_WIDTH_BIT    ADC_WIDTH_BIT_12
 #define ADC_ATTEN        ADC_ATTEN_DB_12
