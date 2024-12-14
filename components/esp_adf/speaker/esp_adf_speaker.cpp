@@ -278,6 +278,60 @@ void ESPADFSpeaker::setup() {
   adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
    
 }
+void ESPADFSpeaker::play_url(const std::string &url) {
+ if (this->state_ == speaker::STATE_RUNNING || this->state_ == speaker::STATE_STARTING) {
+     ESP_LOGI(TAG, "Audio stream is already running, ignoring play request");
+     return;
+ }
+
+ ESP_LOGI(TAG, "Attempting to play URL: %s", url.c_str());
+
+ // Cleanup any existing pipeline
+ this->cleanup_audio_pipeline();
+
+ // Initialize the HTTP stream reader
+ http_stream_cfg_t http_cfg = HTTP_STREAM_CFG_DEFAULT();
+ http_cfg.type = AUDIO_STREAM_READER;
+ http_cfg.out_rb_size = HTTP_STREAM_RINGBUFFER_SIZE;
+ this->http_stream_reader_ = http_stream_init(&http_cfg);
+ if (this->http_stream_reader_ == nullptr) {
+     ESP_LOGE(TAG, "Failed to initialize HTTP stream reader");
+     return;
+ }
+
+ // Set the URL for the HTTP stream
+ audio_element_set_uri(this->http_stream_reader_, url.c_str());
+
+ // Initialize the MP3 decoder
+ mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
+ audio_element_handle_t mp3_decoder = mp3_decoder_init(&mp3_cfg);
+ if (mp3_decoder == nullptr) {
+     ESP_LOGE(TAG, "Failed to initialize MP3 decoder");
+     return;
+ }
+
+ // Create and initialize the audio pipeline
+ audio_pipeline_cfg_t pipeline_cfg = {
+     .rb_size = 8 * 1024,
+ };
+ this->pipeline_ = audio_pipeline_init(&pipeline_cfg);
+
+ // Register elements to the pipeline
+ audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http");
+ audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3");
+ audio_pipeline_register(this->pipeline_, this->http_filter_, "filter");
+ audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s");
+
+ // Link elements in the pipeline
+ const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
+ audio_pipeline_link(this->pipeline_, &link_tag[0], 4);
+
+ // Start the audio pipeline
+ audio_pipeline_run(this->pipeline_);
+ gpio_set_level(PA_ENABLE_GPIO, 1);  // Enable audio amplifier
+
+ ESP_LOGI(TAG, "Audio pipeline started for URL: %s", url.c_str());
+}
 
 void ESPADFSpeaker::start() { this->state_ = speaker::STATE_STARTING; }
 void ESPADFSpeaker::start_() {
