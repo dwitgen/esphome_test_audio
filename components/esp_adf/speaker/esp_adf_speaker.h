@@ -58,6 +58,11 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void set_dynamic_url(const std::string &url);
   bool is_running() const;
 
+  struct TaskParams {
+    ESPADFSpeaker *speaker;  // Pointer to the ESPADFSpeaker instance
+    std::string url;         // Optional HTTP URL for streaming
+  };
+
   // Declare a sensor for volume level
   sensor::Sensor *volume_sensor = nullptr;
 
