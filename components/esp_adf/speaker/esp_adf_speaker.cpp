@@ -453,7 +453,9 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
     ESPADFSpeaker *instance = static_cast<ESPADFSpeaker *>(ctx);
 
     int adc_value = adc1_get_raw(INPUT_BUTOP_ID); // Get ADC raw value
-    ESP_LOGI(TAG, "Button event callback: id=%d, event_type=%d, ADC value=%d", evt->data, evt->type, adc_value);
+    ESP_LOGI(TAG, "Button event callback: id=%d, event_type=%d, ADC value=%d", 
+         static_cast<int>(reinterpret_cast<uintptr_t>(evt->data)), evt->type, adc_value);
+
 
     instance->handle_adc_button(adc_value); // Process button press
     return ESP_OK;
