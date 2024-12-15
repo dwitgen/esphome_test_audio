@@ -398,9 +398,10 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 
 
 void ESPADFSpeaker::set_dynamic_url(const std::string &url) {
+    ESP_LOGI(TAG, "Setting dynamic URL: %s", url.c_str());
     this->url_ = url;
-    ESP_LOGI(TAG, "Updated URL: %s", url.c_str());
 }
+
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     TaskEvent event;
