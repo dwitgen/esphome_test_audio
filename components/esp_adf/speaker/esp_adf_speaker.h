@@ -52,6 +52,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void handle_play_button();
   void handle_mode_button();
   void handle_rec_button();
+  void handle_adc_button(int adc_value);
 
   // Declare a sensor for volume level
   sensor::Sensor *volume_sensor = nullptr;
