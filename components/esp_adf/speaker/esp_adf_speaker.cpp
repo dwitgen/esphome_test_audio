@@ -35,7 +35,7 @@ static const char *const TAG = "esp_adf.speaker";
 esp_err_t configure_i2s_stream_writer_http(audio_element_handle_t *i2s_stream_writer) {
     i2s_driver_config_t i2s_config = {
         .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_TX),
-        .sample_rate = 44100,
+        .sample_rate = 32000,
         .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
         .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
         .communication_format = I2S_COMM_FORMAT_STAND_I2S,
@@ -123,7 +123,7 @@ esp_err_t configure_i2s_stream_writer_raw(audio_element_handle_t *i2s_stream_wri
 // Function to configure resample filter
 esp_err_t configure_resample_filter(audio_element_handle_t *filter) {
     rsp_filter_cfg_t rsp_cfg = {
-        .src_rate = 48000,
+        .src_rate = 32000,
         .src_ch = 2,
         .dest_rate = 44100,
         .dest_bits = 16,
