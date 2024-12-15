@@ -519,6 +519,14 @@ void ESPADFSpeaker::start_() {
   }
   xTaskCreate(ESPADFSpeaker::player_task, "speaker_task", 8192, (void *) this, 0, &this->player_task_handle_);
 }
+bool ESPADFSpeaker::is_running() const {
+    // Check if the pipeline is valid and running
+    if (this->pipeline_ != nullptr && audio_pipeline_state(this->pipeline_) == AUDIO_PIPELINE_STATE_RUNNING) {
+        return true;
+    }
+    ESP_LOGI("ESPADFSpeaker", "Pipeline is not running; state might be STOPPED or STOPPING.");
+    return false;
+}
 
 void ESPADFSpeaker::player_task(void *params) {
     ESPADFSpeaker *this_speaker = (ESPADFSpeaker *) params;
