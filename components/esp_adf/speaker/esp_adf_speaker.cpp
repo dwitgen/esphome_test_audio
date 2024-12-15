@@ -35,7 +35,7 @@ static const char *const TAG = "esp_adf.speaker";
 esp_err_t configure_i2s_stream_writer_http(audio_element_handle_t *i2s_stream_writer) {
     i2s_driver_config_t i2s_config = {
         .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_TX),
-        .sample_rate = 32000,
+        .sample_rate = 44100,
         .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
         .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
         .communication_format = I2S_COMM_FORMAT_STAND_I2S,
@@ -123,7 +123,7 @@ esp_err_t configure_i2s_stream_writer_raw(audio_element_handle_t *i2s_stream_wri
 // Function to configure resample filter
 esp_err_t configure_resample_filter(audio_element_handle_t *filter) {
     rsp_filter_cfg_t rsp_cfg = {
-        .src_rate = 32000,
+        .src_rate = 44100,
         .src_ch = 2,
         .dest_rate = 44100,
         .dest_bits = 16,
@@ -360,6 +360,11 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     // Cleanup any existing pipeline
     this->cleanup_audio_pipeline();
 
+    #ifdef HTTP_STREAM_RINGBUFFER_SIZE
+    #undef HTTP_STREAM_RINGBUFFER_SIZE
+    #endif
+    #define HTTP_STREAM_RINGBUFFER_SIZE (12 * 1024)
+
     // Ensure enough heap is available before proceeding
     uint32_t heap_before = esp_get_free_heap_size();
     if (heap_before < 50 * 1024) {  // Example threshold
@@ -373,7 +378,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
    //http_cfg.cert_pem = NULL;  // Disable server certificate verification for testing
     http_stream_cfg_t http_cfg = {
         .type = AUDIO_STREAM_READER,
-        .out_rb_size = 12 * 1024,  // Ring buffer size
+        .out_rb_size = HTTP_STREAM_RINGBUFFER_SIZE,  // Ring buffer size
         .task_stack = HTTP_STREAM_TASK_STACK,
         .task_core = HTTP_STREAM_TASK_CORE,
         .task_prio = HTTP_STREAM_TASK_PRIO,
@@ -382,8 +387,8 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         .user_data = NULL,
         .auto_connect_next_track = false,
         .enable_playlist_parser = false,
-        .cert_pem = NULL,  // Disable certificate verification
-        .crt_bundle_attach = NULL,  // Do not use certificate bundle
+        //.cert_pem = NULL,  // Disable certificate verification
+        //.crt_bundle_attach = NULL,  // Do not use certificate bundle
        
     };
 
