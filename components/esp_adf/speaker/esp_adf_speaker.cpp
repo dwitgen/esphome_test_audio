@@ -519,8 +519,6 @@ void ESPADFSpeaker::start_() {
 
 void ESPADFSpeaker::player_task(void *params) {
     ESPADFSpeaker *this_speaker = (ESPADFSpeaker *) params;
-    // Cleanup any existing pipeline
-    cleanup_audio_pipeline();
     
     TaskEvent event;
     event.type = TaskEventType::STARTING;
@@ -714,7 +712,10 @@ void ESPADFSpeaker::player_task(void *params) {
     event.type = TaskEventType::STOPPED;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
     gpio_set_level(PA_ENABLE_GPIO, 0);
-
+    
+    // Reinitialize audio pipeline
+    this_speaker->initialize_audio_pipeline();
+    
     while (true) {
         delay(10);
     }
