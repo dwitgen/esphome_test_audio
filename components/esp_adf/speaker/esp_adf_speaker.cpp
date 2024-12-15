@@ -21,6 +21,10 @@
 #include "audio_pipeline.h"
 #include "mp3_decoder.h"
 
+#include "esp_peripherals.h"
+#include "periph_adc_button.h"
+#include "input_key_service.h"
+
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
 #include <board.h>
