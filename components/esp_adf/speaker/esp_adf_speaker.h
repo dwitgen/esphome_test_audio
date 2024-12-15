@@ -65,6 +65,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void start_();
   void watch_();
   void play_url(const std::string &url); 
+  void set_and_play_url(const std::string &url);
 
   static void player_task(void *params);
   audio_board_handle_t board_handle_ = nullptr;
