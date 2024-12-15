@@ -96,6 +96,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
    audio_element_handle_t http_filter_;
    audio_element_handle_t raw_write_;
    audio_element_handle_t http_stream_reader_;
+   std::string url_;
 };
 
 }  // namespace esp_adf
