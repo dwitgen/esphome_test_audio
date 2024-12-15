@@ -499,23 +499,73 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
+    TaskEvent event;
     event.type = TaskEventType::STOPPING;
-    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
+
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
-        audio_pipeline_stop(this->pipeline_);
-        audio_pipeline_wait_for_stop(this->pipeline_);
-        audio_pipeline_terminate(this->pipeline_);
-        audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
-        audio_pipeline_unregister(this->pipeline_, this->http_filter_);
-        audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
-        audio_pipeline_deinit(this->pipeline_);
+
+        esp_err_t err;
+
+        err = audio_pipeline_stop(this->pipeline_);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to stop audio pipeline: %s", esp_err_to_name(err));
+        } else {
+            ESP_LOGI(TAG, "Audio pipeline stopped");
+        }
+
+        err = audio_pipeline_wait_for_stop(this->pipeline_);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to wait for pipeline stop: %s", esp_err_to_name(err));
+        } else {
+            ESP_LOGI(TAG, "Audio pipeline stop completed");
+        }
+
+        err = audio_pipeline_terminate(this->pipeline_);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to terminate audio pipeline: %s", esp_err_to_name(err));
+        } else {
+            ESP_LOGI(TAG, "Audio pipeline terminated");
+        }
+
+        err = audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to unregister i2s_stream_writer_http: %s", esp_err_to_name(err));
+        } else {
+            ESP_LOGI(TAG, "Unregistered i2s_stream_writer_http");
+        }
+
+        err = audio_pipeline_unregister(this->pipeline_, this->http_filter_);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to unregister http_filter: %s", esp_err_to_name(err));
+        } else {
+            ESP_LOGI(TAG, "Unregistered http_filter");
+        }
+
+        err = audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to unregister http_stream_reader: %s", esp_err_to_name(err));
+        } else {
+            ESP_LOGI(TAG, "Unregistered http_stream_reader");
+        }
+
+        err = audio_pipeline_deinit(this->pipeline_);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to deinitialize audio pipeline: %s", esp_err_to_name(err));
+        } else {
+            ESP_LOGI(TAG, "Audio pipeline deinitialized");
+        }
+
+        this->pipeline_ = nullptr;
+    } else {
+        ESP_LOGI(TAG, "No active pipeline to clean up");
     }
+
     ESP_LOGI(TAG, "Transitioning state to STOPPED (state = %d)", this->state_);
     this->state_ = speaker::STATE_STOPPED;
-    ESP_LOGI(TAG, "State updated to STOPPED (state = %d)", this->state_);
-    event.type = TaskEventType::STOPPED;
-}
+    ESP
+
 
 void ESPADFSpeaker::start() { this->state_ = speaker::STATE_STARTING; }
 void ESPADFSpeaker::start_() {
