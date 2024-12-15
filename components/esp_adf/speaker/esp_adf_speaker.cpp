@@ -510,9 +510,10 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         audio_pipeline_unregister(this->pipeline_, this->http_filter_);
         audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
         audio_pipeline_deinit(this->pipeline_);
-        this->pipeline_ = nullptr;
-        //this->state_ = speaker::STATE_STOPPED;
     }
+    ESP_LOGI(TAG, "Transitioning state to STOPPED (state = %d)", this->state_);
+    this->state_ = speaker::STATE_STOPPED;
+    ESP_LOGI(TAG, "State updated to STOPPED (state = %d)", this->state_);
     event.type = TaskEventType::STOPPED;
 }
 
