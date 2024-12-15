@@ -520,7 +520,7 @@ void ESPADFSpeaker::start_() {
 void ESPADFSpeaker::player_task(void *params) {
     ESPADFSpeaker *this_speaker = (ESPADFSpeaker *) params;
     // Cleanup any existing pipeline
-    this->cleanup_audio_pipeline();
+    cleanup_audio_pipeline();
     
     TaskEvent event;
     event.type = TaskEventType::STARTING;
