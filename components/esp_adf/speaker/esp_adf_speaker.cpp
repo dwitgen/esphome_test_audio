@@ -499,10 +499,14 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
         audio_pipeline_deinit(this->pipeline_);
         this->pipeline_ = nullptr;
+    }
+    if (this->state_ == speaker::STATE_RUNNING) {
         ESP_LOGI(TAG, "Transitioning state to STOPPED (state = %d)", this->state_);
         this->state_ = speaker::STATE_STOPPED;
         ESP_LOGI(TAG, "State updated to STOPPED (state = %d)", this->state_);
+    
     }
+    
 }
 
 void ESPADFSpeaker::start() { this->state_ = speaker::STATE_STARTING; }
@@ -515,7 +519,9 @@ void ESPADFSpeaker::start_() {
 
 void ESPADFSpeaker::player_task(void *params) {
     ESPADFSpeaker *this_speaker = (ESPADFSpeaker *) params;
-
+    // Cleanup any existing pipeline
+    this->cleanup_audio_pipeline();
+    
     TaskEvent event;
     event.type = TaskEventType::STARTING;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
