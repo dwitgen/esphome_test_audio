@@ -380,7 +380,9 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         .user_data = NULL,
         .auto_connect_next_track = false,
         .enable_playlist_parser = false,
-        .cert_pem = NULL,
+        .cert_pem = NULL,  // Disable certificate verification
+        .crt_bundle_attach = NULL,  // Do not use certificate bundle
+        .skip_cert_common_name_check = true,  // Skip common name verification
     };
 
     this->http_stream_reader_ = http_stream_init(&http_cfg);
