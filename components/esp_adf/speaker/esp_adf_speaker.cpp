@@ -494,9 +494,25 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         audio_pipeline_stop(this->pipeline_);
         audio_pipeline_wait_for_stop(this->pipeline_);
         audio_pipeline_terminate(this->pipeline_);
-        audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
-        audio_pipeline_unregister(this->pipeline_, this->http_filter_);
-        audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
+        if (this->http_stream_reader_) {
+            ESP_LOGI(TAG, "Stopping http reader");
+            audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
+            audio_element_deinit(this->http_stream_reader_);
+            this->http_stream_reader_ = nullptr;
+        }
+        if (this->i2s_stream_writer_http_) {
+            ESP_LOGI(TAG, "Stopping http writer");
+            audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
+            audio_element_deinit(this->i2s_stream_writer_http_);
+            this->i2s_stream_writer_http_ = nullptr;
+        }
+        if (this->http_filter_) {
+            ESP_LOGI(TAG, "Stopping http filter");
+            audio_pipeline_unregister(this->pipeline_, this->http_filter_);
+            audio_element_deinit(this->http_filter_);
+            this->http_filter_ = nullptr;
+        }
+        ESP_LOGI(TAG, "De-initializing pipeline");
         audio_pipeline_deinit(this->pipeline_);
         this->pipeline_ = nullptr;
     }
