@@ -153,6 +153,11 @@ esp_err_t configure_resample_filter(audio_element_handle_t *filter) {
     return ESP_OK;
 }
 
+void ESPADFSpeaker::set_dynamic_url(const std::string &url) {
+    this->url_ = url;
+    ESP_LOGI(TAG, "Updated URL: %s", url.c_str());
+}
+
 // Define ADC configuration added for button controls, maybe not correct to have in speaker config
 #define ADC_WIDTH_BIT    ADC_WIDTH_BIT_12
 #define ADC_ATTEN        ADC_ATTEN_DB_12
@@ -214,7 +219,12 @@ void ESPADFSpeaker::handle_play_button() {
     ESP_LOGI(TAG, "Play button action");
     if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
         ESP_LOGI(TAG, "Mode button, speaker stopped");
-        this->play_url("http://stream.rtlradio.de/plusedm/mp3-192/");
+         if (this->url_.empty()) {
+            ESP_LOGE(TAG, "No URL set to play!");
+            return;
+        }
+        this->play_url(this->url_);
+        //this->play_url("http://stream.rtlradio.de/plusedm/mp3-192/");
     } else {
         ESP_LOGI(TAG, "State is stopping");
         this->cleanup_audio_pipeline();
