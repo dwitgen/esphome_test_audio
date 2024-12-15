@@ -369,9 +369,9 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 
     // Configure HTTP stream
     ESP_LOGI(TAG, "Configuring HTTP stream");
-    http_stream_cfg_t http_cfg = HTTP_STREAM_CFG_DEFAULT();
-    http_cfg.cert_pem = NULL;  // Disable server certificate verification for testing
-    /*http_stream_cfg_t http_cfg = {
+    //http_stream_cfg_t http_cfg = HTTP_STREAM_CFG_DEFAULT();
+   //http_cfg.cert_pem = NULL;  // Disable server certificate verification for testing
+    http_stream_cfg_t http_cfg = {
         .type = AUDIO_STREAM_READER,
         .out_rb_size = 12 * 1024,  // Ring buffer size
         .task_stack = HTTP_STREAM_TASK_STACK,
@@ -385,7 +385,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         .cert_pem = NULL,  // Disable certificate verification
         .crt_bundle_attach = NULL,  // Do not use certificate bundle
        
-    };*/
+    };
 
     this->http_stream_reader_ = http_stream_init(&http_cfg);
     if (this->http_stream_reader_ == NULL) {
