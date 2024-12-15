@@ -335,7 +335,8 @@ void ESPADFSpeaker::setup() {
   // Configure ADC for volume control
   adc1_config_width(ADC_WIDTH_BIT);
   adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
-   
+
+  this->initialize_audio_pipeline();   
 }
 
 void ESPADFSpeaker::set_and_play_url(const std::string &url) {
@@ -396,6 +397,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         ESP_LOGE(TAG, "Failed to initialize MP3 decoder");
         return;
     }
+
     ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());
     // Initialize audio pipeline
     ESP_LOGI(TAG, "Initializing audio pipeline");
