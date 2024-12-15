@@ -211,29 +211,19 @@ void ESPADFSpeaker::handle_mode_button() {
 }
 
 void ESPADFSpeaker::handle_play_button() {
-    switch (this->state_) {
-        case speaker::STATE_RUNNING:
-            ESP_LOGI(TAG, "Stopping playback...");
-            this->cleanup_audio_pipeline();
-            this->state_ = speaker::STATE_STOPPED;
-            break;
-
-        case speaker::STATE_STOPPED:
-            if (this->url_.empty()) {
-                ESP_LOGE(TAG, "No URL set to play!");
-                return;
-            }
-            ESP_LOGI(TAG, "Starting playback...");
-            ESP_LOGI(TAG, "Playing URL: %s", this->url_.c_str());
-            this->play_url(this->url_);
-            this->state_ = speaker::STATE_STARTING;
-            break;
-
-        default:
-            ESP_LOGW(TAG, "Unexpected state: %d. Resetting to STOPPED.", this->state_);
-            this->cleanup_audio_pipeline();
-            this->state_ = speaker::STATE_STOPPED;
-            break;
+    ESP_LOGI(TAG, "Play button action");
+    if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
+        ESP_LOGI(TAG, "Mode button, speaker stopped");
+         if (this->url_.empty()) {
+            ESP_LOGE(TAG, "No URL set to play!");
+            return;
+        }
+        this->play_url(this->url_);
+        //this->play_url("http://stream.rtlradio.de/plusedm/mp3-192/");
+    } else {
+        ESP_LOGI(TAG, "State is stopping");
+        this->cleanup_audio_pipeline();
+        this->stop();
     }
 }
 
@@ -499,63 +489,18 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
-    TaskEvent event;
-    event.type = TaskEventType::STOPPING;
-    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
-
-    ESP_LOGI(TAG, "Transitioning state to STOPPED (state = %d)", this->state_);
-    this->state_ = speaker::STATE_STOPPED;
-    ESP_LOGI(TAG, "State updated to STOPPED (state = %d)", this->state_);
-
-    event.type = TaskEventType::STOPPED;
-    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
-
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
-
-        esp_err_t err;
-
-        ESP_LOGI(TAG, "Calling audio_pipeline_stop()");
-        err = audio_pipeline_stop(this->pipeline_);
-        ESP_LOGI(TAG, "audio_pipeline_stop() returned: %s", esp_err_to_name(err));
-
-        ESP_LOGI(TAG, "Calling audio_pipeline_wait_for_stop()");
-        err = audio_pipeline_wait_for_stop(this->pipeline_);
-        ESP_LOGI(TAG, "audio_pipeline_wait_for_stop() returned: %s", esp_err_to_name(err));
-
-        ESP_LOGI(TAG, "Calling audio_pipeline_terminate()");
-        err = audio_pipeline_terminate(this->pipeline_);
-        ESP_LOGI(TAG, "audio_pipeline_terminate() returned: %s", esp_err_to_name(err));
-
-        ESP_LOGI(TAG, "Calling audio_pipeline_unregister() for i2s_stream_writer_http_");
-        err = audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
-        ESP_LOGI(TAG, "audio_pipeline_unregister() for i2s_stream_writer_http_ returned: %s", esp_err_to_name(err));
-
-        ESP_LOGI(TAG, "Calling audio_pipeline_unregister() for http_filter_");
-        err = audio_pipeline_unregister(this->pipeline_, this->http_filter_);
-        ESP_LOGI(TAG, "audio_pipeline_unregister() for http_filter_ returned: %s", esp_err_to_name(err));
-
-        ESP_LOGI(TAG, "Calling audio_pipeline_unregister() for http_stream_reader_");
-        err = audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
-        ESP_LOGI(TAG, "audio_pipeline_unregister() for http_stream_reader_ returned: %s", esp_err_to_name(err));
-
-        ESP_LOGI(TAG, "Calling audio_pipeline_deinit()");
-        err = audio_pipeline_deinit(this->pipeline_);
-        ESP_LOGI(TAG, "audio_pipeline_deinit() returned: %s", esp_err_to_name(err));
-
+        audio_pipeline_stop(this->pipeline_);
+        audio_pipeline_wait_for_stop(this->pipeline_);
+        audio_pipeline_terminate(this->pipeline_);
+        audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
+        audio_pipeline_unregister(this->pipeline_, this->http_filter_);
+        audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
+        audio_pipeline_deinit(this->pipeline_);
         this->pipeline_ = nullptr;
-    } else {
-        ESP_LOGI(TAG, "No active pipeline to clean up");
     }
-
-    ESP_LOGI(TAG, "Transitioning state to STOPPED (state = %d)", this->state_);
-    this->state_ = speaker::STATE_STOPPED;
-    ESP_LOGI(TAG, "State updated to STOPPED (state = %d)", this->state_);
-
-    event.type = TaskEventType::STOPPED;
-    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 }
-
 
 void ESPADFSpeaker::start() { this->state_ = speaker::STATE_STARTING; }
 void ESPADFSpeaker::start_() {
@@ -564,14 +509,6 @@ void ESPADFSpeaker::start_() {
   }
   xTaskCreate(ESPADFSpeaker::player_task, "speaker_task", 8192, (void *) this, 0, &this->player_task_handle_);
 }
-/*bool ESPADFSpeaker::is_running() const {
-    // Check if the pipeline is valid and running
-    if (this->pipeline_ != nullptr && audio_pipeline_state(this->pipeline_) == speaker::STATE_RUNNING) {
-        return true;
-    }
-    ESP_LOGI("ESPADFSpeaker", "Pipeline is not running; state might be STOPPED or STOPPING.");
-    return false;
-}*/
 
 void ESPADFSpeaker::player_task(void *params) {
     ESPADFSpeaker *this_speaker = (ESPADFSpeaker *) params;
@@ -791,36 +728,27 @@ void ESPADFSpeaker::watch_() {
   if (xQueueReceive(this->event_queue_, &event, 0) == pdTRUE) {
     switch (event.type) {
       case TaskEventType::STARTING:
-        ESP_LOGI(TAG, "Transitioning to STATE_STARTING");
+      case TaskEventType::STOPPING:
         break;
       case TaskEventType::STARTED:
-        ESP_LOGI(TAG, "Transitioning to STATE_RUNNING");
         this->state_ = speaker::STATE_RUNNING;
         break;
       case TaskEventType::RUNNING:
         this->status_clear_warning();
         break;
-      case TaskEventType::STOPPING:
-        ESP_LOGI(TAG, "Transitioning to STATE_STOPPING");
-        break;
       case TaskEventType::STOPPED:
-        ESP_LOGI(TAG, "Transitioning to STATE_STOPPED");
-        this->state_ = speaker::STATE_STOPPED;
         this->parent_->unlock();
+        this->state_ = speaker::STATE_STOPPED;
         vTaskDelete(this->player_task_handle_);
         this->player_task_handle_ = nullptr;
         break;
       case TaskEventType::WARNING:
-        ESP_LOGW(TAG, "Pipeline warning: %s", esp_err_to_name(event.err));
+        ESP_LOGW(TAG, "Error writing to pipeline: %s", esp_err_to_name(event.err));
         this->status_set_warning();
-        break;
-      default:
-        ESP_LOGW(TAG, "Unknown task event type");
         break;
     }
   }
 }
-
 
 void ESPADFSpeaker::loop() {
   this->watch_();
