@@ -378,6 +378,24 @@ void ESPADFSpeaker::set_and_play_url(const std::string &url) {
     xTaskCreate(player_task, "player_task", 8192, params, 5, nullptr);
 }
 
+void ESPADFSpeaker::play_url(const std::string &url) {
+    ESP_LOGI(TAG, "Received URL to play: %s", url.c_str());
+
+    // Stop any existing playback before starting a new one
+    if (this->is_running()) {
+        this->stop();
+    }
+
+    // Allocate memory for TaskParams
+    TaskParams *params = new TaskParams;
+    params->speaker = this; // Pass the current speaker instance
+    params->url = url;      // Set the URL to be played
+
+    // Create the player_task to handle playback
+    ESP_LOGI(TAG, "Creating player_task for playback");
+    xTaskCreate(player_task, "player_task", 8192, params, 5, nullptr);
+}
+
 
 void ESPADFSpeaker::set_dynamic_url(const std::string &url) {
     this->url_ = url;
@@ -390,7 +408,7 @@ void ESPADFSpeaker::set_dynamic_url(const std::string &url) {
      return;
  }*/
 
-void ESPADFSpeaker::play_url(const std::string &url) {
+/*void ESPADFSpeaker::play_url(const std::string &url) {
     if (this->state_ == speaker::STATE_RUNNING || this->state_ == speaker::STATE_STARTING) {
         ESP_LOGI(TAG, "Audio stream is already running, ignoring play request");
         return;
@@ -515,7 +533,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     // Update state and log
     ESP_LOGI(TAG, "Audio pipeline started successfully for URL: %s", url.c_str());
     this->state_ = speaker::STATE_RUNNING;
-}
+}*/
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     TaskEvent event;
