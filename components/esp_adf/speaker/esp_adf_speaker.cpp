@@ -337,6 +337,12 @@ void ESPADFSpeaker::setup() {
   adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
    
 }
+
+void ESPADFSpeaker::set_and_play_url(const std::string &url) {
+    ESP_LOGI(TAG, "Received URL to play: %s", url.c_str());
+    this->play_url(url);  // Reuse existing playback logic
+}
+
 void ESPADFSpeaker::play_url(const std::string &url) {
  if (this->state_ == speaker::STATE_RUNNING || this->state_ == speaker::STATE_STARTING) {
      ESP_LOGI(TAG, "Audio stream is already running, ignoring play request");
