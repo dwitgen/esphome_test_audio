@@ -566,7 +566,7 @@ void ESPADFSpeaker::start_() {
 }
 bool ESPADFSpeaker::is_running() const {
     // Check if the pipeline is valid and running
-    if (this->pipeline_ != nullptr && audio_pipeline_state(this->pipeline_) == AUDIO_PIPELINE_STATE_RUNNING) {
+    if (this->pipeline_ != nullptr && audio_pipeline_state(this->pipeline_) == speaker::STATE_RUNNING) {
         return true;
     }
     ESP_LOGI("ESPADFSpeaker", "Pipeline is not running; state might be STOPPED or STOPPING.");
