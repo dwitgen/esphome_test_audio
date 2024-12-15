@@ -343,11 +343,140 @@ void ESPADFSpeaker::set_and_play_url(const std::string &url) {
     this->play_url(url);  // Reuse existing playback logic
 }
 
-void ESPADFSpeaker::play_url(const std::string &url) {
+/*void ESPADFSpeaker::play_url(const std::string &url) {
  if (this->state_ == speaker::STATE_RUNNING || this->state_ == speaker::STATE_STARTING) {
      ESP_LOGI(TAG, "Audio stream is already running, ignoring play request");
      return;
- }
+ }*/
+
+void ESPADFSpeaker::play_url(const std::string &url) {
+    if (this->state_ == speaker::STATE_RUNNING || this->state_ == speaker::STATE_STARTING) {
+        ESP_LOGI(TAG, "Audio stream is already running, ignoring play request");
+        return;
+    }
+    ESP_LOGI(TAG, "Attempting to play URL: %s", url.c_str());
+
+    this->cleanup_audio_pipeline();
+
+    #ifdef HTTP_STREAM_RINGBUFFER_SIZE
+    #undef HTTP_STREAM_RINGBUFFER_SIZE
+    #endif
+    #define HTTP_STREAM_RINGBUFFER_SIZE (12 * 1024)
+
+    http_stream_cfg_t http_cfg = {
+        .type = AUDIO_STREAM_READER,
+        .out_rb_size = HTTP_STREAM_RINGBUFFER_SIZE,
+        .task_stack = HTTP_STREAM_TASK_STACK,
+        .task_core = HTTP_STREAM_TASK_CORE,
+        .task_prio = HTTP_STREAM_TASK_PRIO,
+        .stack_in_ext = false,
+        .event_handle = NULL,
+        .user_data = NULL,
+        .auto_connect_next_track = false,
+        .enable_playlist_parser = false,
+        .multi_out_num = 0,
+        .cert_pem = NULL,
+        .crt_bundle_attach = NULL,
+    };
+
+    ESP_LOGI(TAG, "Passed Configure HTTP Stream");
+
+    this->http_stream_reader_ = http_stream_init(&http_cfg);
+    if (this->http_stream_reader_ == NULL) {
+        ESP_LOGE(TAG, "Failed to initialize HTTP stream reader");
+        return;
+    }
+    ESP_LOGI(TAG, "HTTP stream reader init");
+    
+    audio_element_set_uri(this->http_stream_reader_, url.c_str());
+    ESP_LOGI(TAG, "HTTP set URI");
+
+    ESP_LOGI(TAG, "Create MP3 decoder to decode MP3 file");
+    mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
+    audio_element_handle_t mp3_decoder = mp3_decoder_init(&mp3_cfg);
+    if (mp3_decoder == NULL) {
+        ESP_LOGE(TAG, "Failed to initialize MP3 decoder");
+        return;
+    }
+
+    audio_pipeline_cfg_t pipeline_cfg = {
+        .rb_size = 8 * 1024,
+    };
+    this->pipeline_ = audio_pipeline_init(&pipeline_cfg);
+    if (this->pipeline_ == NULL) {
+        ESP_LOGE(TAG, "Failed to initialize http audio pipeline");
+        return;
+    }
+    ESP_LOGI(TAG, "HTTP passed initilialize new audio pipeline");
+
+    ESP_LOGI(TAG, "Register all elements to audio pipeline");
+
+    ESP_LOGI(TAG, "Register HTTP stream reader");
+    if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register HTTP stream reader");
+        audio_pipeline_deinit(this->pipeline_);
+        this->pipeline_ = nullptr;
+        return;
+    }
+
+    ESP_LOGI(TAG, "Register MP3 decoder");
+    if (audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register MP3 decoder");
+        audio_pipeline_deinit(this->pipeline_);
+        this->pipeline_ = nullptr;
+        return;
+    }
+
+    ESP_LOGI(TAG, "Register resample filter");
+    if (audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register resample filter");
+        audio_pipeline_deinit(this->pipeline_);
+        this->pipeline_ = nullptr;
+        return;
+    }
+
+    ESP_LOGI(TAG, "Register I2S stream writer");
+    if (audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s") != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register I2S stream writer");
+        audio_pipeline_deinit(this->pipeline_);
+        this->pipeline_ = nullptr;
+        return;
+    }
+
+    ESP_LOGI(TAG, "Link elements in pipeline");
+    const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
+    if (audio_pipeline_link(this->pipeline_, &link_tag[0], 4) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to link pipeline elements");
+        audio_pipeline_deinit(this->pipeline_);
+        this->pipeline_ = nullptr;
+        return;
+    }
+    ESP_LOGI(TAG, "Linked pipeline elements");
+
+    gpio_set_level(PA_ENABLE_GPIO, 1);
+    ESP_LOGI(TAG, "PA enabled");
+
+    if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
+        ESP_LOGI(TAG, "State is Not Running");
+        TaskEvent event;
+        event.type = TaskEventType::STARTED;
+        this->start();
+    }
+    if (this->state_ == speaker::STATE_RUNNING) {
+        ESP_LOGI(TAG, "State is now Running after button");
+    }
+    if (this->state_ == speaker::STATE_STARTING) {
+        ESP_LOGI(TAG, "State is starting after button");
+    }
+
+    ESP_LOGI(TAG, "Starting new audio pipeline for URL");
+    if (audio_pipeline_run(this->pipeline_) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to run audio pipeline");
+        audio_pipeline_deinit(this->pipeline_);
+        this->pipeline_ = nullptr;
+        return;
+    }
+}
 
  ESP_LOGI(TAG, "Attempting to play URL: %s", url.c_str());
 
