@@ -21,10 +21,6 @@
 #include "audio_pipeline.h"
 #include "mp3_decoder.h"
 
-#include "esp_peripherals.h"
-#include "periph_adc_button.h"
-#include "input_key_service.h"
-
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
 #include <board.h>
@@ -235,82 +231,6 @@ void ESPADFSpeaker::handle_rec_button() {
     // Add code to start recording
 }
 
-void ESPADFSpeaker::handle_adc_button(int adc_value) {
-    if (adc_value >= VOL_UP_THRESHOLD_LOW && adc_value <= VOL_UP_THRESHOLD_HIGH) {
-        ESP_LOGI(TAG, "Volume Up button detected");
-        this->volume_up();
-    } else if (adc_value >= VOL_DOWN_THRESHOLD_LOW && adc_value <= VOL_DOWN_THRESHOLD_HIGH) {
-        ESP_LOGI(TAG, "Volume Down button detected");
-        this->volume_down();
-    } else if (adc_value >= SET_THRESHOLD_LOW && adc_value <= SET_THRESHOLD_HIGH) {
-        ESP_LOGI(TAG, "Set button detected");
-        this->handle_set_button();
-    } else if (adc_value >= PLAY_THRESHOLD_LOW && adc_value <= PLAY_THRESHOLD_HIGH) {
-        ESP_LOGI(TAG, "Play button detected");
-        this->handle_play_button();
-    } else if (adc_value >= MODE_THRESHOLD_LOW && adc_value <= MODE_THRESHOLD_HIGH) {
-        ESP_LOGI(TAG, "Mode button detected");
-        this->handle_mode_button();
-    } else if (adc_value >= REC_THRESHOLD_LOW && adc_value <= REC_THRESHOLD_HIGH) {
-        ESP_LOGI(TAG, "Record button detected");
-        this->handle_rec_button();
-    } else {
-        ESP_LOGW(TAG, "Unknown ADC value: %d", adc_value);
-    }
-}
-
-void ESPADFSpeaker::handle_button_event(int32_t id, int32_t event_type) {
-    ESP_LOGI(TAG, "Handle Button event received: id=%d", id);
-    if (event_type != 1 && event_type != 3) { // Only process the event if the event_type is 1 click action or 3 long press action
-        ESP_LOGI(TAG, "Ignoring event with type: %d", event_type);
-        return;
-    }
-    uint32_t current_time = millis();
-    static uint32_t last_button_press[7] = {0};
-    uint32_t debounce_time = 200;
-
-    if (id == BUTTON_MODE_ID) {
-        debounce_time = 500;
-    }
-
-    if (current_time - last_button_press[id] > debounce_time) {
-        switch (id) {
-            case 0:
-                ESP_LOGI(TAG, "Unkonw Button detected");
-                //volume_down();
-                break;
-            case 1:
-                ESP_LOGI(TAG, "Record button detected");
-                handle_rec_button();
-                break;
-            case 2:
-                ESP_LOGI(TAG, "Set button detected");
-                handle_set_button();
-                break;
-            case 3:
-                ESP_LOGI(TAG, "Play button detected");
-                handle_play_button();
-                break;
-            case 4:
-                ESP_LOGI(TAG, "Mode button detected");
-                handle_mode_button();
-                break;
-            case 5:
-                ESP_LOGI(TAG, "Volume down detected");
-                volume_down();
-                break;
-            case 6:
-                ESP_LOGI(TAG, "Volume up detected");
-                volume_up();
-                break;
-            default:
-                ESP_LOGW(TAG, "Unhandled button event id: %d", id);
-                break;
-        }
-        last_button_press[id] = current_time;
-    }
-}
-
 void ESPADFSpeaker::initialize_audio_pipeline() {
     esp_err_t ret;
 
@@ -336,142 +256,87 @@ void ESPADFSpeaker::initialize_audio_pipeline() {
 }
 
 void ESPADFSpeaker::setup() {
-    ESP_LOGCONFIG(TAG, "Setting up ESP ADF Speaker...");
+  ESP_LOGCONFIG(TAG, "Setting up ESP ADF Speaker...");
 
-    // ===== PA GPIO Initialization =====
-    gpio_config_t io_conf = {};
-    io_conf.intr_type = GPIO_INTR_DISABLE;
-    io_conf.mode = GPIO_MODE_OUTPUT;
-    io_conf.pin_bit_mask = (1ULL << PA_ENABLE_GPIO);
-    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+  #ifdef USE_ESP_ADF_BOARD
+  // Use the PA enable pin from board.h configuration trying to stop speaker popping with control of the PA during speaker operations
+  gpio_num_t pa_enable_gpio = static_cast<gpio_num_t>(get_pa_enable_gpio());
+  int but_channel = INPUT_BUTOP_ID;
+  #endif
 
-    if (gpio_config(&io_conf) != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to configure PA GPIO");
-        this->mark_failed();
-        return;
+  gpio_config_t io_conf;
+  io_conf.intr_type = GPIO_INTR_DISABLE;
+  io_conf.mode = GPIO_MODE_OUTPUT;
+  io_conf.pin_bit_mask = (1ULL << PA_ENABLE_GPIO);
+  io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+  io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+  gpio_config(&io_conf);
+  gpio_set_level(PA_ENABLE_GPIO, 0);  // Ensure PA is off initially
+
+  ExternalRAMAllocator<uint8_t> allocator(ExternalRAMAllocator<uint8_t>::ALLOW_FAILURE);
+
+  this->buffer_queue_.storage = allocator.allocate(sizeof(StaticQueue_t) + (BUFFER_COUNT * sizeof(DataEvent)));
+  if (this->buffer_queue_.storage == nullptr) {
+    ESP_LOGE(TAG, "Failed to allocate buffer queue!");
+    this->mark_failed();
+    return;
+  }
+
+  this->buffer_queue_.handle =
+      xQueueCreateStatic(BUFFER_COUNT, sizeof(DataEvent), this->buffer_queue_.storage + sizeof(StaticQueue_t),
+                         (StaticQueue_t *) (this->buffer_queue_.storage));
+
+  this->event_queue_ = xQueueCreate(20, sizeof(TaskEvent));
+  if (this->event_queue_ == nullptr) {
+    ESP_LOGW(TAG, "Could not allocate event queue.");
+    this->mark_failed();
+    return;
+  }
+
+ //Adding intial setup for volume controls for the speaker
+ // Find the key for the generic volume sensor
+  uint32_t volume_sensor_key = 0;
+  for (auto *sensor : App.get_sensors()) {
+    if (sensor->get_name() == "generic_volume_sensor") {
+      volume_sensor_key = sensor->get_object_id_hash();
+      break;
     }
-    gpio_set_level(PA_ENABLE_GPIO, 0); // Ensure PA is off initially
+  }
 
-    // ===== ADC Configuration =====
-    adc1_config_width(ADC_WIDTH_BIT);
-    adc1_config_channel_atten((adc1_channel_t)INPUT_BUTOP_ID, ADC_ATTEN);
+  // Use the key to get the sensor
+  if (volume_sensor_key != 0) {
+    this->volume_sensor = App.get_sensor_by_key(volume_sensor_key, true);
+    ESP_LOGI(TAG, "Internal generic volume sensor initialized successfully: %s", this->volume_sensor->get_name().c_str());
+  } else {
+    ESP_LOGE(TAG, "Failed to find key for internal generic volume sensor");
+  }
 
-    // ===== External RAM Allocator for Buffers =====
-    ExternalRAMAllocator<uint8_t> allocator(ExternalRAMAllocator<uint8_t>::ALLOW_FAILURE);
-    this->buffer_queue_.storage = allocator.allocate(sizeof(StaticQueue_t) + (BUFFER_COUNT * sizeof(DataEvent)));
-    if (this->buffer_queue_.storage == nullptr) {
-        ESP_LOGE(TAG, "Failed to allocate buffer queue!");
-        this->mark_failed();
-        return;
-    }
-    this->buffer_queue_.handle =
-        xQueueCreateStatic(BUFFER_COUNT, sizeof(DataEvent), this->buffer_queue_.storage + sizeof(StaticQueue_t),
-                           (StaticQueue_t *)(this->buffer_queue_.storage));
+  if (this->volume_sensor == nullptr) {
+    ESP_LOGE(TAG, "Failed to get internal generic volume sensor component");
+  } else {
+    ESP_LOGI(TAG, "Internal generic volume sensor initialized correctly");
+  }
 
-    this->event_queue_ = xQueueCreate(20, sizeof(TaskEvent));
-    if (this->event_queue_ == nullptr) {
-        ESP_LOGE(TAG, "Failed to allocate event queue");
-        this->mark_failed();
-        return;
-    }
+  // Initialize the audio board and store the handle
+  this->board_handle_ = audio_board_init();
+  if (this->board_handle_ == nullptr) {
+      ESP_LOGE(TAG, "Failed to initialize audio board");
+      this->mark_failed();
+      return;
+  }
+    
+  // Set initial volume
+  this->set_volume(volume_); // Set initial volume to 50%
 
-    // ===== Volume Sensor Initialization =====
-    uint32_t volume_sensor_key = 0;
-    for (auto *sensor : App.get_sensors()) {
-        if (sensor->get_name() == "generic_volume_sensor") {
-            volume_sensor_key = sensor->get_object_id_hash();
-            break;
-        }
-    }
-
-    if (volume_sensor_key != 0) {
-        this->volume_sensor = App.get_sensor_by_key(volume_sensor_key, true);
-        ESP_LOGI(TAG, "Volume sensor initialized successfully: %s", this->volume_sensor->get_name().c_str());
-    } else {
-        ESP_LOGE(TAG, "Failed to find volume sensor");
-    }
-
-    // ===== Initialize Audio Board =====
-    this->board_handle_ = audio_board_init();
-    if (this->board_handle_ == nullptr) {
-        ESP_LOGE(TAG, "Failed to initialize audio board");
-        this->mark_failed();
-        return;
-    }
-
-    // ===== Set Initial Volume =====
-    this->set_volume(volume_); // Default to initial volume value
-    int initial_volume = this->get_current_volume();
-    this->set_volume(initial_volume);
-
-    // ===== Initialize Peripherals =====
-    esp_periph_config_t periph_cfg = {
-        .task_stack = 4096,  // Adjusted for memory
-        .task_prio = 5,
-        .task_core = 0,
-        .extern_stack = false
-    };
-    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
-    if (!set) {
-        ESP_LOGE(TAG, "Failed to initialize peripheral set");
-        this->mark_failed();
-        return;
-    }
-
-    // ===== Initialize Input Key Service =====
-    ESP_LOGI(TAG, "Initializing input key service...");
-    input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
-    input_key_service_cfg_t input_cfg = {
-        .based_cfg = {
-            .task_stack = 4096,
-            .task_prio = 5,
-            .task_core = 0,
-            .extern_stack = false
-        },
-        .handle = set,
-    };
-
-    periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
-    if (!input_ser) {
-        ESP_LOGE(TAG, "Failed to initialize input key service");
-        this->mark_failed();
-        return;
-    }
-
-    input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
-    periph_service_set_callback(input_ser, ESPADFSpeaker::input_key_service_cb, this);
-    ESP_LOGI(TAG, "Input key service initialized");
-
-    // ===== Initialize Audio Pipeline =====
-    this->initialize_audio_pipeline();
-
-    ESP_LOGI(TAG, "ESP ADF Speaker setup completed successfully");
+   // Read and set initial volume
+  int initial_volume = this->get_current_volume();
+  this->set_volume(initial_volume);
+  
+  // Configure ADC for volume control
+  adc1_config_width(ADC_WIDTH_BIT);
+  adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
+   
 }
-
-esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
-    ESPADFSpeaker *instance = static_cast<ESPADFSpeaker *>(ctx);
-
-    int adc_value = adc1_get_raw(INPUT_BUTOP_ID); // Get ADC raw value
-    ESP_LOGI(TAG, "Button event callback: id=%d, event_type=%d, ADC value=%d", 
-         static_cast<int>(reinterpret_cast<uintptr_t>(evt->data)), evt->type, adc_value);
-
-
-    instance->handle_adc_button(adc_value); // Process button press
-    return ESP_OK;
-}
-/*esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
-    ESPADFSpeaker *instance = static_cast<ESPADFSpeaker*>(ctx);
-    int32_t id = static_cast<int32_t>(reinterpret_cast<uintptr_t>(evt->data));
-
-    // Read the ADC value
-    int adc_value = adc1_get_raw(INPUT_BUTOP_ID);  // Replace with your ADC channel
-    ESP_LOGI(TAG, "Button event callback received: id=%d, event type=%d, ADC value=%d", id, evt->type, adc_value);
-
-    instance->handle_button_event(id, evt->type);
-    return ESP_OK;
-}*/
-
 void ESPADFSpeaker::play_url(const std::string &url) {
  if (this->state_ == speaker::STATE_RUNNING || this->state_ == speaker::STATE_STARTING) {
      ESP_LOGI(TAG, "Audio stream is already running, ignoring play request");
