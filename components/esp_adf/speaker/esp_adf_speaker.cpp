@@ -211,19 +211,29 @@ void ESPADFSpeaker::handle_mode_button() {
 }
 
 void ESPADFSpeaker::handle_play_button() {
-    ESP_LOGI(TAG, "Play button action");
-    if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
-        ESP_LOGI(TAG, "Mode button, speaker stopped");
-         if (this->url_.empty()) {
-            ESP_LOGE(TAG, "No URL set to play!");
-            return;
-        }
-        this->play_url(this->url_);
-        //this->play_url("http://stream.rtlradio.de/plusedm/mp3-192/");
-    } else {
-        ESP_LOGI(TAG, "State is stopping");
-        this->cleanup_audio_pipeline();
-        this->stop();
+    switch (this->state_) {
+        case speaker::STATE_RUNNING:
+            ESP_LOGI(TAG, "Stopping playback...");
+            this->cleanup_audio_pipeline();
+            this->state_ = speaker::STATE_STOPPED;
+            break;
+
+        case speaker::STATE_STOPPED:
+            if (this->url_.empty()) {
+                ESP_LOGE(TAG, "No URL set to play!");
+                return;
+            }
+            ESP_LOGI(TAG, "Starting playback...");
+            ESP_LOGI(TAG, "Playing URL: %s", this->url_.c_str());
+            this->play_url(this->url_);
+            this->state_ = speaker::STATE_STARTING;
+            break;
+
+        default:
+            ESP_LOGW(TAG, "Unexpected state: %d. Resetting to STOPPED.", this->state_);
+            this->cleanup_audio_pipeline();
+            this->state_ = speaker::STATE_STOPPED;
+            break;
     }
 }
 
