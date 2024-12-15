@@ -56,7 +56,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void play_url(const std::string &url); 
   void set_and_play_url(const std::string &url);
   void set_dynamic_url(const std::string &url);
-  bool is_running() const;
+  //bool is_running() const;
 
   struct TaskParams {
     ESPADFSpeaker *speaker;  // Pointer to the ESPADFSpeaker instance
