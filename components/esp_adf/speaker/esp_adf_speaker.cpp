@@ -206,6 +206,12 @@ void ESPADFSpeaker::volume_down() {
 }
 
 void ESPADFSpeaker::handle_mode_button() {
+    ESP_LOGI(TAG, "Mde button action");
+    // Add code for mode
+}
+
+void ESPADFSpeaker::handle_play_button() {
+    ESP_LOGI(TAG, "Play button action");
     if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
         ESP_LOGI(TAG, "Mode button, speaker stopped");
         this->play_url("http://stream.rtlradio.de/plusedm/mp3-192/");
@@ -214,11 +220,6 @@ void ESPADFSpeaker::handle_mode_button() {
         this->cleanup_audio_pipeline();
         this->stop();
     }
-}
-
-void ESPADFSpeaker::handle_play_button() {
-    ESP_LOGI(TAG, "Play button action");
-    // Add code to play
 }
 
 void ESPADFSpeaker::handle_set_button() {
