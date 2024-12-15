@@ -407,7 +407,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     }
     ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());
     // Register elements to pipeline
-    if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
+    /*if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
         audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
         audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK ||
         audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s") != ESP_OK) {
@@ -415,7 +415,30 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         audio_pipeline_deinit(this->pipeline_);
         this->pipeline_ = nullptr;
         return;
+    }*/
+    if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to register HTTP stream reader");
+    return;
     }
+    ESP_LOGI(TAG, "Heap after registering HTTP stream reader: %u bytes", esp_get_free_heap_size());
+    
+    if (audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register MP3 decoder");
+        return;
+    }
+    ESP_LOGI(TAG, "Heap after registering MP3 decoder: %u bytes", esp_get_free_heap_size());
+    
+    if (audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register HTTP filter");
+        return;
+    }
+    ESP_LOGI(TAG, "Heap after registering HTTP filter: %u bytes", esp_get_free_heap_size());
+    
+    if (audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s") != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register I2S stream writer");
+        return;
+    }
+    ESP_LOGI(TAG, "Heap after registering I2S stream writer: %u bytes", esp_get_free_heap_size());
     ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());
     // Link elements in pipeline
     ESP_LOGI(TAG, "Linking pipeline elements");
