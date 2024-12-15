@@ -380,6 +380,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         .user_data = NULL,
         .auto_connect_next_track = false,
         .enable_playlist_parser = false,
+        .cert_pem = NULL,
     };
 
     this->http_stream_reader_ = http_stream_init(&http_cfg);
