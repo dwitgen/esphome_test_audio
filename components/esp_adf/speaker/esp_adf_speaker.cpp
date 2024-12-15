@@ -396,7 +396,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         ESP_LOGE(TAG, "Failed to initialize MP3 decoder");
         return;
     }
-
+    ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());
     // Initialize audio pipeline
     ESP_LOGI(TAG, "Initializing audio pipeline");
     audio_pipeline_cfg_t pipeline_cfg = {.rb_size = 8 * 1024};
@@ -405,7 +405,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
         return;
     }
-
+    ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());
     // Register elements to pipeline
     if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
         audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
@@ -416,7 +416,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         this->pipeline_ = nullptr;
         return;
     }
-
+    ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());
     // Link elements in pipeline
     ESP_LOGI(TAG, "Linking pipeline elements");
     const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
