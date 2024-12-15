@@ -125,7 +125,7 @@ esp_err_t configure_resample_filter(audio_element_handle_t *filter) {
     rsp_filter_cfg_t rsp_cfg = {
         .src_rate = 44100,
         .src_ch = 2,
-        .dest_rate = 16000,
+        .dest_rate = 44100,
         .dest_bits = 16,
         .dest_ch = 1,
         .src_bits = 16,
