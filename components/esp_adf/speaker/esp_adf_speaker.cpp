@@ -728,27 +728,36 @@ void ESPADFSpeaker::watch_() {
   if (xQueueReceive(this->event_queue_, &event, 0) == pdTRUE) {
     switch (event.type) {
       case TaskEventType::STARTING:
-      case TaskEventType::STOPPING:
+        ESP_LOGI(TAG, "Transitioning to STATE_STARTING");
         break;
       case TaskEventType::STARTED:
+        ESP_LOGI(TAG, "Transitioning to STATE_RUNNING");
         this->state_ = speaker::STATE_RUNNING;
         break;
       case TaskEventType::RUNNING:
         this->status_clear_warning();
         break;
+      case TaskEventType::STOPPING:
+        ESP_LOGI(TAG, "Transitioning to STATE_STOPPING");
+        break;
       case TaskEventType::STOPPED:
-        this->parent_->unlock();
+        ESP_LOGI(TAG, "Transitioning to STATE_STOPPED");
         this->state_ = speaker::STATE_STOPPED;
+        this->parent_->unlock();
         vTaskDelete(this->player_task_handle_);
         this->player_task_handle_ = nullptr;
         break;
       case TaskEventType::WARNING:
-        ESP_LOGW(TAG, "Error writing to pipeline: %s", esp_err_to_name(event.err));
+        ESP_LOGW(TAG, "Pipeline warning: %s", esp_err_to_name(event.err));
         this->status_set_warning();
+        break;
+      default:
+        ESP_LOGW(TAG, "Unknown task event type");
         break;
     }
   }
 }
+
 
 void ESPADFSpeaker::loop() {
   this->watch_();
