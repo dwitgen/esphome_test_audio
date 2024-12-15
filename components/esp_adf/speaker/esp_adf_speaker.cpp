@@ -509,7 +509,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
         audio_pipeline_deinit(this->pipeline_);
         this->pipeline_ = nullptr;
-        this->state_ = speaker::STATE_STOPPED;
+        //this->state_ = speaker::STATE_STOPPED;
     }
 }
 
