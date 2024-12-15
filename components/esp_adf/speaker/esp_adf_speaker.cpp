@@ -235,6 +235,30 @@ void ESPADFSpeaker::handle_rec_button() {
     // Add code to start recording
 }
 
+void ESPADFSpeaker::handle_adc_button(int adc_value) {
+    if (adc_value >= VOL_UP_THRESHOLD_LOW && adc_value <= VOL_UP_THRESHOLD_HIGH) {
+        ESP_LOGI(TAG, "Volume Up button detected");
+        this->volume_up();
+    } else if (adc_value >= VOL_DOWN_THRESHOLD_LOW && adc_value <= VOL_DOWN_THRESHOLD_HIGH) {
+        ESP_LOGI(TAG, "Volume Down button detected");
+        this->volume_down();
+    } else if (adc_value >= SET_THRESHOLD_LOW && adc_value <= SET_THRESHOLD_HIGH) {
+        ESP_LOGI(TAG, "Set button detected");
+        this->handle_set_button();
+    } else if (adc_value >= PLAY_THRESHOLD_LOW && adc_value <= PLAY_THRESHOLD_HIGH) {
+        ESP_LOGI(TAG, "Play button detected");
+        this->handle_play_button();
+    } else if (adc_value >= MODE_THRESHOLD_LOW && adc_value <= MODE_THRESHOLD_HIGH) {
+        ESP_LOGI(TAG, "Mode button detected");
+        this->handle_mode_button();
+    } else if (adc_value >= REC_THRESHOLD_LOW && adc_value <= REC_THRESHOLD_HIGH) {
+        ESP_LOGI(TAG, "Record button detected");
+        this->handle_rec_button();
+    } else {
+        ESP_LOGW(TAG, "Unknown ADC value: %d", adc_value);
+    }
+}
+
 void ESPADFSpeaker::handle_button_event(int32_t id, int32_t event_type) {
     ESP_LOGI(TAG, "Handle Button event received: id=%d", id);
     if (event_type != 1 && event_type != 3) { // Only process the event if the event_type is 1 click action or 3 long press action
@@ -425,8 +449,16 @@ void ESPADFSpeaker::setup() {
     ESP_LOGI(TAG, "ESP ADF Speaker setup completed successfully");
 }
 
-
 esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
+    ESPADFSpeaker *instance = static_cast<ESPADFSpeaker *>(ctx);
+
+    int adc_value = adc1_get_raw(INPUT_BUTOP_ID); // Get ADC raw value
+    ESP_LOGI(TAG, "Button event callback: id=%d, event_type=%d, ADC value=%d", evt->data, evt->type, adc_value);
+
+    instance->handle_adc_button(adc_value); // Process button press
+    return ESP_OK;
+}
+/*esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
     ESPADFSpeaker *instance = static_cast<ESPADFSpeaker*>(ctx);
     int32_t id = static_cast<int32_t>(reinterpret_cast<uintptr_t>(evt->data));
 
@@ -436,7 +468,7 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
 
     instance->handle_button_event(id, evt->type);
     return ESP_OK;
-}
+}*/
 
 void ESPADFSpeaker::play_url(const std::string &url) {
  if (this->state_ == speaker::STATE_RUNNING || this->state_ == speaker::STATE_STARTING) {
