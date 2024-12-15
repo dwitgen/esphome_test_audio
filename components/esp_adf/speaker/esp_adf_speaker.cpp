@@ -503,6 +503,13 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     event.type = TaskEventType::STOPPING;
     xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 
+    ESP_LOGI(TAG, "Transitioning state to STOPPED (state = %d)", this->state_);
+    this->state_ = speaker::STATE_STOPPED;
+    ESP_LOGI(TAG, "State updated to STOPPED (state = %d)", this->state_);
+
+    event.type = TaskEventType::STOPPED;
+    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
+
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
 
