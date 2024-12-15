@@ -208,7 +208,7 @@ void ESPADFSpeaker::volume_down() {
 void ESPADFSpeaker::handle_mode_button() {
     if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
         ESP_LOGI(TAG, "Mode button, speaker stopped");
-        this->play_url("http://rtlberlin.streamabc.net/rtlb-edm-mp3-192-5091837?sABC=675r166s%230%234229no59sn26040or8969p61rnr8r18p%23&aw_0_1st.playerid=&amsparams=playerid:;skey:1734219375");
+        this->play_url("https://streaming.tdiradio.com:8000/house.mp3");
     } else {
         ESP_LOGI(TAG, "State is stopping");
         this->cleanup_audio_pipeline();
