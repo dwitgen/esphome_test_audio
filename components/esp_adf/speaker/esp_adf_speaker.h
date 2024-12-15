@@ -55,6 +55,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void handle_adc_button(int adc_value);
   void play_url(const std::string &url); 
   void set_and_play_url(const std::string &url);
+  void set_dynamic_url(const std::string &url);
 
   // Declare a sensor for volume level
   sensor::Sensor *volume_sensor = nullptr;
