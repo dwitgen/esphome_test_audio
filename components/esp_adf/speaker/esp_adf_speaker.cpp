@@ -153,11 +153,6 @@ esp_err_t configure_resample_filter(audio_element_handle_t *filter) {
     return ESP_OK;
 }
 
-void ESPADFSpeaker::set_dynamic_url(const std::string &url) {
-    this->url_ = url;
-    ESP_LOGI(TAG, "Updated URL: %s", url.c_str());
-}
-
 // Define ADC configuration added for button controls, maybe not correct to have in speaker config
 #define ADC_WIDTH_BIT    ADC_WIDTH_BIT_12
 #define ADC_ATTEN        ADC_ATTEN_DB_12
@@ -353,6 +348,11 @@ void ESPADFSpeaker::setup() {
 void ESPADFSpeaker::set_and_play_url(const std::string &url) {
     ESP_LOGI(TAG, "Received URL to play: %s", url.c_str());
     this->play_url(url);  // Reuse existing playback logic
+}
+
+void ESPADFSpeaker::set_dynamic_url(const std::string &url) {
+    this->url_ = url;
+    ESP_LOGI(TAG, "Updated URL: %s", url.c_str());
 }
 
 /*void ESPADFSpeaker::play_url(const std::string &url) {
