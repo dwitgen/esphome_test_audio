@@ -705,29 +705,74 @@ void ESPADFSpeaker::player_task(void *params) {
     audio_pipeline_wait_for_stop(this_speaker->pipeline_);
     audio_pipeline_terminate(this_speaker->pipeline_);
 
+    // Signal that cleanup is starting
     event.type = TaskEventType::STOPPING;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
-
-    audio_pipeline_unregister(this_speaker->pipeline_, this_speaker->i2s_stream_writer_);
-    if (this_speaker->is_http_stream_) {
-        audio_pipeline_unregister(this_speaker->pipeline_, this_speaker->filter_);
-        audio_pipeline_unregister(this_speaker->pipeline_, this_speaker->http_stream_reader_);
-    } else {
-        audio_pipeline_unregister(this_speaker->pipeline_, this_speaker->raw_write_);
+    
+    // Flush and reset pipeline buffers
+    ESP_LOGI(TAG, "Resetting pipeline states and buffers");
+    audio_pipeline_reset_items_state(this_speaker->pipeline_);
+    audio_pipeline_reset_ringbuffer(this_speaker->pipeline_);
+    
+    // Unregister elements from the pipeline
+    ESP_LOGI(TAG, "Unregistering elements from pipeline");
+    if (audio_pipeline_unregister(this_speaker->pipeline_, this_speaker->i2s_stream_writer_) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to unregister I2S stream writer");
     }
-
-    audio_pipeline_deinit(this_speaker->pipeline_);
-    audio_element_deinit(this_speaker->i2s_stream_writer_);
+    
     if (this_speaker->is_http_stream_) {
-        audio_element_deinit(this_speaker->filter_);
-        audio_element_deinit(this_speaker->http_stream_reader_);
+        if (audio_pipeline_unregister(this_speaker->pipeline_, this_speaker->filter_) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to unregister filter");
+        }
+        if (audio_pipeline_unregister(this_speaker->pipeline_, this_speaker->http_stream_reader_) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to unregister HTTP stream reader");
+        }
     } else {
-        audio_element_deinit(this_speaker->raw_write_);
+        if (audio_pipeline_unregister(this_speaker->pipeline_, this_speaker->raw_write_) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to unregister raw stream writer");
+        }
     }
-
+    
+    // Deinitialize the pipeline
+    ESP_LOGI(TAG, "Deinitializing pipeline");
+    if (audio_pipeline_deinit(this_speaker->pipeline_) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to deinitialize pipeline");
+    }
+    
+    // Deinitialize individual elements
+    ESP_LOGI(TAG, "Deinitializing elements");
+    if (audio_element_deinit(this_speaker->i2s_stream_writer_) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to deinitialize I2S stream writer");
+    }
+    
+    if (this_speaker->is_http_stream_) {
+        if (audio_element_deinit(this_speaker->filter_) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to deinitialize filter");
+        }
+        if (audio_element_deinit(this_speaker->http_stream_reader_) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to deinitialize HTTP stream reader");
+        }
+    } else {
+        if (audio_element_deinit(this_speaker->raw_write_) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to deinitialize raw stream writer");
+        }
+    }
+    
+    // Log heap usage and compact memory
+    ESP_LOGI(TAG, "Heap before cleanup: %u bytes", esp_get_free_heap_size());
+    heap_caps_defrag(heap_caps_get_free_size(MALLOC_CAP_DEFAULT), MALLOC_CAP_DEFAULT);
+    ESP_LOGI(TAG, "Heap after cleanup: %u bytes", esp_get_free_heap_size());
+    
+    // Signal that cleanup is complete
     event.type = TaskEventType::STOPPED;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+    
+    // Reset GPIO to ensure hardware is in a known state
+    ESP_LOGI(TAG, "Resetting GPIO");
+    gpio_reset_pin(PA_ENABLE_GPIO);
     gpio_set_level(PA_ENABLE_GPIO, 0);
+    
+    ESP_LOGI(TAG, "Player task cleanup completed.");
     
     // Reinitialize audio pipeline
     this_speaker->initialize_audio_pipeline();
