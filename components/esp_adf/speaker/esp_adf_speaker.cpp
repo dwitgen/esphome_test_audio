@@ -338,13 +338,13 @@ void ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
 
     // Configure I2S stream writer
     if (is_http_stream) {
-        ret = configure_i2s_stream_writer(&this->i2s_stream_writer_http_, 44100);
+        ret = configure_i2s_stream(&this->i2s_stream_writer_http_, 44100);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Error initializing I2S stream writer for HTTP: %s", esp_err_to_name(ret));
             return;
         }
     } else {
-        ret = configure_i2s_stream_writer(&this->i2s_stream_writer_raw_, 16000);
+        ret = configure_i2s_stream(&this->i2s_stream_writer_raw_, 16000);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Error initializing I2S stream writer for raw: %s", esp_err_to_name(ret));
             return;
@@ -891,7 +891,7 @@ void ESPADFSpeaker::player_task(void *params) {
     ESP_LOGI(TAG, "Player task cleanup completed.");
     
     // Reinitialize audio pipeline
-    this_speaker->initialize_audio_pipeline();
+    //this_speaker->initialize_audio_pipeline();
     
     while (true) {
         delay(10);
