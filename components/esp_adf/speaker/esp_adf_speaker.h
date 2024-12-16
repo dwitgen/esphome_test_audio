@@ -70,7 +70,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void initialize_audio_pipeline(bool is_http_stream);
   void cleanup_audio_pipeline();
 
-  protected:
+ protected:
   void start_();
   void watch_();
   
@@ -98,6 +98,10 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
    audio_element_handle_t http_stream_reader_;
    std::string url_;
 };
+
+// Function prototypes for helper functions
+esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate);
+esp_err_t configure_resample_filter(audio_element_handle_t *filter, int src_rate, int dest_rate, int dest_ch);
 
 }  // namespace esp_adf
 }  // namespace esphome
