@@ -36,7 +36,7 @@ static const char *const TAG = "esp_adf.speaker";
 esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate) {
     i2s_driver_config_t i2s_config = {
         .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_TX),
-        .sample_rate = sample_rate,
+        .sample_rate = static_cast<uint32_t>(sample_rate),  // Explicit cast
         .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
         .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
         .communication_format = I2S_COMM_FORMAT_STAND_I2S,
@@ -77,6 +77,7 @@ esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_ra
     return ESP_OK;
 }
 
+
 // Helper to configure resample filter with dynamic rates
 esp_err_t configure_resample_filter(audio_element_handle_t *filter, int src_rate, int dest_rate, int dest_ch) {
     rsp_filter_cfg_t rsp_cfg = {
@@ -112,7 +113,7 @@ esp_err_t configure_resample_filter(audio_element_handle_t *filter, int src_rate
 
 // Helper to initialize the audio pipeline
 audio_pipeline_handle_t configure_audio_pipeline(size_t ringbuffer_size) {
-    audio_pipeline_cfg_t pipeline_cfg = {.rb_size = ringbuffer_size};
+    audio_pipeline_cfg_t pipeline_cfg = {.rb_size = static_cast<int>(ringbuffer_size)};  // Explicit cast
     return audio_pipeline_init(&pipeline_cfg);
 }
 
