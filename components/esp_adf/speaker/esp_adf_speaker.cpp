@@ -758,11 +758,6 @@ void ESPADFSpeaker::player_task(void *params) {
         }
     }
     
-    // Log heap usage and compact memory
-    ESP_LOGI(TAG, "Heap before cleanup: %u bytes", esp_get_free_heap_size());
-    heap_caps_defrag(heap_caps_get_free_size(MALLOC_CAP_DEFAULT), MALLOC_CAP_DEFAULT);
-    ESP_LOGI(TAG, "Heap after cleanup: %u bytes", esp_get_free_heap_size());
-    
     // Signal that cleanup is complete
     event.type = TaskEventType::STOPPED;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
