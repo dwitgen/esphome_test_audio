@@ -655,6 +655,75 @@ void ESPADFSpeaker::start_() {
 }
 
 void ESPADFSpeaker::player_task(void *params) {
+    ESPADFSpeaker *this_speaker = (ESPADFSpeaker *)params;
+
+    TaskEvent event;
+    event.type = TaskEventType::STARTING;
+    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+
+    // Dynamically initialize the audio pipeline based on the stream type
+    if (!this_speaker->initialize_audio_pipeline(this_speaker->is_http_stream_)) {
+        ESP_LOGE(TAG, "Failed to initialize audio pipeline");
+        event.type = TaskEventType::WARNING;
+        xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+        return;
+    }
+
+    // Start the audio pipeline
+    audio_pipeline_run(this_speaker->pipeline_);
+    ESP_LOGI(TAG, "Audio pipeline started");
+
+    event.type = TaskEventType::STARTED;
+    xQueueSend(this_speaker->event_queue_, &event, 0);
+    gpio_set_level(PA_ENABLE_GPIO, 1);  // Enable amplifier
+
+    // Process audio data
+    DataEvent data_event;
+    uint32_t last_received = millis();
+
+    while (true) {
+        if (xQueueReceive(this_speaker->buffer_queue_.handle, &data_event, 0) != pdTRUE) {
+            if (millis() - last_received > 500) break;
+            continue;
+        }
+
+        if (data_event.stop) {
+            while (xQueueReceive(this_speaker->buffer_queue_.handle, &data_event, 0) == pdTRUE) {
+                break;
+            }
+        }
+
+        size_t remaining = data_event.len;
+        size_t current = 0;
+        if (remaining > 0) last_received = millis();
+
+        while (remaining > 0) {
+            int bytes_written = raw_stream_write(this_speaker->raw_write_, (char *)data_event.data + current, remaining);
+            if (bytes_written == ESP_FAIL) {
+                event = {.type = TaskEventType::WARNING, .err = ESP_FAIL};
+                xQueueSend(this_speaker->event_queue_, &event, 0);
+                continue;
+            }
+
+            remaining -= bytes_written;
+            current += bytes_written;
+        }
+
+        event.type = TaskEventType::RUNNING;
+        xQueueSend(this_speaker->event_queue_, &event, 0);
+    }
+
+    // Cleanup pipeline after the task finishes
+    this_speaker->cleanup_audio_pipeline();
+
+    event.type = TaskEventType::STOPPED;
+    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+    gpio_set_level(PA_ENABLE_GPIO, 0);  // Disable amplifier
+    ESP_LOGI(TAG, "Player task cleanup completed.");
+}
+
+
+/*void ESPADFSpeaker::player_task(void *params) {
     ESPADFSpeaker *this_speaker = (ESPADFSpeaker *) params;
     
     TaskEvent event;
@@ -896,7 +965,7 @@ void ESPADFSpeaker::player_task(void *params) {
     while (true) {
         delay(10);
     }
-}
+}*/
 void ESPADFSpeaker::stop() {
   if (this->state_ == speaker::STATE_STOPPED)
     return;
