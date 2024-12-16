@@ -321,7 +321,41 @@ void ESPADFSpeaker::handle_rec_button() {
     // Add code to start recording
 }
 
-void ESPADFSpeaker::initialize_audio_pipeline() {
+void ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
+    esp_err_t ret;
+
+    // Configure resample filter
+    int src_rate = is_http_stream ? 44100 : 44100; // Adjust if different source rates are needed
+    int dest_rate = is_http_stream ? 44100 : 16000; // HTTP typically uses higher rates
+    int dest_ch = is_http_stream ? 1 : 1;          // Channels may differ for raw or HTTP
+
+    ret = configure_resample_filter(&this->http_filter_, src_rate, dest_rate, dest_ch);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error initializing resample filter: %s", esp_err_to_name(ret));
+        return;
+    }
+
+    // Configure I2S stream writer
+    if (is_http_stream) {
+        ret = configure_i2s_stream_writer(&this->i2s_stream_writer_http_, 44100);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Error initializing I2S stream writer for HTTP: %s", esp_err_to_name(ret));
+            return;
+        }
+    } else {
+        ret = configure_i2s_stream_writer(&this->i2s_stream_writer_raw_, 16000);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Error initializing I2S stream writer for raw: %s", esp_err_to_name(ret));
+            return;
+        }
+    }
+
+    ESP_LOGI(TAG, "Audio pipeline and elements initialized successfully for %s stream",
+             is_http_stream ? "HTTP" : "raw");
+}
+
+
+/*void ESPADFSpeaker::initialize_audio_pipeline() {
     esp_err_t ret;
 
     ret = configure_resample_filter(&this->http_filter_);
@@ -343,7 +377,7 @@ void ESPADFSpeaker::initialize_audio_pipeline() {
     }
 
     ESP_LOGI(TAG, "Audio pipeline and elements initialized successfully");
-}
+}*/
 
 void ESPADFSpeaker::setup() {
   ESP_LOGCONFIG(TAG, "Setting up ESP ADF Speaker...");
@@ -426,7 +460,7 @@ void ESPADFSpeaker::setup() {
   adc1_config_width(ADC_WIDTH_BIT);
   adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
 
-  this->initialize_audio_pipeline();   
+  //this->initialize_audio_pipeline();   
 }
 
 void ESPADFSpeaker::set_and_play_url(const std::string &url) {
@@ -454,6 +488,8 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 
     // Cleanup any existing pipeline
     this->cleanup_audio_pipeline();
+    // Initialize new audio pipeline
+    this->initialize_audio_pipeline(true); 
 
     #ifdef HTTP_STREAM_RINGBUFFER_SIZE
     #undef HTTP_STREAM_RINGBUFFER_SIZE
