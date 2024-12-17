@@ -416,9 +416,9 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         //ESP_LOGI(TAG, "Initializing MP3 decoder");
         mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
         audio_element_handle_t mp3_decoder = mp3_decoder_init(&mp3_cfg);
-        if (mp3_decoder == NULL) {
+        if (mp3_decoder == nullptr) {
             ESP_LOGE(TAG, "Failed to initialize MP3 decoder");
-            return;
+            return nullptr;
         }
         if (audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK
             audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
