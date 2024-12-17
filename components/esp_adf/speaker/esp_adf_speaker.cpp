@@ -322,7 +322,7 @@ void ESPADFSpeaker::handle_rec_button() {
     // Add code to start recording
 }
 
-bool ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
+void ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
     ESP_LOGI(TAG, "Initializing audio pipeline for %s stream", is_http_stream ? "HTTP" : "RAW");
 
     // Initialize pipeline configuration
@@ -330,7 +330,7 @@ bool ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
     this->pipeline_ = audio_pipeline_init(&pipeline_cfg);
     if (this->pipeline_ == nullptr) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
-        return false; // Early failure
+        return //false; // Early failure
     }
 
     if (is_http_stream) {
@@ -339,7 +339,7 @@ bool ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
         this->http_stream_reader_ = http_stream_init(&http_cfg);
         if (this->http_stream_reader_ == nullptr) {
             ESP_LOGE(TAG, "Failed to initialize HTTP stream reader");
-            return false; // Failure
+            return //false; // Failure
         }
 
         // Resample filter
@@ -366,7 +366,7 @@ bool ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
         this->filter_ = rsp_filter_init(&rsp_cfg);
         if (this->filter_ == nullptr) {
             ESP_LOGE(TAG, "Failed to initialize resample filter");
-            return false; // Failure
+            return //false; // Failure
         }
 
         // Register elements for HTTP stream
@@ -374,14 +374,14 @@ bool ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
             audio_pipeline_register(this->pipeline_, this->filter_, "filter") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register elements to pipeline");
-            return false; // Failure
+            return //false; // Failure
         }
 
         // Link pipeline elements for HTTP stream
         const char *link_tag_http[3] = {"http", "filter", "i2s"};
         if (audio_pipeline_link(this->pipeline_, &link_tag_http[0], 3) != ESP_OK) {
             ESP_LOGE(TAG, "Failed to link pipeline elements for HTTP stream");
-            return false; // Failure
+            return //false; // Failure
         }
     } else {
         // RAW stream setup
@@ -389,26 +389,26 @@ bool ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
         this->raw_write_ = raw_stream_init(&raw_cfg);
         if (this->raw_write_ == nullptr) {
             ESP_LOGE(TAG, "Failed to initialize RAW stream writer");
-            return false; // Failure
+            return //false; // Failure
         }
 
         // Register elements for RAW stream
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register elements to pipeline");
-            return false; // Failure
+            return //false; // Failure
         }
 
         // Link pipeline elements for RAW stream
         const char *link_tag_raw[2] = {"raw", "i2s"};
         if (audio_pipeline_link(this->pipeline_, &link_tag_raw[0], 2) != ESP_OK) {
             ESP_LOGE(TAG, "Failed to link pipeline elements for RAW stream");
-            return false; // Failure
+            return //false; // Failure
         }
     }
 
     ESP_LOGI(TAG, "Audio pipeline initialized successfully for %s stream", is_http_stream ? "HTTP" : "RAW");
-    return true; // Success
+    return //true; // Success
 }
 
 
