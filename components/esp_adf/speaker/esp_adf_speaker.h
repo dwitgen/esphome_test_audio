@@ -56,8 +56,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void play_url(const std::string &url); 
   void set_and_play_url(const std::string &url);
   void set_dynamic_url(const std::string &url);
-  static int http_event_handler(http_stream_event_msg_t *msg);
-
+  
   struct TaskParams {
     ESPADFSpeaker *speaker;  // Pointer to the ESPADFSpeaker instance
     std::string url;         // Optional HTTP URL for streaming
