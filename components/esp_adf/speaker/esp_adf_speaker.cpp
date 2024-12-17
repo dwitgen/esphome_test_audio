@@ -300,13 +300,6 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             return ESP_OK;
         }, this);
 
-        // Initialize HTTP stream reader
-        ret = configure_http_stream_reader(&this->http_stream_reader_);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Error initializing HTTP stream reader.");
-            return nullptr;
-        }
-
         // Register HTTP reader and MP3 decoder to pipeline
         audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http");
         audio_pipeline_register(this->pipeline_, this->mp3_decoder_, "mp3");
