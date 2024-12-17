@@ -677,7 +677,22 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     } else {
         ESP_LOGI(TAG, "Audio pipeline is already cleaned up");
     }
-    i2s_driver_uninstall(I2S_NUM_0);
+     if (i2s_get_status(I2S_NUM_0) == ESP_OK) {
+        ESP_LOGI(TAG, "Uninstalling I2S driver...");
+        i2s_driver_uninstall(I2S_NUM_0);
+        ESP_LOGI(TAG, "I2S driver uninstalled successfully");
+    } else {
+        ESP_LOGW(TAG, "I2S driver is not installed, skipping uninstall");
+    }
+    
+    int pa_state = gpio_get_level(PA_ENABLE_GPIO);
+    if (pa_state == 1) {
+        ESP_LOGI(TAG, "Disabling PA...");
+        gpio_set_level(PA_ENABLE_GPIO, 0);  // Set GPIO LOW to disable PA
+        ESP_LOGI(TAG, "PA disabled successfully");
+    } else {
+        ESP_LOGI(TAG, "PA was already disabled");
+    }
 }
 
 /*void ESPADFSpeaker::cleanup_audio_pipeline() {
@@ -778,7 +793,6 @@ void ESPADFSpeaker::player_task(void *params) {
     this_speaker->initialize_audio_pipeline(false); // RAW stream initialization
 
     ESP_LOGI(TAG, "Heap before pipeline_cfg: %u bytes", esp_get_free_heap_size());
-    // Step 2: Initialize pipeline configuration
     audio_pipeline_cfg_t pipeline_cfg = {
         .rb_size = 8 * 1024,
     };
@@ -791,37 +805,15 @@ void ESPADFSpeaker::player_task(void *params) {
         ESP_LOGW(TAG, "Retrying audio pipeline initialization...");
         vTaskDelay(pdMS_TO_TICKS(100));
     }
-    /*audio_pipeline_handle_t pipeline = audio_pipeline_init(&pipeline_cfg);
-    if (this_speaker->pipeline_ == nullptr) {
-        ESP_LOGE(TAG, "Failed to initialize audio pipeline");
-        return;
-    }*/
-
+    
     this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
-    // Step 3: Register and link pipeline elements for RAW stream
-    /*raw_stream_cfg_t raw_cfg = {
-        .type = AUDIO_STREAM_WRITER,
-        .out_rb_size = 8 * 1024,
-    };
-    this_speaker->raw_write_ = raw_stream_init(&raw_cfg);*/
-
-    if (this_speaker->raw_write_ == nullptr) {
-        ESP_LOGE("ESPADFSpeaker", "Failed to initialize raw stream writer");
-        event.type = TaskEventType::WARNING;
-        xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
-        return;
-    }
-    if (this_speaker->pipeline_ == nullptr) {
-        ESP_LOGE(TAG, "Failed to initialize audio pipeline");
-        return;
-    }
-    if (this_speaker->i2s_stream_writer_raw_ == nullptr) {
-        ESP_LOGE(TAG, "Failed to initialize i2s_stream_writer_raw");
-        return;
-    }
+    
     ESP_LOGI(TAG, "Registering audio pipeline components");
-    audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw"); 
-    audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_raw_, "i2s");
+    if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw") ||
+    audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register raw_write_ and i2s_stream_writer_raw");
+        return;
+    }
         
     ESP_LOGI(TAG, "Heap after registering: %u bytes", esp_get_free_heap_size());
     ESP_LOGI(TAG, "Linking audio pipeline components");
@@ -832,7 +824,6 @@ void ESPADFSpeaker::player_task(void *params) {
     }
     ESP_LOGI(TAG, "Heap after linking: %u bytes", esp_get_free_heap_size());
     ESP_LOGI(TAG, "Starting audio pipeline components");
-    // Step 4: Start the audio pipeline
     if (audio_pipeline_run(this_speaker->pipeline_) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start audio pipeline");
         return;
@@ -840,7 +831,6 @@ void ESPADFSpeaker::player_task(void *params) {
     ESP_LOGI(TAG, "Heap after starting: %u bytes", esp_get_free_heap_size());
     ESP_LOGI(TAG, "Audio pipeline started for RAW stream");
 
-    // Step 5: Process audio data
     gpio_set_level(PA_ENABLE_GPIO, 1);  // Enable amplifier
     DataEvent data_event;
     uint32_t last_received = millis();
@@ -865,13 +855,11 @@ void ESPADFSpeaker::player_task(void *params) {
         }
     }
 
-    // Step 6: Cleanup pipeline after the task finishes
     ESP_LOGI(TAG, "Cleaning up audio pipeline after player_task...");
     this_speaker->cleanup_audio_pipeline();
 
     event.type = TaskEventType::STOPPED;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
-    gpio_set_level(PA_ENABLE_GPIO, 0);  // Disable amplifier
     ESP_LOGI(TAG, "Player task cleanup completed.");
 }
 
