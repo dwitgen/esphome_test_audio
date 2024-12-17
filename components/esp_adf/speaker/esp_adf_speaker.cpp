@@ -544,13 +544,17 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         ESP_LOGI(TAG, "Audio stream is already running, ignoring play request");
         return;
     }
+
     ESP_LOGI(TAG, "Attempting to play URL: %s", url.c_str());
 
     // Cleanup any existing pipeline
     this->cleanup_audio_pipeline();
-    // Initialize new audio pipeline
-    this->initialize_audio_pipeline(true); 
 
+    TaskEvent event;
+    event.type = TaskEventType::STARTING;
+    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+
+       
     #ifdef HTTP_STREAM_RINGBUFFER_SIZE
     #undef HTTP_STREAM_RINGBUFFER_SIZE
     #endif
@@ -599,7 +603,10 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         return;
     }
 
-    ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());
+    // Initialize new audio pipeline
+    this->initialize_audio_pipeline(true); 
+    
+   /* ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());
     // Initialize audio pipeline
     ESP_LOGI(TAG, "Initializing audio pipeline");
     audio_pipeline_cfg_t pipeline_cfg = {.rb_size = 8 * 1024};
@@ -608,7 +615,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
         return;
     }
-    ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());
+    ESP_LOGI(TAG, "Heap before registering elements: %u bytes", esp_get_free_heap_size());*/
     // Register elements to pipeline
     /*if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
         audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
@@ -619,7 +626,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         this->pipeline_ = nullptr;
         return;
     }*/
-    if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK) {
+    /*if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK) {
     ESP_LOGE(TAG, "Failed to register HTTP stream reader");
     return;
     }
@@ -651,7 +658,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         audio_pipeline_deinit(this->pipeline_);
         this->pipeline_ = nullptr;
         return;
-    }
+    }*/
 
     // Start the pipeline
     ESP_LOGI(TAG, "Starting the audio pipeline");
@@ -665,7 +672,9 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 
     // Update state and log
     ESP_LOGI(TAG, "Audio pipeline started successfully for URL: %s", url.c_str());
-    this->state_ = speaker::STATE_RUNNING;
+    TaskEvent event;
+    event.type = TaskEventType::STARTED;
+    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
