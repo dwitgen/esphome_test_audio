@@ -14,17 +14,19 @@
 
 #include <audio_element.h>
 #include <audio_pipeline.h>
+
 #include <audio_hal.h>
 #include "esp_peripherals.h"
 #include "periph_adc_button.h"
 #include "input_key_service.h"
 #include <board.h>
-#include <esp_event.h>
+
+#include <esp_event.h>  
 
 namespace esphome {
 namespace esp_adf {
 
-class ESPADFSpeaker :  public ESPADFPipeline, public speaker::Speaker, public Component {
+class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Component {
  public:
   float get_setup_priority() const override { return esphome::setup_priority::LATE; }
 
@@ -35,21 +37,15 @@ class ESPADFSpeaker :  public ESPADFPipeline, public speaker::Speaker, public Co
   void stop() override;
 
   size_t play(const uint8_t *data, size_t length) override;
+
   bool has_buffered_data() const override;
 
-  void play_url(const std::string &url); 
-  void set_and_play_url(const std::string &url);
-  void set_dynamic_url(const std::string &url);
-
-  void initialize_audio_pipeline(bool is_http_stream);
-  void cleanup_audio_pipeline();
-
+  // Declare methods for volume control
   void set_volume(int volume);
   void volume_up();
   void volume_down();
+  // Declare a method to get the current volume from the device
   int get_current_volume();
-
-  static void player_task(void *params);
 
   static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx);
   void handle_set_button();
@@ -57,40 +53,63 @@ class ESPADFSpeaker :  public ESPADFPipeline, public speaker::Speaker, public Co
   void handle_mode_button();
   void handle_rec_button();
   void handle_adc_button(int adc_value);
-  sensor::Sensor *volume_sensor = nullptr;									 
+  void play_url(const std::string &url); 
+  void set_and_play_url(const std::string &url);
+  void set_dynamic_url(const std::string &url);
+
+  struct TaskParams {
+    ESPADFSpeaker *speaker;  // Pointer to the ESPADFSpeaker instance
+    std::string url;         // Optional HTTP URL for streaming
+  };
+
+  // Declare a sensor for volume level
+  sensor::Sensor *volume_sensor = nullptr;
+
+  // Method to initialize pipeline and cleanup
+  void initialize_audio_pipeline(bool is_http_stream);
+  void cleanup_audio_pipeline();
 
  protected:
   void start_();
   void watch_();
+  
+  static void player_task(void *params);
   audio_board_handle_t board_handle_ = nullptr;
   static void button_event_handler(void *handler_args, esp_event_base_t base, int32_t id, void *event_data);
-  void handle_button_event(int32_t id, int32_t event_type);									
+  void handle_button_event(int32_t id, int32_t event_type);
+
+  TaskHandle_t player_task_handle_{nullptr};
+   struct {
+     QueueHandle_t handle;
+     uint8_t *storage;
+   } buffer_queue_;
+   QueueHandle_t event_queue_;
 
  private:
-  int volume_ = 50;  // Default volume
-  bool is_http_stream_;
-  std::string url_;
+   int volume_ = 50;  // Default volume level
+   bool is_http_stream_;
+   audio_pipeline_handle_t pipeline_;
+   audio_element_handle_t i2s_stream_writer_;
+   audio_element_handle_t i2s_stream_writer_http_;
+   audio_element_handle_t i2s_stream_writer_raw_;
+   audio_element_handle_t filter_;
+   audio_element_handle_t http_filter_;
+   audio_element_handle_t raw_write_;
+   audio_element_handle_t http_stream_reader_;
+   std::string url_;
 
-  // Audio pipeline and elements
-  audio_pipeline_handle_t pipeline_;
-  audio_element_handle_t i2s_stream_writer_;
-  audio_element_handle_t i2s_stream_writer_http_;
-  audio_element_handle_t i2s_stream_writer_raw_;
-  audio_element_handle_t http_filter_;
-  audio_element_handle_t raw_write_;
-  audio_element_handle_t http_stream_reader_;
-
-  // Helper functions for shared logic
-  bool check_heap_memory(uint32_t threshold);
-  bool init_pipeline(size_t rb_size);
-  bool register_pipeline_elements(const std::vector<std::pair<std::string, audio_element_handle_t>> &elements);
-  bool link_pipeline_elements(const std::vector<std::string> &link_tags);
-  void start_pipeline();
+   // New private helper methods for modularization
+   bool check_heap_memory(uint32_t threshold);
+   bool init_pipeline(size_t rb_size);
+   bool register_pipeline_elements(const std::vector<std::pair<std::string, audio_element_handle_t>> &elements);
+   bool link_pipeline_elements(const std::vector<std::string> &link_tags);
+   void start_pipeline();
 };
 
+// Function prototypes for standalone helper functions
 esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate);
 esp_err_t configure_resample_filter(audio_element_handle_t *filter, int src_rate, int dest_rate, int dest_ch);
-								   
+
 }  // namespace esp_adf
 }  // namespace esphome
 
