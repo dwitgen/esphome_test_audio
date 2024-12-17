@@ -91,35 +91,6 @@ esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *re
     #endif
     #define HTTP_STREAM_RINGBUFFER_SIZE (12 * 1024)
 
-    // Event handler function
-    static int http_event_handler(http_stream_event_msg_t *msg) {
-        ESP_LOGI("HTTP_EVENT", "HTTP Event received, event_id=%d", msg->event_id);
-
-        switch (msg->event_id) {
-            case HTTP_STREAM_RESOLVE_URL:
-                ESP_LOGI("HTTP_EVENT", "Resolving URL...");
-                break;
-            case HTTP_STREAM_FINISH_TRACK:
-                ESP_LOGI("HTTP_EVENT", "Finished track playback");
-                break;
-            case HTTP_STREAM_FAILED_TRACK:
-                ESP_LOGE("HTTP_EVENT", "Track failed to play");
-                break;
-            case HTTP_STREAM_PRE_REQUEST:
-                ESP_LOGI("HTTP_EVENT", "Preparing HTTP request");
-                break;
-            case HTTP_STREAM_ON_REQUEST:
-                ESP_LOGI("HTTP_EVENT", "Sending HTTP request");
-                break;
-            case HTTP_STREAM_ON_RESPONSE:
-                ESP_LOGI("HTTP_EVENT", "Received HTTP response");
-                break;
-            default:
-                ESP_LOGW("HTTP_EVENT", "Unhandled event_id: %d", msg->event_id);
-                break;
-        }
-        return ESP_OK;
-    }
     // Configure HTTP stream reader
     http_stream_cfg_t http_cfg = {
         .type = AUDIO_STREAM_READER,
@@ -128,7 +99,7 @@ esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *re
         .task_core = HTTP_STREAM_TASK_CORE,
         .task_prio = HTTP_STREAM_TASK_PRIO,
         .stack_in_ext = false,
-        .event_handle = http_event_handler,
+        .event_handle = NULL,
         .user_data = NULL,
         .auto_connect_next_track = false,
         .enable_playlist_parser = false,
