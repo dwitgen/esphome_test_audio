@@ -83,6 +83,35 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
     return ESP_OK;
 }
 
+static int http_stream_event_handler(http_stream_event_msg_t *msg) {
+    ESP_LOGI("HTTP_EVENT", "Event received: event_id=%d", msg->event_id);
+
+    switch (msg->event_id) {
+        case HTTP_STREAM_RESOLVE_URL:
+            ESP_LOGI("HTTP_EVENT", "Resolving URL...");
+            break;
+        case HTTP_STREAM_FINISH_TRACK:
+            ESP_LOGI("HTTP_EVENT", "Finished track playback");
+            break;
+        case HTTP_STREAM_FAILED_TRACK:
+            ESP_LOGE("HTTP_EVENT", "HTTP stream failed to play");
+            break;
+        case HTTP_STREAM_PRE_REQUEST:
+            ESP_LOGI("HTTP_EVENT", "Preparing HTTP request...");
+            break;
+        case HTTP_STREAM_ON_REQUEST:
+            ESP_LOGI("HTTP_EVENT", "Sending HTTP request...");
+            break;
+        case HTTP_STREAM_ON_RESPONSE:
+            ESP_LOGI("HTTP_EVENT", "HTTP response received");
+            break;
+        default:
+            ESP_LOGW("HTTP_EVENT", "Unhandled event: %d", msg->event_id);
+            break;
+    }
+    return ESP_OK;
+}
+
 // Helper to configure http stream reader
 esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *reader) {
 
