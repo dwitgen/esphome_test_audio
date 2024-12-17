@@ -16,10 +16,10 @@
 #include <filter_resample.h>
 #include <i2s_stream.h>
 #include <raw_stream.h>
-#include "esp_http_client.h"
+#include <esp_http_client.h>
 #include <http_stream.h>
-#include "audio_pipeline.h"
-#include "mp3_decoder.h"
+#include <audio_pipeline.h>
+#include <mp3_decoder.h>
 
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
@@ -461,7 +461,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
     // Link components
     if (is_http_stream) {
         const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
-        if (audio_pipeline_link(this->pipeline_, link_tag, 3) != ESP_OK) {
+        if (audio_pipeline_link(this->pipeline_, link_tag, 4) != ESP_OK) {
             ESP_LOGE(TAG, "Failed to link HTTP pipeline components");
             return nullptr;
         }
