@@ -762,13 +762,21 @@ void ESPADFSpeaker::start_() {
 void ESPADFSpeaker::player_task(void *params) {
     ESPADFSpeaker *this_speaker = (ESPADFSpeaker *)params;
 
+    // Ensure enough heap is available before proceeding
+    uint32_t heap_before = esp_get_free_heap_size();
+    if (heap_before < 50 * 1024) {  // Example threshold
+        ESP_LOGE(TAG, "Insufficient heap memory: %u bytes available", heap_before);
+        return;
+    }
+
     TaskEvent event;
     event.type = TaskEventType::STARTING;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
-
+    ESP_LOGI(TAG, "Heap before initialize_audio_pipeline: %u bytes", esp_get_free_heap_size());
     // Step 1: Initialize the audio pipeline for RAW stream
     this_speaker->initialize_audio_pipeline(false); // RAW stream initialization
 
+    ESP_LOGI(TAG, "Heap before pipeline_cfg: %u bytes", esp_get_free_heap_size());
     // Step 2: Initialize pipeline configuration
     audio_pipeline_cfg_t pipeline_cfg = {
         .rb_size = 8 * 1024,
@@ -779,12 +787,6 @@ void ESPADFSpeaker::player_task(void *params) {
         return;
     }
 
-    // Ensure enough heap is available before proceeding
-    uint32_t heap_before = esp_get_free_heap_size();
-    if (heap_before < 50 * 1024) {  // Example threshold
-        ESP_LOGE(TAG, "Insufficient heap memory: %u bytes available", heap_before);
-        return;
-    }
     this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
     // Step 3: Register and link pipeline elements for RAW stream
     ESP_LOGI(TAG, "Registering audio pipeline components");
