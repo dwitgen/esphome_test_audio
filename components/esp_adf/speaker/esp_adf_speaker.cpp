@@ -122,7 +122,7 @@ esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *re
         .task_core = HTTP_STREAM_TASK_CORE,
         .task_prio = HTTP_STREAM_TASK_PRIO,
         .stack_in_ext = false,
-        .event_handle = ESPADFSpeaker::http_stream_event_handler,
+        .event_handle = NULL, //ESPADFSpeaker::http_stream_event_handler,
         .user_data = NULL,
         .auto_connect_next_track = false,
         .enable_playlist_parser = false,
