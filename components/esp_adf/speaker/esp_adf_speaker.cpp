@@ -610,6 +610,41 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
+    if (this->pipeline_) {
+        ESP_LOGI(TAG, "Stopping and cleaning up existing audio pipeline...");
+
+        audio_pipeline_stop(this->pipeline_);
+        audio_pipeline_wait_for_stop(this->pipeline_);
+        audio_pipeline_terminate(this->pipeline_);
+        audio_pipeline_deinit(this->pipeline_);
+        this->pipeline_ = nullptr;
+    }
+
+    if (this->i2s_stream_writer_) {
+        audio_element_deinit(this->i2s_stream_writer_);
+        this->i2s_stream_writer_ = nullptr;
+    }
+
+    if (this->raw_write_) {
+        audio_element_deinit(this->raw_write_);
+        this->raw_write_ = nullptr;
+    }
+
+    if (this->filter_) {
+        audio_element_deinit(this->filter_);
+        this->filter_ = nullptr;
+    }
+
+    if (this->http_stream_reader_) {
+        audio_element_deinit(this->http_stream_reader_);
+        this->http_stream_reader_ = nullptr;
+    }
+    gpio_set_level(PA_ENABLE_GPIO, 0);
+    ESP_LOGI(TAG, "Audio pipeline cleanup complete.");
+}
+
+
+/*void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
         audio_pipeline_stop(this->pipeline_);
@@ -644,7 +679,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     }
     gpio_set_level(PA_ENABLE_GPIO, 0);
     
-}
+}*/
 
 void ESPADFSpeaker::start() { this->state_ = speaker::STATE_STARTING; }
 void ESPADFSpeaker::start_() {
