@@ -131,8 +131,8 @@ esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *re
         .user_data = NULL,
         .auto_connect_next_track = false,
         .enable_playlist_parser = false,
-        //.cert_pem = NULL,  // Disable certificate verification
-        //.crt_bundle_attach = NULL,  // Do not use certificate bundle
+        .cert_pem = NULL,  // Disable certificate verification
+        .crt_bundle_attach = NULL,  // Do not use certificate bundle
        
     };
 
