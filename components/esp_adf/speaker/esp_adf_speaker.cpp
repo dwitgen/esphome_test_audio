@@ -721,12 +721,13 @@ void ESPADFSpeaker::player_task(void *params) {
     // Dynamically initialize the audio pipeline for RAW streaming
     ESP_LOGI(TAG, "Initializing audio pipeline for RAW stream in player_task...");
     this_speaker->cleanup_audio_pipeline();  // Ensure no previous pipeline exists
-    if (!this_speaker->initialize_audio_pipeline(false)) {
+    /*if (!this_speaker->initialize_audio_pipeline(false)) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline for RAW stream!");
         event.type = TaskEventType::WARNING;
         xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
         return;
-    }
+    }*/
+    this_speaker->initialize_audio_pipeline(false);
 
     // Start the audio pipeline
     if (audio_pipeline_run(this_speaker->pipeline_) != ESP_OK) {
