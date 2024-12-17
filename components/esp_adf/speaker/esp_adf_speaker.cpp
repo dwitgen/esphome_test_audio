@@ -811,6 +811,10 @@ void ESPADFSpeaker::player_task(void *params) {
         xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
         return;
     }
+    if (this_speaker->pipeline_ == nullptr) {
+        ESP_LOGE(TAG, "Failed to initialize audio pipeline");
+        return;
+    }
     ESP_LOGI(TAG, "Registering audio pipeline components");
     audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw"); 
     audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_, "i2s");
