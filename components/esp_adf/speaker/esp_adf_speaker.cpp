@@ -823,6 +823,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     int pa_state = gpio_get_level(PA_ENABLE_GPIO);
     if (pa_state == 1) {
         ESP_LOGI(TAG, "Disabling PA...");
+        gpio_reset_pin(PA_ENABLE_GPIO);
         gpio_set_level(PA_ENABLE_GPIO, 0);  // Set GPIO LOW to disable PA
         ESP_LOGI(TAG, "PA disabled successfully");
     } else {
@@ -965,12 +966,12 @@ void ESPADFSpeaker::player_task(void *params) {
     }
     ESP_LOGI(TAG, "Heap after starting: %u bytes", esp_get_free_heap_size());
     ESP_LOGI(TAG, "Audio pipeline started for RAW stream");*/
-
+    gpio_set_level(PA_ENABLE_GPIO, 1);  // Enable amplifier
     if (audio_pipeline_run(this_speaker->pipeline_) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start audio pipeline");
         return;
     }
-    gpio_set_level(PA_ENABLE_GPIO, 1);  // Enable amplifier
+   
     DataEvent data_event;
     uint32_t last_received = millis();
 
