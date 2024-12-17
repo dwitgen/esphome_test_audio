@@ -79,6 +79,7 @@ esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_ra
     }
 
     ESP_LOGI(TAG, "I2S stream initialized (Sample Rate: %d)", sample_rate);
+    i2s_installed_ = true;
     return ESP_OK;
 }
 
@@ -677,9 +678,10 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     } else {
         ESP_LOGI(TAG, "Audio pipeline is already cleaned up");
     }
-     if (i2s_get_status(I2S_NUM_0) == ESP_OK) {
+     if (i2s_installed_) {
         ESP_LOGI(TAG, "Uninstalling I2S driver...");
         i2s_driver_uninstall(I2S_NUM_0);
+        i2s_installed_ = false;  // Reset the flag
         ESP_LOGI(TAG, "I2S driver uninstalled successfully");
     } else {
         ESP_LOGW(TAG, "I2S driver is not installed, skipping uninstall");
