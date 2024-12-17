@@ -583,9 +583,9 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     // Cleanup any existing pipeline
     this->cleanup_audio_pipeline();
 
-    TaskEvent event;
-    event.type = TaskEventType::STARTING;
-    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
+    //TaskEvent event;
+    //event.type = TaskEventType::STARTING;
+    //xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 
        
    /* #ifdef HTTP_STREAM_RINGBUFFER_SIZE
@@ -711,8 +711,9 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 
     // Update state and log
     ESP_LOGI(TAG, "Audio pipeline started successfully for URL: %s", url.c_str());
-    event.type = TaskEventType::STARTED;
-    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
+    this->state_ = speaker::STATE_RUNNING;
+    //event.type = TaskEventType::STARTED;
+    //xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
