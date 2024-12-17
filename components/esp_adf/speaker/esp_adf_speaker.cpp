@@ -54,11 +54,7 @@ esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_ra
         .rb_size = 8 * 1024,
     };
     audio_pipeline_handle_t pipeline = audio_pipeline_init(&pipeline_cfg);
-    if (this_speaker->pipeline_ == nullptr) {
-        ESP_LOGE(TAG, "Failed to initialize audio pipeline");
-        return;
-    }
-
+    
     i2s_stream_cfg_t i2s_cfg = {
         .type = AUDIO_STREAM_WRITER,
         .i2s_config = i2s_config,
