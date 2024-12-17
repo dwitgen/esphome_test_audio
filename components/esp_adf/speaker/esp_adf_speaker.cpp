@@ -661,32 +661,41 @@ void ESPADFSpeaker::player_task(void *params) {
     event.type = TaskEventType::STARTING;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
 
-    // Dynamically initialize the audio pipeline for RAW streaming
-    ESP_LOGI(TAG, "Initializing audio pipeline for RAW stream in player_task...");
-    this_speaker->cleanup_audio_pipeline();  // Ensure no previous pipeline exists
-    /*if (!this_speaker->initialize_audio_pipeline(false)) {
-        ESP_LOGE(TAG, "Failed to initialize audio pipeline for RAW stream!");
-        event.type = TaskEventType::WARNING;
-        xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+    // Clean up any previous pipeline
+    this_speaker->cleanup_audio_pipeline();
+    this_speaker->initialize_audio_pipeline(false); // RAW stream initialization
+
+    // Initialize pipeline configuration
+    audio_pipeline_cfg_t pipeline_cfg = {.rb_size = 8 * 1024};
+    this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
+    if (this_speaker->pipeline_ == nullptr) {
+        ESP_LOGE(TAG, "Failed to initialize audio pipeline");
         return;
-    }*/
-    this_speaker->initialize_audio_pipeline(false);
+    }
+
+    // Register and link pipeline elements for RAW stream
+    if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw") != ESP_OK ||
+        audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_, "i2s") != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register pipeline elements");
+        return;
+    }
+
+    const char *link_tag[2] = {"raw", "i2s"};
+    if (audio_pipeline_link(this_speaker->pipeline_, link_tag, 2) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to link pipeline elements");
+        return;
+    }
 
     // Start the audio pipeline
     if (audio_pipeline_run(this_speaker->pipeline_) != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to run the audio pipeline!");
-        this_speaker->cleanup_audio_pipeline();
-        event.type = TaskEventType::WARNING;
-        xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+        ESP_LOGE(TAG, "Failed to start audio pipeline");
         return;
     }
+
     ESP_LOGI(TAG, "Audio pipeline started for RAW stream");
 
-    event.type = TaskEventType::STARTED;
-    xQueueSend(this_speaker->event_queue_, &event, 0);
-    gpio_set_level(PA_ENABLE_GPIO, 1);  // Enable amplifier
-
     // Process audio data
+    gpio_set_level(PA_ENABLE_GPIO, 1);  // Enable amplifier
     DataEvent data_event;
     uint32_t last_received = millis();
 
@@ -696,25 +705,15 @@ void ESPADFSpeaker::player_task(void *params) {
             continue;
         }
 
-        if (data_event.stop) {
-            while (xQueueReceive(this_speaker->buffer_queue_.handle, &data_event, 0) == pdTRUE) {
-                break;
-            }
-        }
-
         size_t remaining = data_event.len;
         size_t current = 0;
-        if (remaining > 0) last_received = millis();
 
         while (remaining > 0) {
             int bytes_written = raw_stream_write(this_speaker->raw_write_, (char *)data_event.data + current, remaining);
             if (bytes_written == ESP_FAIL) {
-                ESP_LOGE(TAG, "raw_stream_write failed!");
-                event = {.type = TaskEventType::WARNING, .err = ESP_FAIL};
-                xQueueSend(this_speaker->event_queue_, &event, 0);
+                ESP_LOGE(TAG, "Failed to write raw data");
                 continue;
             }
-
             remaining -= bytes_written;
             current += bytes_written;
         }
@@ -731,7 +730,7 @@ void ESPADFSpeaker::player_task(void *params) {
 }
 
 
-
+ 
 /*void ESPADFSpeaker::player_task(void *params) {
     ESPADFSpeaker *this_speaker = (ESPADFSpeaker *) params;
     
