@@ -420,8 +420,8 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to initialize MP3 decoder");
             return nullptr;
         }
-        if (audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
+        if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
+            audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register HTTP pipeline components");
