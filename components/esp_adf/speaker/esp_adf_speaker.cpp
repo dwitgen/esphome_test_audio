@@ -322,7 +322,7 @@ void ESPADFSpeaker::handle_rec_button() {
     // Add code to start recording
 }
 
-bool ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
+void ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
     esp_err_t ret;
 
     // Configure resample filter
