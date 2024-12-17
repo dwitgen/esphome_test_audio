@@ -412,7 +412,16 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
 
     // Register components
     if (is_http_stream) {
-        if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
+        // Initialize MP3 decoder
+        //ESP_LOGI(TAG, "Initializing MP3 decoder");
+        mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
+        audio_element_handle_t mp3_decoder = mp3_decoder_init(&mp3_cfg);
+        if (mp3_decoder == NULL) {
+            ESP_LOGE(TAG, "Failed to initialize MP3 decoder");
+            return;
+        }
+        if (audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK
+            audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register HTTP pipeline components");
@@ -428,7 +437,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
 
     // Link components
     if (is_http_stream) {
-        const char *link_tag[3] = {"http", "filter", "i2s"};
+        const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
         if (audio_pipeline_link(this->pipeline_, link_tag, 3) != ESP_OK) {
             ESP_LOGE(TAG, "Failed to link HTTP pipeline components");
             return nullptr;
@@ -634,13 +643,13 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     audio_element_set_uri(this->http_stream_reader_, url.c_str());
 
     // Initialize MP3 decoder
-    ESP_LOGI(TAG, "Initializing MP3 decoder");
+    /*ESP_LOGI(TAG, "Initializing MP3 decoder");
     mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
     audio_element_handle_t mp3_decoder = mp3_decoder_init(&mp3_cfg);
     if (mp3_decoder == NULL) {
         ESP_LOGE(TAG, "Failed to initialize MP3 decoder");
         return;
-    }
+    }*/
 
     // Initialize new audio pipeline
     this->initialize_audio_pipeline(true); 
