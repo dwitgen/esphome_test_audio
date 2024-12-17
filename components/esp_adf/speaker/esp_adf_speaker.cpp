@@ -54,6 +54,11 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
         .rb_size = 8 * 1024,
     };
     audio_pipeline_handle_t pipeline = audio_pipeline_init(&pipeline_cfg);
+
+    #ifdef I2S_STREAM_RINGBUFFER_SIZE
+    #undef I2S_STREAM_RINGBUFFER_SIZE
+    #endif
+    #define I2S_STREAM_RINGBUFFER_SIZE (16 * 1024)
     
     i2s_stream_cfg_t i2s_cfg = {
         .type = AUDIO_STREAM_WRITER,
@@ -112,7 +117,7 @@ esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *re
     #ifdef HTTP_STREAM_RINGBUFFER_SIZE
     #undef HTTP_STREAM_RINGBUFFER_SIZE
     #endif
-    #define HTTP_STREAM_RINGBUFFER_SIZE (12 * 1024)
+    #define HTTP_STREAM_RINGBUFFER_SIZE (16 * 1024)
 
     // Configure HTTP stream reader
     http_stream_cfg_t http_cfg = {
