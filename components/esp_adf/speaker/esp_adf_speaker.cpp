@@ -50,6 +50,15 @@ esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_ra
         .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT,
     };
 
+    audio_pipeline_cfg_t pipeline_cfg = {
+        .rb_size = 8 * 1024,
+    };
+    audio_pipeline_handle_t pipeline = audio_pipeline_init(&pipeline_cfg);
+    if (this_speaker->pipeline_ == nullptr) {
+        ESP_LOGE(TAG, "Failed to initialize audio pipeline");
+        return;
+    }
+
     i2s_stream_cfg_t i2s_cfg = {
         .type = AUDIO_STREAM_WRITER,
         .i2s_config = i2s_config,
@@ -765,14 +774,14 @@ void ESPADFSpeaker::player_task(void *params) {
     this_speaker->initialize_audio_pipeline(false); // RAW stream initialization
 
     // Step 2: Initialize pipeline configuration
-    audio_pipeline_cfg_t pipeline_cfg = {
+    /*audio_pipeline_cfg_t pipeline_cfg = {
         .rb_size = 8 * 1024,
     };
     audio_pipeline_handle_t pipeline = audio_pipeline_init(&pipeline_cfg);
     if (this_speaker->pipeline_ == nullptr) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
         return;
-    }
+    }*/
 
     // Step 3: Register and link pipeline elements for RAW stream
     if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw") != ESP_OK ||
