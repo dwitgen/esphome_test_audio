@@ -812,11 +812,9 @@ void ESPADFSpeaker::player_task(void *params) {
         return;
     }
     ESP_LOGI(TAG, "Registering audio pipeline components");
-    if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw") != ESP_OK ||
-        audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_, "i2s") != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to register pipeline elements");
-        return;
-    }
+    audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw"); 
+    audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_, "i2s");
+        
     ESP_LOGI(TAG, "Heap after registering: %u bytes", esp_get_free_heap_size());
     ESP_LOGI(TAG, "Linking audio pipeline components");
     const char *link_tag[2] = {"raw", "i2s"};
