@@ -287,14 +287,12 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         }
 
         // Attach event callback to detect sample rate
-        audio_element_set_event_callback(this->mp3_decoder_, [](audio_event_iface_msg_t *msg, void *context) {
+        audio_element_set_event_callback(this->mp3_decoder_, [](audio_element_handle_t el, audio_event_iface_msg_t *msg, void *context) {
+            audio_element_info_t music_info;
+            audio_element_getinfo(el, &music_info);
+            ESP_LOGD("MP3_INFO", "Detected Sample rate: %d, Channels: %d",
+                     music_info.sample_rates, music_info.channels);
             if (msg->cmd == AEL_MSG_CMD_REPORT_MUSIC_INFO) {
-                audio_element_info_t music_info;
-                audio_element_getinfo((audio_element_handle_t)context, &music_info);
-                ESP_LOGD("MP3_INFO", "Detected Sample rate: %d, Channels: %d, Bitrate: %d",
-                         music_info.sample_rates, music_info.channels, music_info.bitrate);
-
-                // Store detected values in the class context
                 auto *speaker = static_cast<ESPADFSpeaker *>(context);
                 speaker->detected_sample_rate_ = music_info.sample_rates;
                 speaker->detected_channels_ = music_info.channels;
