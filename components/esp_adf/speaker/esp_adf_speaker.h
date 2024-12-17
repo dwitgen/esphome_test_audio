@@ -67,7 +67,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   sensor::Sensor *volume_sensor = nullptr;
 
   // Method to initialize pipeline and cleanup
-  void initialize_audio_pipeline(bool is_http_stream);
+  bool initialize_audio_pipeline(bool is_http_stream);
   void cleanup_audio_pipeline();
 
  protected:
