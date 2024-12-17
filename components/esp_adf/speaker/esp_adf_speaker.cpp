@@ -351,6 +351,19 @@ void ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
         }
     }
 
+    raw_stream_cfg_t raw_cfg = {
+        .type = AUDIO_STREAM_WRITER,
+        .out_rb_size = 8 * 1024,
+        .task_stack = 2048,
+        .task_prio = 5,
+        .task_core = 1,
+    };
+    this->raw_write_ = raw_stream_init(&raw_cfg);
+    if (this->raw_write_ == nullptr) {
+        ESP_LOGE(TAG, "Failed to initialize RAW write stream");
+        return;
+    }
+    
     ESP_LOGI(TAG, "Audio pipeline and elements initialized successfully for %s stream",
              is_http_stream ? "HTTP" : "raw");
 }
@@ -612,16 +625,58 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
+
+        // Step 1: Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
         audio_pipeline_wait_for_stop(this->pipeline_);
         audio_pipeline_terminate(this->pipeline_);
-        audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
-        audio_pipeline_unregister(this->pipeline_, this->http_filter_);
-        audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
+
+        // Step 2: Unregister and deinitialize elements
+        if (this->i2s_stream_writer_http_ != nullptr) {
+            audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
+            audio_element_deinit(this->i2s_stream_writer_http_);
+            this->i2s_stream_writer_http_ = nullptr;
+            ESP_LOGI(TAG, "Unregistered and deinitialized HTTP I2S stream writer");
+        }
+
+        if (this->i2s_stream_writer_raw_ != nullptr) {
+            audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_raw_);
+            audio_element_deinit(this->i2s_stream_writer_raw_);
+            this->i2s_stream_writer_raw_ = nullptr;
+            ESP_LOGI(TAG, "Unregistered and deinitialized RAW I2S stream writer");
+        }
+
+        if (this->raw_write_ != nullptr) {
+            audio_pipeline_unregister(this->pipeline_, this->raw_write_);
+            audio_element_deinit(this->raw_write_);
+            this->raw_write_ = nullptr;
+            ESP_LOGI(TAG, "Unregistered and deinitialized RAW stream writer");
+        }
+
+        if (this->http_filter_ != nullptr) {
+            audio_pipeline_unregister(this->pipeline_, this->http_filter_);
+            audio_element_deinit(this->http_filter_);
+            this->http_filter_ = nullptr;
+            ESP_LOGI(TAG, "Unregistered and deinitialized HTTP filter");
+        }
+
+        if (this->http_stream_reader_ != nullptr) {
+            audio_pipeline_unregister(this->pipeline_, this->http_stream_reader_);
+            audio_element_deinit(this->http_stream_reader_);
+            this->http_stream_reader_ = nullptr;
+            ESP_LOGI(TAG, "Unregistered and deinitialized HTTP stream reader");
+        }
+
+        // Step 3: Deinitialize the audio pipeline
         audio_pipeline_deinit(this->pipeline_);
         this->pipeline_ = nullptr;
+
+        ESP_LOGI(TAG, "Audio pipeline cleanup completed successfully");
+    } else {
+        ESP_LOGI(TAG, "Audio pipeline is already cleaned up");
     }
 }
+
 /*void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_) {
         ESP_LOGI(TAG, "Stopping and cleaning up existing audio pipeline...");
@@ -709,11 +764,10 @@ void ESPADFSpeaker::player_task(void *params) {
     event.type = TaskEventType::STARTING;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
 
-    // Clean up any previous pipeline
-    this_speaker->cleanup_audio_pipeline();
+    // Step 1: Initialize the audio pipeline for RAW stream
     this_speaker->initialize_audio_pipeline(false); // RAW stream initialization
 
-    // Initialize pipeline configuration
+    // Step 2: Initialize pipeline configuration
     audio_pipeline_cfg_t pipeline_cfg = {.rb_size = 8 * 1024};
     this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
     if (this_speaker->pipeline_ == nullptr) {
@@ -721,7 +775,7 @@ void ESPADFSpeaker::player_task(void *params) {
         return;
     }
 
-    // Register and link pipeline elements for RAW stream
+    // Step 3: Register and link pipeline elements for RAW stream
     if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw") != ESP_OK ||
         audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_, "i2s") != ESP_OK) {
         ESP_LOGE(TAG, "Failed to register pipeline elements");
@@ -734,7 +788,7 @@ void ESPADFSpeaker::player_task(void *params) {
         return;
     }
 
-    // Start the audio pipeline
+    // Step 4: Start the audio pipeline
     if (audio_pipeline_run(this_speaker->pipeline_) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start audio pipeline");
         return;
@@ -742,7 +796,7 @@ void ESPADFSpeaker::player_task(void *params) {
 
     ESP_LOGI(TAG, "Audio pipeline started for RAW stream");
 
-    // Process audio data
+    // Step 5: Process audio data
     gpio_set_level(PA_ENABLE_GPIO, 1);  // Enable amplifier
     DataEvent data_event;
     uint32_t last_received = millis();
@@ -767,7 +821,7 @@ void ESPADFSpeaker::player_task(void *params) {
         }
     }
 
-    // Cleanup pipeline after the task finishes
+    // Step 6: Cleanup pipeline after the task finishes
     ESP_LOGI(TAG, "Cleaning up audio pipeline after player_task...");
     this_speaker->cleanup_audio_pipeline();
 
@@ -776,6 +830,7 @@ void ESPADFSpeaker::player_task(void *params) {
     gpio_set_level(PA_ENABLE_GPIO, 0);  // Disable amplifier
     ESP_LOGI(TAG, "Player task cleanup completed.");
 }
+
 
 
  
