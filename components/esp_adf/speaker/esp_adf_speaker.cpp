@@ -99,7 +99,10 @@ esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *re
         .task_core = HTTP_STREAM_TASK_CORE,
         .task_prio = HTTP_STREAM_TASK_PRIO,
         .stack_in_ext = false,
-        .event_handle = NULL,
+        .event_handle = [](audio_event_iface_msg_t *msg, void *user_data) {
+            ESP_LOGI("HTTP_EVENT", "Event received, cmd=%d, state=%d", msg->cmd, msg->state);
+            return ESP_OK;
+        },
         .user_data = NULL,
         .auto_connect_next_track = false,
         .enable_playlist_parser = false,
