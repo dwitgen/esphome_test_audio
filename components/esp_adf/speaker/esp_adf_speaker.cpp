@@ -765,8 +765,10 @@ void ESPADFSpeaker::player_task(void *params) {
     this_speaker->initialize_audio_pipeline(false); // RAW stream initialization
 
     // Step 2: Initialize pipeline configuration
-    audio_pipeline_cfg_t pipeline_cfg = {.rb_size = 8 * 1024};
-    this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
+    audio_pipeline_cfg_t pipeline_cfg = {
+        .rb_size = 8 * 1024,
+    };
+    audio_pipeline_handle_t pipeline = audio_pipeline_init(&pipeline_cfg);
     if (this_speaker->pipeline_ == nullptr) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
         return;
