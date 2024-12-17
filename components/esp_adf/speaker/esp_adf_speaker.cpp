@@ -672,11 +672,12 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         // Step 3: Deinitialize the audio pipeline
         audio_pipeline_deinit(this->pipeline_);
         this->pipeline_ = nullptr;
-
+      
         ESP_LOGI(TAG, "Audio pipeline cleanup completed successfully");
     } else {
         ESP_LOGI(TAG, "Audio pipeline is already cleaned up");
     }
+    i2s_driver_uninstall(I2S_NUM_0);
 }
 
 /*void ESPADFSpeaker::cleanup_audio_pipeline() {
@@ -781,11 +782,20 @@ void ESPADFSpeaker::player_task(void *params) {
     audio_pipeline_cfg_t pipeline_cfg = {
         .rb_size = 8 * 1024,
     };
-    audio_pipeline_handle_t pipeline = audio_pipeline_init(&pipeline_cfg);
+    audio_pipeline_handle_t pipeline = nullptr;
+    for (int retry = 0; retry < 3; retry++) {
+        pipeline = audio_pipeline_init(&pipeline_cfg);
+        if (pipeline != nullptr) {
+            break;
+        }
+        ESP_LOGW(TAG, "Retrying audio pipeline initialization...");
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    /*audio_pipeline_handle_t pipeline = audio_pipeline_init(&pipeline_cfg);
     if (this_speaker->pipeline_ == nullptr) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
         return;
-    }
+    }*/
 
     this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
     // Step 3: Register and link pipeline elements for RAW stream
