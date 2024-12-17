@@ -799,6 +799,18 @@ void ESPADFSpeaker::player_task(void *params) {
 
     this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
     // Step 3: Register and link pipeline elements for RAW stream
+    raw_stream_cfg_t raw_cfg = {
+        .type = AUDIO_STREAM_WRITER,
+        .out_rb_size = 8 * 1024,
+    };
+    this_speaker->raw_write_ = raw_stream_init(&raw_cfg);
+
+    if (this_speaker->raw_write_ == nullptr) {
+        ESP_LOGE("ESPADFSpeaker", "Failed to initialize raw stream writer");
+        event.type = TaskEventType::WARNING;
+        xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+        return;
+    }
     ESP_LOGI(TAG, "Registering audio pipeline components");
     if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw") != ESP_OK ||
         audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_, "i2s") != ESP_OK) {
