@@ -330,7 +330,7 @@ void ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
     this->pipeline_ = audio_pipeline_init(&pipeline_cfg);
     if (this->pipeline_ == nullptr) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
-        return //false; // Early failure
+        return; //false; // Early failure
     }
 
     if (is_http_stream) {
