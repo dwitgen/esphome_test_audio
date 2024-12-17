@@ -629,12 +629,17 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
 
-        // Step 1: Stop and terminate the pipeline
+        // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
         audio_pipeline_wait_for_stop(this->pipeline_);
         audio_pipeline_terminate(this->pipeline_);
+        
+        // Reset the ringbuffers
+        ESP_LOGI(TAG, "Resetting pipeline ringbuffers and states");
+        audio_pipeline_reset_ringbuffer(this->pipeline_);
+        audio_pipeline_reset_items_state(this->pipeline_);
 
-        // Step 2: Unregister and deinitialize elements
+        // Unregister and deinitialize elements
         if (this->i2s_stream_writer_http_ != nullptr) {
             audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
             audio_element_deinit(this->i2s_stream_writer_http_);
@@ -670,7 +675,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
             ESP_LOGI(TAG, "Unregistered and deinitialized HTTP stream reader");
         }
 
-        // Step 3: Deinitialize the audio pipeline
+        // Deinitialize the audio pipeline
         audio_pipeline_deinit(this->pipeline_);
         this->pipeline_ = nullptr;
       
@@ -791,7 +796,7 @@ void ESPADFSpeaker::player_task(void *params) {
     event.type = TaskEventType::STARTING;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
     ESP_LOGI(TAG, "Heap before initialize_audio_pipeline: %u bytes", esp_get_free_heap_size());
-    // Step 1: Initialize the audio pipeline for RAW stream
+    // Initialize the audio pipeline for RAW stream
     this_speaker->initialize_audio_pipeline(false); // RAW stream initialization
 
     ESP_LOGI(TAG, "Heap before pipeline_cfg: %u bytes", esp_get_free_heap_size());
@@ -857,12 +862,19 @@ void ESPADFSpeaker::player_task(void *params) {
         }
     }
 
+    // Signal that cleanup is starting
+    event.type = TaskEventType::STOPPING;
+    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
     ESP_LOGI(TAG, "Cleaning up audio pipeline after player_task...");
     this_speaker->cleanup_audio_pipeline();
 
     event.type = TaskEventType::STOPPED;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
     ESP_LOGI(TAG, "Player task cleanup completed.");
+    
+    while (true) {
+        delay(10);
+    }
 }
 
 
