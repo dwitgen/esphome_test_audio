@@ -117,10 +117,10 @@ esp_err_t configure_resample_filter(audio_element_handle_t *filter, int src_rate
 }
 
 // Helper to initialize the audio pipeline
-audio_pipeline_handle_t configure_audio_pipeline(size_t ringbuffer_size) {
+/*audio_pipeline_handle_t configure_audio_pipeline(size_t ringbuffer_size) {
     audio_pipeline_cfg_t pipeline_cfg = {.rb_size = static_cast<int>(ringbuffer_size)};  // Explicit cast
     return audio_pipeline_init(&pipeline_cfg);
-}
+}*/
 
 /*esp_err_t configure_i2s_stream_writer_http(audio_element_handle_t *i2s_stream_writer) {
     i2s_driver_config_t i2s_config = {
