@@ -102,6 +102,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
    // New private helper methods for modularization
    esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate);
    esp_err_t configure_resample_filter(audio_element_handle_t *filter, int src_rate, int dest_rate, int dest_ch);
+   esp_err_t configure_http_stream_reader(audio_element_handle_t *reader);
    bool check_heap_memory(uint32_t threshold);
    bool init_pipeline(size_t rb_size);
    bool register_pipeline_elements(const std::vector<std::pair<std::string, audio_element_handle_t>> &elements);
