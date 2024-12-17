@@ -97,6 +97,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
    audio_element_handle_t raw_write_;
    audio_element_handle_t http_stream_reader_;
    std::string url_;
+   bool i2s_installed_ = false;
 
    // New private helper methods for modularization
    bool check_heap_memory(uint32_t threshold);
