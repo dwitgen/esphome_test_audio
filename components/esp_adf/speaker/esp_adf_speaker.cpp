@@ -33,7 +33,7 @@ static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
 // Helper to configure I2S stream with dynamic sample rate
-esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate) {
+esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate) {
     i2s_driver_config_t i2s_config = {
         .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_TX),
         .sample_rate = static_cast<uint32_t>(sample_rate),  // Explicit cast
@@ -79,13 +79,13 @@ esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_ra
     }
 
     ESP_LOGI(TAG, "I2S stream initialized (Sample Rate: %d)", sample_rate);
-    i2s_installed_ = true;
+    this->i2s_installed_ = true;
     return ESP_OK;
 }
 
 
 // Helper to configure resample filter with dynamic rates
-esp_err_t configure_resample_filter(audio_element_handle_t *filter, int src_rate, int dest_rate, int dest_ch) {
+esp_err_t ESPADFSpeaker::configure_resample_filter(audio_element_handle_t *filter, int src_rate, int dest_rate, int dest_ch) {
     rsp_filter_cfg_t rsp_cfg = {
         .src_rate = src_rate,
         .src_ch = 2,
@@ -678,7 +678,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     } else {
         ESP_LOGI(TAG, "Audio pipeline is already cleaned up");
     }
-     if (i2s_installed_) {
+     if (this->i2s_installed_) {
         ESP_LOGI(TAG, "Uninstalling I2S driver...");
         i2s_driver_uninstall(I2S_NUM_0);
         i2s_installed_ = false;  // Reset the flag
