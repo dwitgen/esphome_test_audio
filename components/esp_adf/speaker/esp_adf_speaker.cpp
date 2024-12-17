@@ -83,6 +83,39 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
     return ESP_OK;
 }
 
+// Helper to configure http stream reader
+esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *reader) {
+
+    #ifdef HTTP_STREAM_RINGBUFFER_SIZE
+    #undef HTTP_STREAM_RINGBUFFER_SIZE
+    #endif
+    #define HTTP_STREAM_RINGBUFFER_SIZE (12 * 1024)
+    
+    // Configure HTTP stream reader
+    http_stream_cfg_t http_cfg = {
+        .type = AUDIO_STREAM_READER,
+        .out_rb_size = HTTP_STREAM_RINGBUFFER_SIZE,  // Ring buffer size
+        .task_stack = HTTP_STREAM_TASK_STACK,
+        .task_core = HTTP_STREAM_TASK_CORE,
+        .task_prio = HTTP_STREAM_TASK_PRIO,
+        .stack_in_ext = false,
+        .event_handle = NULL,
+        .user_data = NULL,
+        .auto_connect_next_track = false,
+        .enable_playlist_parser = false,
+        //.cert_pem = NULL,  // Disable certificate verification
+        //.crt_bundle_attach = NULL,  // Do not use certificate bundle
+       
+    };
+
+    *reader = http_stream_init(&http_cfg);
+    if (*reader == nullptr) {
+        ESP_LOGE(TAG, "Failed to initialize HTTP stream reader");
+        return ESP_FAIL;
+    }
+    ESP_LOGI(TAG, "HTTP reader initialized");
+    return ESP_OK;
+}
 
 // Helper to configure resample filter with dynamic rates
 esp_err_t ESPADFSpeaker::configure_resample_filter(audio_element_handle_t *filter, int src_rate, int dest_rate, int dest_ch) {
@@ -555,7 +588,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 
        
-    #ifdef HTTP_STREAM_RINGBUFFER_SIZE
+   /* #ifdef HTTP_STREAM_RINGBUFFER_SIZE
     #undef HTTP_STREAM_RINGBUFFER_SIZE
     #endif
     #define HTTP_STREAM_RINGBUFFER_SIZE (12 * 1024)
@@ -590,6 +623,12 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     this->http_stream_reader_ = http_stream_init(&http_cfg);
     if (this->http_stream_reader_ == NULL) {
         ESP_LOGE(TAG, "Failed to initialize HTTP stream reader");
+        return;
+    }*/
+
+    esp_err_t ret = configure_http_stream_reader(&this->http_stream_reader_);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error initializing HTTP stream reader: %s", esp_err_to_name(ret));
         return;
     }
     audio_element_set_uri(this->http_stream_reader_, url.c_str());
