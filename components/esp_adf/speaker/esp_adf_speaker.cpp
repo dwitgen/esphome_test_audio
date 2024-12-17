@@ -662,13 +662,14 @@ void ESPADFSpeaker::player_task(void *params) {
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
 
     // Dynamically initialize the audio pipeline based on the stream type
-    if (!this_speaker->initialize_audio_pipeline(this_speaker->is_http_stream_)) {
+    /*if (!this_speaker->initialize_audio_pipeline(this_speaker->is_http_stream_)) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
         event.type = TaskEventType::WARNING;
         xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
         return;
-    }
-
+    }*/
+    this_speaker->initialize_audio_pipeline(false)
+        
     // Start the audio pipeline
     audio_pipeline_run(this_speaker->pipeline_);
     ESP_LOGI(TAG, "Audio pipeline started");
