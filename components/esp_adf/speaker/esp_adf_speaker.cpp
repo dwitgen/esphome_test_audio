@@ -799,11 +799,11 @@ void ESPADFSpeaker::player_task(void *params) {
 
     this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
     // Step 3: Register and link pipeline elements for RAW stream
-    raw_stream_cfg_t raw_cfg = {
+    /*raw_stream_cfg_t raw_cfg = {
         .type = AUDIO_STREAM_WRITER,
         .out_rb_size = 8 * 1024,
     };
-    this_speaker->raw_write_ = raw_stream_init(&raw_cfg);
+    this_speaker->raw_write_ = raw_stream_init(&raw_cfg);*/
 
     if (this_speaker->raw_write_ == nullptr) {
         ESP_LOGE("ESPADFSpeaker", "Failed to initialize raw stream writer");
@@ -815,13 +815,13 @@ void ESPADFSpeaker::player_task(void *params) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
         return;
     }
-    if (this_speaker->i2s_stream_writer_ == nullptr) {
-        ESP_LOGE(TAG, "Failed to initialize i2s_stream_writer_");
+    if (this_speaker->i2s_stream_writer_raw_ == nullptr) {
+        ESP_LOGE(TAG, "Failed to initialize i2s_stream_writer_raw");
         return;
     }
     ESP_LOGI(TAG, "Registering audio pipeline components");
     audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw"); 
-    audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_, "i2s");
+    audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_raw_, "i2s");
         
     ESP_LOGI(TAG, "Heap after registering: %u bytes", esp_get_free_heap_size());
     ESP_LOGI(TAG, "Linking audio pipeline components");
