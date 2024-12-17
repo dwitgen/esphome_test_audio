@@ -98,6 +98,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
    audio_element_handle_t http_stream_reader_;
    std::string url_;
    bool i2s_installed_ = false;
+   static int http_stream_event_handler(http_stream_event_msg_t *msg);
 
    // New private helper methods for modularization
    esp_err_t configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate);
