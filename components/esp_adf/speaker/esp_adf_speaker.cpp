@@ -779,25 +779,35 @@ void ESPADFSpeaker::player_task(void *params) {
         return;
     }*/
 
+    // Ensure enough heap is available before proceeding
+    uint32_t heap_before = esp_get_free_heap_size();
+    if (heap_before < 50 * 1024) {  // Example threshold
+        ESP_LOGE(TAG, "Insufficient heap memory: %u bytes available", heap_before);
+        return;
+    }
+
     // Step 3: Register and link pipeline elements for RAW stream
+    ESP_LOGI(TAG, "Registering audio pipeline components");
     if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw") != ESP_OK ||
         audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_, "i2s") != ESP_OK) {
         ESP_LOGE(TAG, "Failed to register pipeline elements");
         return;
     }
-
+    ESP_LOGI(TAG, "Heap after registering: %u bytes", esp_get_free_heap_size());
+    ESP_LOGI(TAG, "Linking audio pipeline components");
     const char *link_tag[2] = {"raw", "i2s"};
     if (audio_pipeline_link(this_speaker->pipeline_, link_tag, 2) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to link pipeline elements");
         return;
     }
-
+    ESP_LOGI(TAG, "Heap after linking: %u bytes", esp_get_free_heap_size());
+    ESP_LOGI(TAG, "Starting audio pipeline components");
     // Step 4: Start the audio pipeline
     if (audio_pipeline_run(this_speaker->pipeline_) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to start audio pipeline");
         return;
     }
-
+    ESP_LOGI(TAG, "Heap after starting: %u bytes", esp_get_free_heap_size());
     ESP_LOGI(TAG, "Audio pipeline started for RAW stream");
 
     // Step 5: Process audio data
