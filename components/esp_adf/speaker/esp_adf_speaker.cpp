@@ -785,7 +785,7 @@ void ESPADFSpeaker::player_task(void *params) {
         ESP_LOGE(TAG, "Insufficient heap memory: %u bytes available", heap_before);
         return;
     }
-
+    this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
     // Step 3: Register and link pipeline elements for RAW stream
     ESP_LOGI(TAG, "Registering audio pipeline components");
     if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw") != ESP_OK ||
