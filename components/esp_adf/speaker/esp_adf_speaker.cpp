@@ -678,14 +678,14 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     } else {
         ESP_LOGI(TAG, "Audio pipeline is already cleaned up");
     }
-     if (this->i2s_installed_) {
+     /*if (this->i2s_installed_) {
         ESP_LOGI(TAG, "Uninstalling I2S driver...");
         i2s_driver_uninstall(I2S_NUM_0);
         i2s_installed_ = false;  // Reset the flag
         ESP_LOGI(TAG, "I2S driver uninstalled successfully");
     } else {
         ESP_LOGW(TAG, "I2S driver is not installed, skipping uninstall");
-    }
+    }*/
     
     int pa_state = gpio_get_level(PA_ENABLE_GPIO);
     if (pa_state == 1) {
