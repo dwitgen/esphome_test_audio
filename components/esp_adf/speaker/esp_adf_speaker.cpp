@@ -351,12 +351,9 @@ void ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
         }
     }
 
-    raw_stream_cfg_t raw_cfg = {
+    raw_stream_cfg_t raw_cfg = = {
         .type = AUDIO_STREAM_WRITER,
         .out_rb_size = 8 * 1024,
-        .task_stack = 2048,
-        .task_prio = 5,
-        .task_core = 1,
     };
     this->raw_write_ = raw_stream_init(&raw_cfg);
     if (this->raw_write_ == nullptr) {
