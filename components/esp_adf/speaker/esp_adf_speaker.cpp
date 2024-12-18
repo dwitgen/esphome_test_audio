@@ -264,6 +264,7 @@ void ESPADFSpeaker::handle_rec_button() {
 }
 
 audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
+    ESPADFSpeaker *this_speaker = (ESPADFSpeaker *)params;
     esp_err_t ret;
 
     // Configure resample filter
@@ -271,7 +272,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
     int dest_rate = is_http_stream ? 44100 : 16000;
     int dest_ch = 1;
 
-    ret = configure_resample_filter(&this->http_filter_, src_rate, dest_rate, dest_ch);
+    ret = configure_resample_filter(&this_speaker->http_filter_, src_rate, dest_rate, dest_ch);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Error initializing resample filter: %s", esp_err_to_name(ret));
         return nullptr;
@@ -279,13 +280,13 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
 
     // Configure I2S stream writer
     if (is_http_stream) {
-        ret = configure_i2s_stream(&this->i2s_stream_writer_http_, 44100);
+        ret = configure_i2s_stream(&this_speaker->i2s_stream_writer_http_, 44100);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Error initializing I2S stream writer for HTTP: %s", esp_err_to_name(ret));
             return nullptr;
         }
     } else {
-        ret = configure_i2s_stream(&this->i2s_stream_writer_raw_, 16000);
+        ret = configure_i2s_stream(&this_speaker->i2s_stream_writer_raw_, 16000);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Error initializing I2S stream writer for RAW: %s", esp_err_to_name(ret));
             return nullptr;
@@ -295,8 +296,8 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             .type = AUDIO_STREAM_WRITER,
             .out_rb_size = 8 * 1024,
         };
-        this->raw_write_ = raw_stream_init(&raw_cfg);
-        if (this->raw_write_ == nullptr) {
+        this_speaker->raw_write_ = raw_stream_init(&raw_cfg);
+        if (this_speaker->raw_write_ == nullptr) {
             ESP_LOGE(TAG, "Failed to initialize RAW write stream");
             return nullptr;
         }
@@ -306,8 +307,8 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
     ESP_LOGD(TAG, "Initializing audio pipeline");
     audio_pipeline_cfg_t pipeline_cfg = {.rb_size = 8 * 1024};
 
-    this->pipeline_ = audio_pipeline_init(&pipeline_cfg);
-    if (this->pipeline_ == nullptr) {
+    this_speaker->pipeline_ = audio_pipeline_init(&pipeline_cfg);
+    if (this_speaker->pipeline_ == nullptr) {
         ESP_LOGE(TAG, "Failed to initialize audio pipeline");
         return nullptr;
     }
@@ -322,16 +323,16 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to initialize MP3 decoder");
             return nullptr;
         }
-        if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s") != ESP_OK) {
+        if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->http_stream_reader_, "http") != ESP_OK ||
+            audio_pipeline_register(this_speaker->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
+            audio_pipeline_register(this_speaker->pipeline_, this_speaker->http_filter_, "filter") != ESP_OK ||
+            audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_http_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register HTTP pipeline components");
             return nullptr;
         }
     } else {
-        if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
+        if (audio_pipeline_register(this_speaker->pipeline_, this_speaker->raw_write_, "raw") != ESP_OK ||
+            audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register RAW pipeline components");
             return nullptr;
         }
@@ -344,40 +345,40 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         vTaskDelay(pdMS_TO_TICKS(500));  // Allow time for metadata detection
 
         ESP_LOGI(TAG, "Configuring resample filter and I2S stream with sample rate: %d", this->detected_sample_rate_);
-        ret = configure_resample_filter(&this->http_filter_, this->detected_sample_rate_, 44100, 1);
+        ret = configure_resample_filter(&this_speaker->http_filter_, this_speaker->detected_sample_rate_, 44100, 1);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Error initializing resample filter: %s", esp_err_to_name(ret));
             return nullptr;
         }
 
-        ret = configure_i2s_stream(&this->i2s_stream_writer_http_, this->detected_sample_rate_);
+        ret = configure_i2s_stream(&this_speaker->i2s_stream_writer_http_, this_speaker->detected_sample_rate_);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Error initializing I2S stream writer: %s", esp_err_to_name(ret));
             return nullptr;
         }
 
         // Register remaining components
-        audio_pipeline_register(this->pipeline_, this->http_filter_, "filter");
-        audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s");
+        audio_pipeline_register(this_speaker->pipeline_, this_speaker->http_filter_, "filter");
+        audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_http_, "i2s");
 
         // Link components
         const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
-        if (audio_pipeline_link(this->pipeline_, link_tag, 4) != ESP_OK) {
+        if (audio_pipeline_link(this_speaker->pipeline_, link_tag, 4) != ESP_OK) {
             ESP_LOGE(TAG, "Failed to link HTTP pipeline components");
             return nullptr;
         }
     } else {
-        ret = configure_i2s_stream(&this->i2s_stream_writer_raw_, 16000);
+        ret = configure_i2s_stream(&this_speaker->i2s_stream_writer_raw_, 16000);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Error initializing I2S stream writer for RAW");
             return nullptr;
         }
 
-        audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s");
+        audio_pipeline_register(this_speaker->pipeline_, this_speaker->i2s_stream_writer_raw_, "i2s");
 
         // Link components
         const char *link_tag[2] = {"raw", "i2s"};
-        if (audio_pipeline_link(this->pipeline_, link_tag, 2) != ESP_OK) {
+        if (audio_pipeline_link(this_speaker->pipeline_, link_tag, 2) != ESP_OK) {
             ESP_LOGE(TAG, "Failed to link RAW pipeline components");
             return nullptr;
         }
@@ -385,7 +386,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
 
     ESP_LOGI(TAG, "Audio pipeline initialized successfully for %s stream",
              is_http_stream ? "HTTP" : "RAW");
-    return this->pipeline_;
+    return this_speaker->pipeline_;
 }
 
 
