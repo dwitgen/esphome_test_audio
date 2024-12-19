@@ -338,12 +338,15 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
          // Start the pipeline to fetch MP3 metadata
         ESP_LOGI(TAG, "Starting pipeline temporarily to fetch MP3 metadata");
         audio_pipeline_run(this->pipeline_);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    
+        vTaskDelay(pdMS_TO_TICKS(2000));
+        audio_pipeline_pause(pipeline_);
+        audio_pipeline_stop(pipeline_);
+        audio_pipeline_wait_for_stop(pipeline_);
+        
         // Get MP3 metadata
         audio_element_info_t mp3_info;
-        esp_err_t ret = audio_element_getinfo(mp3_decoder, &mp3_info);
-        if (ret == ESP_OK) {
+        //esp_err_t ret = audio_element_getinfo(mp3_decoder, &mp3_info);
+        if (audio_element_getinfo(mp3_decoder, &mp3_info) == ESP_OK) {
             ESP_LOGI(TAG, "MP3 Metadata - Sample Rate: %d Hz, Channels: %d, Bit Rate: %d kbps",
                      mp3_info.sample_rates, mp3_info.channels, mp3_info.bps / 1000);
         } else {
@@ -353,9 +356,9 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         // Stop the pipeline after fetching metadata
         ESP_LOGI(TAG, "Stopping pipeline after fetching MP3 metadata");
         if (this->http_filter_ != nullptr) {
-            audio_pipeline_pause(pipeline_);
+            /*audio_pipeline_pause(pipeline_);
             audio_pipeline_stop(pipeline_);
-            audio_pipeline_wait_for_stop(pipeline_);
+            audio_pipeline_wait_for_stop(pipeline_);*/
             audio_pipeline_unregister(this->pipeline_, this->http_filter_);
             audio_element_deinit(this->http_filter_);
             this->http_filter_ = nullptr;
