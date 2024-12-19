@@ -352,8 +352,12 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
     
         // Stop the pipeline after fetching metadata
         ESP_LOGI(TAG, "Stopping pipeline after fetching MP3 metadata");
-       // Cleanup any existing pipeline
-        this->cleanup_audio_pipeline();
+        if (this->http_filter_ != nullptr) {
+            audio_pipeline_unregister(this->pipeline_, this->http_filter_);
+            audio_element_deinit(this->http_filter_);
+            this->http_filter_ = nullptr;
+            ESP_LOGI(TAG, "Unregistered and deinitialized HTTP filter");
+        }
 
         // Reconfigure the resample filter based on the retrieved sample rate and channels
         int src_rate = mp3_info.sample_rates; // From MP3 metadata
@@ -365,7 +369,11 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Error reinitializing resample filter: %s", esp_err_to_name(ret));
             return nullptr;
         }
-        // Reinitialize the pipeline
+        if (audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK) {
+            ESP_LOGE(TAG, "failed to re-register http filter");
+            return nullptr;
+        }
+       /* // Reinitialize the pipeline
         this->pipeline_ = audio_pipeline_init(&pipeline_cfg);
         if (this->pipeline_ == nullptr) {
             ESP_LOGE(TAG, "Failed to reinitialize audio pipeline");
@@ -385,7 +393,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         if (audio_pipeline_link(this->pipeline_, link_tag, 4) != ESP_OK) {
             ESP_LOGE(TAG, "Failed to link components after reconfiguration");
             return nullptr;
-        }
+        }*/
 
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
