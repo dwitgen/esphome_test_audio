@@ -373,6 +373,10 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "failed to re-register http filter");
             return nullptr;
         }
+        if(audio_pipeline_unlink(this->pipeline) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to unlink pipeline components");
+            return nullptr;
+        }
         if (audio_pipeline_relink(this->pipeline_, link_tag, 4) != ESP_OK) {
             ESP_LOGE(TAG, "Failed to relink HTTP pipeline components");
             return nullptr;
