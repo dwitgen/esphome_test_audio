@@ -338,7 +338,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
          // Start the pipeline to fetch MP3 metadata
         ESP_LOGI(TAG, "Starting pipeline temporarily to fetch MP3 metadata");
         audio_pipeline_run(this->pipeline_);
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     
         // Get MP3 metadata
         audio_element_info_t mp3_info;
@@ -371,6 +371,10 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         }
         if (audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK) {
             ESP_LOGE(TAG, "failed to re-register http filter");
+            return nullptr;
+        }
+        if (audio_pipeline_relink(this->pipeline_, link_tag, 4) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to relink HTTP pipeline components");
             return nullptr;
         }
        /* // Reinitialize the pipeline
