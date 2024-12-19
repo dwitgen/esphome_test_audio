@@ -329,17 +329,29 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to register HTTP pipeline components");
             return nullptr;
         }
+         // Link components
+        const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
+        if (audio_pipeline_link(this->pipeline_, link_tag, 4) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to link HTTP pipeline components");
+            return nullptr;
+        }
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register RAW pipeline components");
             return nullptr;
         }
+        // Link components
+        const char *link_tag[2] = {"raw", "i2s"};
+        if (audio_pipeline_link(this->pipeline_, link_tag, 2) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to link RAW pipeline components");
+            return nullptr;
+        }
     }
 
 
     // Step 3: Dynamically configure resample filter and I2S writer after detecting sample rate
-    if (is_http_stream) {
+   /* if (is_http_stream) {
         // Wait for MP3 event to get the sample rate
         vTaskDelay(pdMS_TO_TICKS(500));  // Allow time for metadata detection
 
@@ -381,7 +393,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to link RAW pipeline components");
             return nullptr;
         }
-    }
+    } */
 
     ESP_LOGI(TAG, "Audio pipeline initialized successfully for %s stream",
              is_http_stream ? "HTTP" : "RAW");
