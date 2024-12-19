@@ -344,7 +344,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         esp_err_t ret = audio_element_getinfo(mp3_decoder, &mp3_info);
         if (ret == ESP_OK) {
             ESP_LOGI(TAG, "MP3 Metadata - Sample Rate: %d Hz, Channels: %d, Bit Rate: %d kbps",
-                     mp3_info.sample_rates, mp3_info.channels, mp3_info.bitrate / 1000);
+                     mp3_info.sample_rates, mp3_info.channels, mp3_info.bps / 1000);
         } else {
             ESP_LOGE(TAG, "Failed to get MP3 metadata: %s", esp_err_to_name(ret));
         }
