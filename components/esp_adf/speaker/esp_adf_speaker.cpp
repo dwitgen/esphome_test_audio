@@ -352,8 +352,41 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
     
         // Stop the pipeline after fetching metadata
         ESP_LOGI(TAG, "Stopping pipeline after fetching MP3 metadata");
-        audio_pipeline_stop(this->pipeline_);
-        audio_pipeline_wait_for_stop(this->pipeline_);
+       // Cleanup any existing pipeline
+        this->cleanup_audio_pipeline();
+
+        // Reconfigure the resample filter based on the retrieved sample rate and channels
+        int src_rate = mp3_info.sample_rates; // From MP3 metadata
+        int dest_rate = 16000; // Desired output sample rate
+        int dest_ch = 1; // Mono output
+        
+        ret = configure_resample_filter(&this->http_filter_, src_rate, dest_rate, dest_ch);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Error reinitializing resample filter: %s", esp_err_to_name(ret));
+            return nullptr;
+        }
+        // Reinitialize the pipeline
+        this->pipeline_ = audio_pipeline_init(&pipeline_cfg);
+        if (this->pipeline_ == nullptr) {
+            ESP_LOGE(TAG, "Failed to reinitialize audio pipeline");
+            return nullptr;
+        }
+        
+        // Re-register and link components
+        if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
+            audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
+            audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK ||
+            audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s") != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to register components after reconfiguration");
+            return nullptr;
+        }
+        
+        const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
+        if (audio_pipeline_link(this->pipeline_, link_tag, 4) != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to link components after reconfiguration");
+            return nullptr;
+        }
+
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
