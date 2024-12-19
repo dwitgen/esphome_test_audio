@@ -490,7 +490,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     ESP_LOGI(TAG, "Attempting to play URL: %s", url.c_str());
     TaskEvent event;
     event.type = TaskEventType::STARTING;
-    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 
     // Cleanup any existing pipeline
     this->cleanup_audio_pipeline();
