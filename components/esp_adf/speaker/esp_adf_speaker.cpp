@@ -338,6 +338,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
          // Start the pipeline to fetch MP3 metadata
         ESP_LOGI(TAG, "Starting pipeline temporarily to fetch MP3 metadata");
         audio_pipeline_run(this->pipeline_);
+        vTaskDelay(pdMS_TO_TICKS(2000));
     
         // Get MP3 metadata
         audio_element_info_t mp3_info;
