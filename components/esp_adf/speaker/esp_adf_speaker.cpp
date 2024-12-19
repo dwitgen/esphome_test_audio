@@ -335,6 +335,24 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to link HTTP pipeline components");
             return nullptr;
         }
+         // Start the pipeline to fetch MP3 metadata
+        ESP_LOGI(TAG, "Starting pipeline temporarily to fetch MP3 metadata");
+        audio_pipeline_run(this->pipeline_);
+    
+        // Get MP3 metadata
+        audio_element_info_t mp3_info;
+        esp_err_t ret = audio_element_getinfo(mp3_decoder, &mp3_info);
+        if (ret == ESP_OK) {
+            ESP_LOGI(TAG, "MP3 Metadata - Sample Rate: %d Hz, Channels: %d, Bit Rate: %d kbps",
+                     mp3_info.sample_rates, mp3_info.channels, mp3_info.bitrate / 1000);
+        } else {
+            ESP_LOGE(TAG, "Failed to get MP3 metadata: %s", esp_err_to_name(ret));
+        }
+    
+        // Stop the pipeline after fetching metadata
+        ESP_LOGI(TAG, "Stopping pipeline after fetching MP3 metadata");
+        audio_pipeline_stop(this->pipeline_);
+        audio_pipeline_wait_for_stop(this->pipeline_);
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
