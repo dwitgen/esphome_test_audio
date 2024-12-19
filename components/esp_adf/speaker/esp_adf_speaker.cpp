@@ -353,6 +353,9 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         // Stop the pipeline after fetching metadata
         ESP_LOGI(TAG, "Stopping pipeline after fetching MP3 metadata");
         if (this->http_filter_ != nullptr) {
+            audio_pipeline_pause(pipeline_);
+            audio_pipeline_stop(pipeline_);
+            audio_pipeline_wait_for_stop(pipeline_);
             audio_pipeline_unregister(this->pipeline_, this->http_filter_);
             audio_element_deinit(this->http_filter_);
             this->http_filter_ = nullptr;
