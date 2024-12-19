@@ -339,7 +339,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
 
 
     // Step 3: Dynamically configure resample filter and I2S writer after detecting sample rate
-    /*if (is_http_stream) {
+    if (is_http_stream) {
         // Wait for MP3 event to get the sample rate
         vTaskDelay(pdMS_TO_TICKS(500));  // Allow time for metadata detection
 
@@ -381,7 +381,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to link RAW pipeline components");
             return nullptr;
         }
-    }*/
+    }
 
     ESP_LOGI(TAG, "Audio pipeline initialized successfully for %s stream",
              is_http_stream ? "HTTP" : "RAW");
