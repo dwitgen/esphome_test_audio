@@ -381,7 +381,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             return nullptr;
         }
         
-        *link_tag[4] = {"http", "mp3", "filter", "i2s"};
+        // const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
         if (audio_pipeline_link(this->pipeline_, link_tag, 4) != ESP_OK) {
             ESP_LOGE(TAG, "Failed to link components after reconfiguration");
             return nullptr;
