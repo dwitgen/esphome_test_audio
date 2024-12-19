@@ -367,7 +367,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
 
         // Reconfigure the resample filter based on the retrieved sample rate and channels
         int src_rate = 16000; //mp3_info.sample_rates; // From MP3 metadata
-        int dest_rate = 16000; // Desired output sample rate
+        int dest_rate = 12000; // Desired output sample rate
         int dest_ch = 1; // Mono output
         
         if (configure_resample_filter(&this->http_filter_, src_rate, dest_rate, dest_ch) != ESP_OK) {
