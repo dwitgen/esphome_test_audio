@@ -356,9 +356,9 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         // Stop the pipeline after fetching metadata
         ESP_LOGI(TAG, "Stopping pipeline after fetching MP3 metadata");
         if (this->http_filter_ != nullptr) {
-            /*audio_pipeline_pause(pipeline_);
-            audio_pipeline_stop(pipeline_);
-            audio_pipeline_wait_for_stop(pipeline_);*/
+            //audio_pipeline_pause(pipeline_);
+            //audio_pipeline_stop(pipeline_);
+            //audio_pipeline_wait_for_stop(pipeline_);
             audio_pipeline_unregister(this->pipeline_, this->http_filter_);
             audio_element_deinit(this->http_filter_);
             this->http_filter_ = nullptr;
@@ -366,12 +366,11 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         }
 
         // Reconfigure the resample filter based on the retrieved sample rate and channels
-        int src_rate = mp3_info.sample_rates; // From MP3 metadata
-        int dest_rate = 16000; // Desired output sample rate
+        //int src_rate = mp3_info.sample_rates; // From MP3 metadata
+        int dest_rate = mp3_info.sample_rates; //16000; // Desired output sample rate
         int dest_ch = 1; // Mono output
         
-        ret = configure_resample_filter(&this->http_filter_, src_rate, dest_rate, dest_ch);
-        if (ret != ESP_OK) {
+        if (configure_resample_filter(&this->http_filter_, src_rate, dest_rate, dest_ch) != ESP_OK) {
             ESP_LOGE(TAG, "Error reinitializing resample filter: %s", esp_err_to_name(ret));
             return nullptr;
         }
@@ -387,28 +386,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to relink HTTP pipeline components");
             return nullptr;
         }
-       /* // Reinitialize the pipeline
-        this->pipeline_ = audio_pipeline_init(&pipeline_cfg);
-        if (this->pipeline_ == nullptr) {
-            ESP_LOGE(TAG, "Failed to reinitialize audio pipeline");
-            return nullptr;
-        }
-        
-        // Re-register and link components
-        if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s") != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to register components after reconfiguration");
-            return nullptr;
-        }
-        
-        // const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
-        if (audio_pipeline_link(this->pipeline_, link_tag, 4) != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to link components after reconfiguration");
-            return nullptr;
-        }*/
-
+      
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
@@ -423,51 +401,6 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         }
     }
 
-
-    // Step 3: Dynamically configure resample filter and I2S writer after detecting sample rate
-   /* if (is_http_stream) {
-        // Wait for MP3 event to get the sample rate
-        vTaskDelay(pdMS_TO_TICKS(500));  // Allow time for metadata detection
-
-        ESP_LOGI(TAG, "Configuring resample filter and I2S stream with sample rate: %d", this->detected_sample_rate_);
-        ret = configure_resample_filter(&this->http_filter_, this->detected_sample_rate_, 44100, 1);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Error initializing resample filter: %s", esp_err_to_name(ret));
-            return nullptr;
-        }
-
-        ret = configure_i2s_stream(&this->i2s_stream_writer_http_, this->detected_sample_rate_);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Error initializing I2S stream writer: %s", esp_err_to_name(ret));
-            return nullptr;
-        }
-
-        // Register remaining components
-        audio_pipeline_register(this->pipeline_, this->http_filter_, "filter");
-        audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s");
-
-        // Link components
-        const char *link_tag[4] = {"http", "mp3", "filter", "i2s"};
-        if (audio_pipeline_link(this->pipeline_, link_tag, 4) != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to link HTTP pipeline components");
-            return nullptr;
-        }
-    } else {
-        ret = configure_i2s_stream(&this->i2s_stream_writer_raw_, 16000);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Error initializing I2S stream writer for RAW");
-            return nullptr;
-        }
-
-        audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s");
-
-        // Link components
-        const char *link_tag[2] = {"raw", "i2s"};
-        if (audio_pipeline_link(this->pipeline_, link_tag, 2) != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to link RAW pipeline components");
-            return nullptr;
-        }
-    } */
 
     ESP_LOGI(TAG, "Audio pipeline initialized successfully for %s stream",
              is_http_stream ? "HTTP" : "RAW");
