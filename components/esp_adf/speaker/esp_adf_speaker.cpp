@@ -231,14 +231,14 @@ void ESPADFSpeaker::volume_down() {
     this->set_volume(current_volume - 10);
 }
 
-void ESPADFSpeaker::handle_mode_button() {
+/*void ESPADFSpeaker::handle_mode_button() {
     ESP_LOGI(TAG, "Mde button action");
     // Add code for mode
 }
 
 void ESPADFSpeaker::handle_play_button() {
     ESP_LOGI(TAG, "Play button action");
-    /*if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
+    if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
         ESP_LOGI(TAG, "Mode button, speaker stopped");
          if (this->url_.empty()) {
             ESP_LOGE(TAG, "No URL set to play!");
@@ -250,7 +250,7 @@ void ESPADFSpeaker::handle_play_button() {
         ESP_LOGI(TAG, "State is stopping");
         this->cleanup_audio_pipeline();
         this->stop();
-    }*/
+    }
 }
 
 void ESPADFSpeaker::handle_set_button() {
@@ -262,7 +262,7 @@ void ESPADFSpeaker::handle_rec_button() {
     ESP_LOGI(TAG, "Record button action");
     // Add code to start recording
 }
-
+*/
 audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
     esp_err_t ret;
 
@@ -339,7 +339,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
 
 
     // Step 3: Dynamically configure resample filter and I2S writer after detecting sample rate
-    if (is_http_stream) {
+    /*if (is_http_stream) {
         // Wait for MP3 event to get the sample rate
         vTaskDelay(pdMS_TO_TICKS(500));  // Allow time for metadata detection
 
@@ -381,7 +381,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to link RAW pipeline components");
             return nullptr;
         }
-    }
+    }*/
 
     ESP_LOGI(TAG, "Audio pipeline initialized successfully for %s stream",
              is_http_stream ? "HTTP" : "RAW");
@@ -469,7 +469,6 @@ void ESPADFSpeaker::setup() {
   adc1_config_width(ADC_WIDTH_BIT);
   adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
 
-  //this->initialize_audio_pipeline();   
 }
 
 void ESPADFSpeaker::set_and_play_url(const std::string &url) {
@@ -477,10 +476,10 @@ void ESPADFSpeaker::set_and_play_url(const std::string &url) {
     this->play_url(url);  // Reuse existing playback logic
 }
 
-void ESPADFSpeaker::set_dynamic_url(const std::string &url) {
+/*void ESPADFSpeaker::set_dynamic_url(const std::string &url) {
     this->url_ = url;
     ESP_LOGI(TAG, "Updated URL: %s", url.c_str());
-}
+}*/
 
 void ESPADFSpeaker::play_url(const std::string &url) {
     if (this->state_ == speaker::STATE_RUNNING || this->state_ == speaker::STATE_STARTING) {
@@ -489,6 +488,9 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     }
 
     ESP_LOGI(TAG, "Attempting to play URL: %s", url.c_str());
+    TaskEvent event;
+    event.type = TaskEventType::STARTING;
+    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
 
     // Cleanup any existing pipeline
     this->cleanup_audio_pipeline();
@@ -515,9 +517,9 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 
     // Update state and log
     ESP_LOGI(TAG, "Audio pipeline started successfully for URL: %s", url.c_str());
-    this->state_ = speaker::STATE_RUNNING;
-    //event.type = TaskEventType::STARTED;
-    //xQueueSend(this->event_queue_, &event, portMAX_DELAY);
+    //this->state_ = speaker::STATE_RUNNING;
+    event.type = TaskEventType::STARTED;
+    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
