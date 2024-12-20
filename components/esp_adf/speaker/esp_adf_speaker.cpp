@@ -335,6 +335,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to link HTTP pipeline components");
             return nullptr;
         }
+        /*
          // Start the pipeline to fetch MP3 metadata
         ESP_LOGI(TAG, "Starting pipeline temporarily to fetch MP3 metadata");
         audio_pipeline_run(this->pipeline_);
@@ -386,6 +387,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to relink HTTP pipeline components");
             return nullptr;
         }
+        */
       
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
