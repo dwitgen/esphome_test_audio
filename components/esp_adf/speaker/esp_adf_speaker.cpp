@@ -548,11 +548,12 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
+    TaskEvent event;
+    event.type = TaskEventType::STOPPING;
+    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
+    
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
-        TaskEvent event;
-        event.type = TaskEventType::STOPPING;
-        xQueueSend(this->event_queue_, &event, portMAX_DELAY);
         
         // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
