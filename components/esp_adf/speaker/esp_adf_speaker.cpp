@@ -552,7 +552,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
         TaskEvent event;
         event.type = TaskEventType::STOPPING;
-        xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+        xQueueSend(this->event_queue_, &event, portMAX_DELAY);
         
         // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
@@ -619,7 +619,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         ESP_LOGI(TAG, "PA was already disabled");
     }
     event.type = TaskEventType::STOPPED;
-    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+    xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 }
 
 void ESPADFSpeaker::start() { this->state_ = speaker::STATE_STARTING; }
