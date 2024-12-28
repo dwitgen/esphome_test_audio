@@ -733,6 +733,10 @@ void ESPADFSpeaker::stop() {
   // Transition to STOPPED state
   this->state_ = speaker::STATE_STOPPED;
 }
+// Function to update ESPHome playback state
+void update_playback_state(const char *state) {
+    id(playback_state).publish_state(state);
+}
 
 void ESPADFSpeaker::watch_() {
   TaskEvent event;
@@ -743,6 +747,7 @@ void ESPADFSpeaker::watch_() {
         break;
       case TaskEventType::STARTED:
         this->state_ = speaker::STATE_RUNNING;
+        update_playback_state("running");
         break;
       case TaskEventType::RUNNING:
         this->status_clear_warning();
@@ -752,6 +757,7 @@ void ESPADFSpeaker::watch_() {
         this->state_ = speaker::STATE_STOPPED;
         vTaskDelete(this->player_task_handle_);
         this->player_task_handle_ = nullptr;
+        update_playback_state("stopped");
         break;
       case TaskEventType::WARNING:
         ESP_LOGW(TAG, "Error writing to pipeline: %s", esp_err_to_name(event.err));
