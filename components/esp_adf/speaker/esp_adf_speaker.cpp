@@ -742,7 +742,7 @@ void ESPADFSpeaker::stop() {
   // Transition to STOPPED state
   this->state_ = speaker::STATE_STOPPED;
 }
-void ESPADFSpeaker::update_playback_state(const int *state) {
+void ESPADFSpeaker::update_playback_state(int state) {
   if (this->playback_sensor != nullptr) {
     this->playback_sensor->publish_state(state);
   } else {
