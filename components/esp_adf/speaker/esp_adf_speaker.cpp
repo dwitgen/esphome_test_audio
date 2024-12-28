@@ -786,8 +786,11 @@ void ESPADFSpeaker::watch_() {
             case TaskEventType::RUNNING:
                 this->status_clear_warning();
                 break;
-            case TaskEventType::PAUSED:
+            case TaskEventType::PAUSED: // Handle PAUSED
                 this->state_ = speaker::STATE_PAUSED;
+                break;
+            case TaskEventType::RESUMED: // Handle RESUMED
+                this->state_ = speaker::STATE_RUNNING;
                 break;
             case TaskEventType::STOPPED:
                 this->parent_->unlock();
