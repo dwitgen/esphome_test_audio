@@ -714,6 +714,45 @@ void ESPADFSpeaker::player_task(void *params) {
         delay(10);
     }
 }
+void ESPADFSpeaker::pause() {
+    if (this->pipeline_ == nullptr) {
+        ESP_LOGE(TAG, "Pause failed: No active pipeline");
+        return;
+    }
+
+    if (this->state_ != speaker::STATE_RUNNING) {
+        ESP_LOGW(TAG, "Pause requested, but the pipeline is not running");
+        return;
+    }
+
+    esp_err_t ret = audio_pipeline_pause(this->pipeline_);
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "Audio pipeline paused successfully");
+        this->state_ = speaker::STATE_PAUSED;
+    } else {
+        ESP_LOGE(TAG, "Failed to pause audio pipeline: %s", esp_err_to_name(ret));
+    }
+}
+
+void ESPADFSpeaker::resume() {
+    if (this->pipeline_ == nullptr) {
+        ESP_LOGE(TAG, "Resume failed: No active pipeline");
+        return;
+    }
+
+    if (this->state_ != speaker::STATE_PAUSED) {
+        ESP_LOGW(TAG, "Resume requested, but the pipeline is not paused");
+        return;
+    }
+
+    esp_err_t ret = audio_pipeline_resume(this->pipeline_);
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "Audio pipeline resumed successfully");
+        this->state_ = speaker::STATE_RUNNING;
+    } else {
+        ESP_LOGE(TAG, "Failed to resume audio pipeline: %s", esp_err_to_name(ret));
+    }
+}
 
 void ESPADFSpeaker::stop() {
   if (this->state_ == speaker::STATE_STOPPED)
