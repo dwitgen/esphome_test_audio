@@ -36,8 +36,8 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
 
   void start() override;
   void stop() override;
-  void pause() override;
-  void resume() override;
+  void pause(); 
+  void resume();
 
   size_t play(const uint8_t *data, size_t length) override;
 
