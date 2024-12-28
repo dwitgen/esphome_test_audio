@@ -11,6 +11,7 @@
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
+#include "esphome/core/defines.h"
 
 #include <audio_hal.h>
 #include <filter_resample.h>
