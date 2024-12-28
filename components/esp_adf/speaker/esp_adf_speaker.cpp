@@ -509,7 +509,7 @@ void ESPADFSpeaker::set_and_play_url(const std::string &url) {
 void ESPADFSpeaker::play_url(const std::string &url) {
     if (this->state_ == speaker::STATE_RUNNING || this->state_ == speaker::STATE_STARTING) {
         ESP_LOGI(TAG, "Audio stream is already running, ignoring play request");
-        return;
+        this->stop(); //return;
     }
 
     ESP_LOGI(TAG, "Attempting to play URL: %s", url.c_str());
@@ -725,6 +725,12 @@ void ESPADFSpeaker::stop() {
   DataEvent data;
   data.stop = true;
   xQueueSendToFront(this->buffer_queue_.handle, &data, portMAX_DELAY);
+  
+  // Clean up the audio pipeline after signaling stop
+  this->cleanup_audio_pipeline();
+
+  // Transition to STOPPED state
+  this->state_ = speaker::STATE_STOPPED;
 }
 
 void ESPADFSpeaker::watch_() {
