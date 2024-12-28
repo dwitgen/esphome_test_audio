@@ -47,6 +47,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void volume_down();
   // Declare a method to get the current volume from the device
   int get_current_volume();
+  void update_playback_state(const char *state);
 
   static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx);
   void handle_set_button();
