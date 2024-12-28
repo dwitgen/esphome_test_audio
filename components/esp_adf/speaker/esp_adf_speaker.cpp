@@ -452,6 +452,14 @@ void ESPADFSpeaker::setup() {
     return;
   }
 
+ // Adding playback_state
+  // Find and bind the playback state sensor
+  for (auto *sensor : App.get_text_sensors()) {
+    if (sensor->get_name() == "current_playback_state") {
+      this->playback_state = sensor;
+      break;
+    }
+  }
  //Adding intial setup for volume controls for the speaker
  // Find the key for the generic volume sensor
   uint32_t volume_sensor_key = 0;
@@ -734,9 +742,12 @@ void ESPADFSpeaker::stop() {
   // Transition to STOPPED state
   this->state_ = speaker::STATE_STOPPED;
 }
-// Function to update ESPHome playback state
-void update_playback_state(const char *state) {
-    id(current_playback_state).publish_state(state);
+void ESPADFSpeaker::update_playback_state(const char *state) {
+  if (this->playback_state != nullptr) {
+    this->playback_state->publish_state(state);
+  } else {
+    ESP_LOGE(TAG, "Playback state sensor is not initialized");
+  }
 }
 
 void ESPADFSpeaker::watch_() {
