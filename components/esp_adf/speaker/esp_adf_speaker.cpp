@@ -554,6 +554,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     }
 
     ESP_LOGI(TAG, "Setting speaker state to STOPPING");
+    this->state_ = speaker::STATE_STOPPING;
     
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
@@ -622,7 +623,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     } else {
         ESP_LOGI(TAG, "PA was already disabled");
     }
-    
+    this->state_ = speaker::STATE_STOPPED; 
 }
 
 void ESPADFSpeaker::start() { this->state_ = speaker::STATE_STARTING; }
