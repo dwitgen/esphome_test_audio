@@ -736,7 +736,7 @@ void ESPADFSpeaker::stop() {
 }
 // Function to update ESPHome playback state
 void update_playback_state(const char *state) {
-    id(my_playback_state).publish_state(state);
+    id(current_playback_state).publish_state(state);
 }
 
 void ESPADFSpeaker::watch_() {
