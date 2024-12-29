@@ -68,7 +68,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   // Declare a sensor for volume level
   sensor::Sensor *volume_sensor = nullptr;
   sensor::Sensor *playback_sensor = nullptr;
-  text_sensor::TextSensor *text_sensor = nullptr;
+  text_sensor::TextSensor *playback_state_text_sensor = nullptr;
 
   // Method to initialize pipeline and cleanup
   audio_pipeline_handle_t initialize_audio_pipeline(bool is_http_stream);
