@@ -451,53 +451,14 @@ void ESPADFSpeaker::setup() {
     this->mark_failed();
     return;
   }
-  // Log all sensors
-  ESP_LOGE(TAG, "Listing all sensors:");
-  for (auto *sensor : App.get_sensors()) {
-    ESP_LOGE(TAG, "Sensor Name: %s, Key: %u", sensor->get_name().c_str(), sensor->get_object_id_hash());
-  }
-
-  // Log all text sensors
-  ESP_LOGE(TAG, "Listing all text sensors:");
   for (auto *text_sensor : App.get_text_sensors()) {
-    ESP_LOGE(TAG, "Text Sensor Name: %s", text_sensor->get_name().c_str());
-  }
- // Adding playback_state
-  // Find and bind the playback state sensor
-  for (auto *sensor : App.get_sensors()) {
-    if (sensor->get_name() == "playback_sensor") {
-      this->playback_sensor = sensor;
-      break;
+      ESP_LOGI(TAG, "Checking Text Sensor Name: %s", text_sensor->get_name().c_str());
+      if (text_sensor->get_name().find("Playback State") != std::string::npos) {
+        this->playback_state_text_sensor = text_sensor;
+        ESP_LOGI(TAG, "Matched Text Sensor: %s", text_sensor->get_name().c_str());
+        break;
+      }
     }
-  }
-
-  uint32_t playback_state_text_key = 0;
-  for (auto *text_sensor : App.get_text_sensors()) {
-    if (text_sensor->get_name() == "playback_state_text") {
-      playback_state_text_key = text_sensor->get_object_id_hash();
-      break;
-    }
-  }
-  
-  if (playback_state_text_key != 0) {
-    this->playback_state_text_sensor = App.get_text_sensor_by_key(playback_state_text_key, true);
-    if (this->playback_state_text_sensor != nullptr) {
-      ESP_LOGI(TAG, "Playback state text sensor initialized successfully: %s",
-               this->playback_state_text_sensor->get_name().c_str());
-    } else {
-      ESP_LOGE(TAG, "Failed to retrieve playback state text sensor by key.");
-    }
-  } else {
-    ESP_LOGE(TAG, "Failed to find key for playback_state_text.");
-  }
-
-    
-  /*for (auto *text_sensor : App.get_text_sensors()) {
-    if (text_sensor->get_name() == "playback_state_text") {
-      this->playback_state_text_sensor = text_sensor;
-      break;
-    }
-  }*/
     
  //Adding intial setup for volume controls for the speaker
  // Find the key for the generic volume sensor
