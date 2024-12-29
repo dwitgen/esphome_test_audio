@@ -749,9 +749,9 @@ void ESPADFSpeaker::stop() {
   // Transition to STOPPED state
   this->state_ = speaker::STATE_STOPPED;
 }
-void ESPADFSpeaker::update_playback_state(int state) {
-  if (this->playback_sensor != nullptr) {
-    this->playback_sensor->publish_state(state);
+void ESPADFSpeaker::void update_playback_state(const char *state) {
+  if (this->playback_state_text != nullptr) {
+    this->playback_state_text_sensor->publish_state(state);
   } else {
     ESP_LOGE(TAG, "Playback state sensor is not initialized");
   }
@@ -766,8 +766,8 @@ void ESPADFSpeaker::watch_() {
         break;
       case TaskEventType::STARTED:
         this->state_ = speaker::STATE_RUNNING;
-        update_playback_state(1);
-        id(playback_state_text_sensor).publish_state("running");
+        update_playback_state("running");
+        //id(playback_state_text_sensor).publish_state("running");
         break;
       case TaskEventType::RUNNING:
         this->status_clear_warning();
@@ -777,8 +777,8 @@ void ESPADFSpeaker::watch_() {
         this->state_ = speaker::STATE_STOPPED;
         vTaskDelete(this->player_task_handle_);
         this->player_task_handle_ = nullptr;
-        update_playback_state(0);
-        id(playback_state_text_sensor).publish_state("stopped");
+        update_playback_state("stopped");
+        //id(playback_state_text_sensor).publish_state("stopped");
         break;
       case TaskEventType::WARNING:
         ESP_LOGW(TAG, "Error writing to pipeline: %s", esp_err_to_name(event.err));
