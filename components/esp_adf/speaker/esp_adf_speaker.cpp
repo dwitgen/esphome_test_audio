@@ -561,6 +561,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     //this->state_ = speaker::STATE_RUNNING;
     event.type = TaskEventType::STARTED;
     xQueueSend(this->event_queue_, &event, portMAX_DELAY);
+    update_playback_state("running");
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
@@ -640,6 +641,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         ESP_LOGI(TAG, "PA was already disabled");
     }
     this->state_ = speaker::STATE_STOPPED; 
+    update_playback_state("stopped");
 }
 
 void ESPADFSpeaker::start() { this->state_ = speaker::STATE_STARTING; }
