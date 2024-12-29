@@ -460,6 +460,13 @@ void ESPADFSpeaker::setup() {
       break;
     }
   }
+  for (auto *sensor : App.get_sensors()) {
+    if (sensor->get_name() == "playback_state_text") {
+      this->playback_state_text = sensor;
+      break;
+    }
+  }
+    
  //Adding intial setup for volume controls for the speaker
  // Find the key for the generic volume sensor
   uint32_t volume_sensor_key = 0;
