@@ -785,6 +785,17 @@ void ESPADFSpeaker::stop() {
 }
 void ESPADFSpeaker::update_playback_state(const char *state) {
   ESP_LOGE(TAG, "Attempting to update state %s", state);
+   // Log all sensors
+  ESP_LOGE(TAG, "Listing all sensors:");
+  for (auto *sensor : App.get_sensors()) {
+    ESP_LOGE(TAG, "Sensor Name: %s, Key: %u", sensor->get_name().c_str(), sensor->get_object_id_hash());
+  }
+
+  // Log all text sensors
+  ESP_LOGE(TAG, "Listing all text sensors:");
+  for (auto *text_sensor : App.get_text_sensors()) {
+    ESP_LOGE(TAG, "Text Sensor Name: %s", text_sensor->get_name().c_str());
+  }
   if (this->playback_state_text_sensor != nullptr) {
     this->playback_state_text_sensor->publish_state(state);
   } else {
