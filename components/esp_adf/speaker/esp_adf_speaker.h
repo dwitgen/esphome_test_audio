@@ -11,6 +11,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
 #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/text_sensor/text_sensor.h"
 
 #include <audio_element.h>
 #include <audio_pipeline.h>
@@ -67,7 +68,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   // Declare a sensor for volume level
   sensor::Sensor *volume_sensor = nullptr;
   sensor::Sensor *playback_sensor = nullptr;
-  sensor::Sensor *playback_state_text = nullptr;
+  text_sensor::TextSensor *text_sensor = nullptr;
 
   // Method to initialize pipeline and cleanup
   audio_pipeline_handle_t initialize_audio_pipeline(bool is_http_stream);
