@@ -750,6 +750,7 @@ void ESPADFSpeaker::stop() {
   this->state_ = speaker::STATE_STOPPED;
 }
 void ESPADFSpeaker::update_playback_state(const char *state) {
+  ESP_LOGE(TAG, "Attempting to update state %s", state.c_str());
   if (this->playback_state_text_sensor != nullptr) {
     this->playback_state_text_sensor->publish_state(state);
   } else {
