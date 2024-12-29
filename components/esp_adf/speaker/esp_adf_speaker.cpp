@@ -750,7 +750,7 @@ void ESPADFSpeaker::stop() {
   this->state_ = speaker::STATE_STOPPED;
 }
 void ESPADFSpeaker::update_playback_state(const char *state) {
-  if (this->playback_state_text != nullptr) {
+  if (this->playback_state_text_sensor != nullptr) {
     this->playback_state_text_sensor->publish_state(state);
   } else {
     ESP_LOGE(TAG, "Playback state sensor is not initialized");
