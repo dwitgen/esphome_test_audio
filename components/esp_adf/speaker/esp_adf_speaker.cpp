@@ -452,13 +452,15 @@ void ESPADFSpeaker::setup() {
     return;
   }
   for (auto *text_sensor : App.get_text_sensors()) {
-      ESP_LOGI(TAG, "Checking Text Sensor Name: %s", text_sensor->get_name().c_str());
-      if (text_sensor->get_name().find("Playback State") != std::string::npos) {
+      std::string name = text_sensor->get_name().c_str(); // Convert to std::string
+      ESP_LOGI(TAG, "Checking Text Sensor Name: %s", name.c_str());
+      if (name.find("Playback State") != std::string::npos) {
         this->playback_state_text_sensor = text_sensor;
-        ESP_LOGI(TAG, "Matched Text Sensor: %s", text_sensor->get_name().c_str());
+        ESP_LOGI(TAG, "Matched Text Sensor: %s", name.c_str());
         break;
       }
     }
+
     
  //Adding intial setup for volume controls for the speaker
  // Find the key for the generic volume sensor
