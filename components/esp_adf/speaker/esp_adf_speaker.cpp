@@ -460,7 +460,7 @@ void ESPADFSpeaker::setup() {
       break;
     }
   }
-  for (auto *text_sensor : App.get_sensors()) {
+  for (auto *text_sensor : App.get_text_sensors()) {
     if (text_sensor->get_name() == "playback_state_text") {
       this->playback_state_text = text_sensor;
       break;
