@@ -470,12 +470,34 @@ void ESPADFSpeaker::setup() {
       break;
     }
   }
+
+  uint32_t playback_state_text_key = 0;
   for (auto *text_sensor : App.get_text_sensors()) {
+    if (text_sensor->get_name() == "playback_state_text") {
+      playback_state_text_key = text_sensor->get_object_id_hash();
+      break;
+    }
+  }
+  
+  if (playback_state_text_key != 0) {
+    this->playback_state_text_sensor = App.get_text_sensor_by_key(playback_state_text_key, true);
+    if (this->playback_state_text_sensor != nullptr) {
+      ESP_LOGI(TAG, "Playback state text sensor initialized successfully: %s",
+               this->playback_state_text_sensor->get_name().c_str());
+    } else {
+      ESP_LOGE(TAG, "Failed to retrieve playback state text sensor by key.");
+    }
+  } else {
+    ESP_LOGE(TAG, "Failed to find key for playback_state_text.");
+  }
+
+    
+  /*for (auto *text_sensor : App.get_text_sensors()) {
     if (text_sensor->get_name() == "playback_state_text") {
       this->playback_state_text_sensor = text_sensor;
       break;
     }
-  }
+  }*/
     
  //Adding intial setup for volume controls for the speaker
  // Find the key for the generic volume sensor
