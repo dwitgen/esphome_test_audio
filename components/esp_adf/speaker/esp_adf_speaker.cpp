@@ -451,7 +451,17 @@ void ESPADFSpeaker::setup() {
     this->mark_failed();
     return;
   }
+  // Log all sensors
+  ESP_LOGI(TAG, "Listing all sensors:");
+  for (auto *sensor : App.get_sensors()) {
+    ESP_LOGI(TAG, "Sensor Name: %s, Key: %u", sensor->get_name().c_str(), sensor->get_object_id_hash());
+  }
 
+  // Log all text sensors
+  ESP_LOGI(TAG, "Listing all text sensors:");
+  for (auto *text_sensor : App.get_text_sensors()) {
+    ESP_LOGI(TAG, "Text Sensor Name: %s", text_sensor->get_name().c_str());
+  }
  // Adding playback_state
   // Find and bind the playback state sensor
   for (auto *sensor : App.get_sensors()) {
