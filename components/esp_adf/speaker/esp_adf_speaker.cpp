@@ -270,24 +270,29 @@ void ESPADFSpeaker::handle_rec_button() {
 audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
     esp_err_t ret;
 
-    // Configure resample filter
-    int src_rate = is_http_stream ? 44100 : 44100;
+    //set rates
+    int src_rate = is_http_stream ? 44100 : 16000;
     int dest_rate = is_http_stream ? 44100 : 16000;
     int dest_ch = 1;
 
-    ret = configure_resample_filter(&this->http_filter_, src_rate, dest_rate, dest_ch);
+    // Configure resample filter
+    ret = configure_resample_filter(&this->filter_, src_rate, dest_rate, dest_ch);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Error initializing resample filter: %s", esp_err_to_name(ret));
         return nullptr;
     }
 
     // Configure I2S stream writer
+    ret = configure_i2s_stream(&this-<i2s_stream_writer_, src_rate);
+    if re != ESP_OK) {
+        ESP_LOGE(TAG, "Error initializing I2S stream writer: %s", esp_err_to_name(ret));
+    }
     if (is_http_stream) {
-        ret = configure_i2s_stream(&this->i2s_stream_writer_http_, 44100);
+       /* ret = configure_i2s_stream(&this->i2s_stream_writer_http_, 44100);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Error initializing I2S stream writer for HTTP: %s", esp_err_to_name(ret));
             return nullptr;
-        }
+        }*/
     } else {
         ret = configure_i2s_stream(&this->i2s_stream_writer_raw_, 16000);
         if (ret != ESP_OK) {
@@ -328,8 +333,8 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
         }
         if (audio_pipeline_register(this->pipeline_, this->http_stream_reader_, "http") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, mp3_decoder, "mp3") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_http_, "i2s") != ESP_OK) {
+            audio_pipeline_register(this->pipeline_, this->filter_, "filter") != ESP_OK ||
+            audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register HTTP pipeline components");
             return nullptr;
         }
@@ -395,7 +400,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
       
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
+            audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register RAW pipeline components");
             return nullptr;
         }
@@ -569,8 +574,14 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         audio_pipeline_reset_ringbuffer(this->pipeline_);
         audio_pipeline_reset_items_state(this->pipeline_);
 
+        // Unregsiter ad deinit I2S Stream Writer
+        audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_);
+        audio_element_deinit(this->i2s_stream_writer_);
+        this->i2s_stream_writer_ = nullptr;
+        ESP_LOGI(TAG, "Unregistered and deinitialized I2S stream writer");
+
         // Unregister and deinitialize elements
-        if (this->i2s_stream_writer_http_ != nullptr) {
+        /*if (this->i2s_stream_writer_http_ != nullptr) {
             audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
             audio_element_deinit(this->i2s_stream_writer_http_);
             this->i2s_stream_writer_http_ = nullptr;
@@ -582,7 +593,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
             audio_element_deinit(this->i2s_stream_writer_raw_);
             this->i2s_stream_writer_raw_ = nullptr;
             ESP_LOGI(TAG, "Unregistered and deinitialized RAW I2S stream writer");
-        }
+        }*/
 
         if (this->raw_write_ != nullptr) {
             audio_pipeline_unregister(this->pipeline_, this->raw_write_);
@@ -591,11 +602,11 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
             ESP_LOGI(TAG, "Unregistered and deinitialized RAW stream writer");
         }
 
-        if (this->http_filter_ != nullptr) {
-            audio_pipeline_unregister(this->pipeline_, this->http_filter_);
-            audio_element_deinit(this->http_filter_);
+        if (this->filter_ != nullptr) {
+            audio_pipeline_unregister(this->pipeline_, this->filter_);
+            audio_element_deinit(this->filter_);
             this->http_filter_ = nullptr;
-            ESP_LOGI(TAG, "Unregistered and deinitialized HTTP filter");
+            ESP_LOGI(TAG, "Unregistered and deinitialized Resample filter");
         }
 
         if (this->http_stream_reader_ != nullptr) {
