@@ -575,6 +575,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
 
     ESP_LOGI(TAG, "Setting speaker state to STOPPING");
     if (this->state_ != speaker::STATE_STOPPING) {
+        ESP_LOGI(TAG, "Pipeline is being stopped");
         this->state_ = speaker::STATE_STOPPING;
     }
     
@@ -646,6 +647,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         ESP_LOGI(TAG, "PA was already disabled");
     }
     if (this->state_ != speaker::STATE_STOPPED) {
+        ESP_LOGI(TAG, "Pipeline is stopped");
         this->state_ = speaker::STATE_STOPPED; 
     }
     update_playback_state("stopped");
@@ -668,7 +670,8 @@ void ESPADFSpeaker::player_task(void *params) {
         ESP_LOGE(TAG, "Insufficient heap memory: %u bytes available", heap_before);
         return;
     }
-
+    this->cleanup_audio_pipeline();
+    vTaskDelay(pdMS_TO_TICKS(100));
     TaskEvent event;
     event.type = TaskEventType::STARTING;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
