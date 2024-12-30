@@ -712,11 +712,13 @@ void ESPADFSpeaker::player_task(void *params) {
     }
 
     // Signal that cleanup is starting
-    event.type = TaskEventType::STOPPING;
-    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
     ESP_LOGI(TAG, "Cleaning up audio pipeline after player_task...");
     this_speaker->cleanup_audio_pipeline();
-
+    vTaskDelay(pdMS_TO_TICKS(100));
+    event.type = TaskEventType::STOPPING;
+    xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
+    
+    
     event.type = TaskEventType::STOPPED;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
     ESP_LOGI(TAG, "Player task cleanup completed.");
@@ -739,10 +741,10 @@ void ESPADFSpeaker::stop() {
   xQueueSendToFront(this->buffer_queue_.handle, &data, portMAX_DELAY);
   
   // Clean up the audio pipeline after signaling stop
-  this->cleanup_audio_pipeline();
+  //this->cleanup_audio_pipeline();
 
   // Transition to STOPPED state
-  this->state_ = speaker::STATE_STOPPED;
+  //this->state_ = speaker::STATE_STOPPED;
 }
 
 void ESPADFSpeaker::watch_() {
