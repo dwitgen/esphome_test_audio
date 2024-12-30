@@ -21,10 +21,6 @@
 #include <audio_pipeline.h>
 #include <mp3_decoder.h>
 
-// tls
-//#include "esp_tls.h"
-//#include "esp_crt_bundle.h"
-
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
 #include <board.h>
@@ -136,7 +132,7 @@ esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *re
         .auto_connect_next_track = false,
         .enable_playlist_parser = false,
         .cert_pem = NULL,  // Disable certificate verification
-        .crt_bundle_attach = NULL, //esp_crt_bundle_attach,  // Do not use certificate bundle use NULL
+        .crt_bundle_attach = NULL,  // Do not use certificate bundle
        
     };
 
@@ -569,12 +565,6 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
 
-         ESP_LOGI(TAG, "Setting speaker state to STOPPING");
-        if (this->state_ != speaker::STATE_STOPPING) {
-            ESP_LOGI(TAG, "Pipeline is being stopped");
-            this->state_ = speaker::STATE_STOPPING;
-        }
-
         // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
         audio_pipeline_wait_for_stop(this->pipeline_);
@@ -638,10 +628,6 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         ESP_LOGI(TAG, "PA disabled successfully");
     } else {
         ESP_LOGI(TAG, "PA was already disabled");
-    }
-    if (this->state_ != speaker::STATE_STOPPED) {
-        ESP_LOGI(TAG, "Pipeline is stopped");
-        this->state_ = speaker::STATE_STOPPED; 
     }
 }
 
