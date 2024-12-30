@@ -22,7 +22,7 @@
 #include <mp3_decoder.h>
 
 // tls
-#include "esp_tls.h"
+//#include "esp_tls.h"
 #include "esp_crt_bundle.h"
 
 // Added include for board config to be used with button and other controls
