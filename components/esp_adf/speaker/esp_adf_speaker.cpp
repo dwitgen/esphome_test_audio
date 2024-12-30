@@ -670,7 +670,7 @@ void ESPADFSpeaker::player_task(void *params) {
         ESP_LOGE(TAG, "Insufficient heap memory: %u bytes available", heap_before);
         return;
     }
-    this->cleanup_audio_pipeline();
+    this_speaker->cleanup_audio_pipeline();
     vTaskDelay(pdMS_TO_TICKS(100));
     TaskEvent event;
     event.type = TaskEventType::STARTING;
