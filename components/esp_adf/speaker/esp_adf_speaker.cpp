@@ -749,10 +749,10 @@ void ESPADFSpeaker::stop() {
   xQueueSendToFront(this->buffer_queue_.handle, &data, portMAX_DELAY);
   
   // Clean up the audio pipeline after signaling stop
-  this->cleanup_audio_pipeline();
+  //this->cleanup_audio_pipeline();
 
   // Transition to STOPPED state
-  this->state_ = speaker::STATE_STOPPED;
+  //this->state_ = speaker::STATE_STOPPED;
 }
 void ESPADFSpeaker::update_playback_state(const char *state) {
   ESP_LOGI(TAG, "Attempting to update state %s", state);
