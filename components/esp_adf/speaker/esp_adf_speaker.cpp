@@ -283,7 +283,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
     }
 
     // Configure I2S stream writer
-    ret = configure_i2s_stream(&this-<i2s_stream_writer_, src_rate);
+    ret = configure_i2s_stream(&this->i2s_stream_writer_, src_rate);
     if ret != ESP_OK) {
         ESP_LOGE(TAG, "Error initializing I2S stream writer: %s", esp_err_to_name(ret));
     }
