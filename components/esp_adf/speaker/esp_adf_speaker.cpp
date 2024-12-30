@@ -11,7 +11,6 @@
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
-#include "esphome/core/defines.h"
 
 #include <audio_hal.h>
 #include <filter_resample.h>
@@ -272,7 +271,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
     esp_err_t ret;
 
     // Configure resample filter
-    int src_rate = is_http_stream ? 44100 : 16000;
+    int src_rate = is_http_stream ? 44100 : 44100;
     int dest_rate = is_http_stream ? 44100 : 16000;
     int dest_ch = 1;
 
@@ -396,7 +395,6 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
       
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
-            audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register RAW pipeline components");
             return nullptr;
@@ -453,24 +451,6 @@ void ESPADFSpeaker::setup() {
     return;
   }
 
-  // Setting Playback State text sensor to provide state for media player and set to stopped
-  for (auto *text_sensor : App.get_text_sensors()) {
-      std::string name = text_sensor->get_name().c_str(); // Convert to std::string
-      ESP_LOGI(TAG, "Checking Text Sensor Name: %s", name.c_str());
-      if (name.find("Playback State") != std::string::npos) {
-        this->playback_state_text_sensor = text_sensor;
-        ESP_LOGI(TAG, "Matched Text Sensor: %s", name.c_str());
-        break;
-      }
-  }
-  if (this->playback_state_text_sensor == nullptr) {
-    ESP_LOGE(TAG, "Failed to initialize playback state text sensor.");
-  } else {
-    ESP_LOGI(TAG, "Playback state text sensor initialized successfully.");
-    // Set initial playback state as stopped
-    this->update_playback_state("stopped");
-  }
-    
  //Adding intial setup for volume controls for the speaker
  // Find the key for the generic volume sensor
   uint32_t volume_sensor_key = 0;
@@ -565,20 +545,16 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     //this->state_ = speaker::STATE_RUNNING;
     event.type = TaskEventType::STARTED;
     xQueueSend(this->event_queue_, &event, portMAX_DELAY);
-    update_playback_state("running");
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
-   //if (this->state_ == speaker::STATE_STOPPING || this->state_ == speaker::STATE_STOPPED) {
-   //     ESP_LOGI(TAG, "Pipeline is already being stopped or stopped");
-   //     return;
-   //}
+   if (this->state_ == speaker::STATE_STOPPING || this->state_ == speaker::STATE_STOPPED) {
+        ESP_LOGI(TAG, "Pipeline is already being stopped or stopped");
+        return;
+    }
 
     ESP_LOGI(TAG, "Setting speaker state to STOPPING");
-    if (this->state_ != speaker::STATE_STOPPING) {
-        ESP_LOGI(TAG, "Pipeline is being stopped");
-        this->state_ = speaker::STATE_STOPPING;
-    }
+    this->state_ = speaker::STATE_STOPPING;
     
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
@@ -647,11 +623,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     } else {
         ESP_LOGI(TAG, "PA was already disabled");
     }
-    if (this->state_ != speaker::STATE_STOPPED) {
-        ESP_LOGI(TAG, "Pipeline is stopped");
-        this->state_ = speaker::STATE_STOPPED; 
-    }
-    update_playback_state("stopped");
+    this->state_ = speaker::STATE_STOPPED; 
 }
 
 void ESPADFSpeaker::start() { this->state_ = speaker::STATE_STARTING; }
@@ -671,8 +643,7 @@ void ESPADFSpeaker::player_task(void *params) {
         ESP_LOGE(TAG, "Insufficient heap memory: %u bytes available", heap_before);
         return;
     }
-    this_speaker->cleanup_audio_pipeline();
-    vTaskDelay(pdMS_TO_TICKS(100));
+
     TaskEvent event;
     event.type = TaskEventType::STARTING;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
@@ -757,18 +728,10 @@ void ESPADFSpeaker::stop() {
   xQueueSendToFront(this->buffer_queue_.handle, &data, portMAX_DELAY);
   
   // Clean up the audio pipeline after signaling stop
-  //this->cleanup_audio_pipeline();
+  this->cleanup_audio_pipeline();
 
   // Transition to STOPPED state
-  //this->state_ = speaker::STATE_STOPPED;
-}
-void ESPADFSpeaker::update_playback_state(const char *state) {
-  ESP_LOGI(TAG, "Attempting to update state %s", state);
-   if (this->playback_state_text_sensor != nullptr) {
-    this->playback_state_text_sensor->publish_state(state);
-  } else {
-    ESP_LOGE(TAG, "Playback state sensor is not initialized");
-  }
+  this->state_ = speaker::STATE_STOPPED;
 }
 
 void ESPADFSpeaker::watch_() {
@@ -780,7 +743,6 @@ void ESPADFSpeaker::watch_() {
         break;
       case TaskEventType::STARTED:
         this->state_ = speaker::STATE_RUNNING;
-        update_playback_state("running");
         break;
       case TaskEventType::RUNNING:
         this->status_clear_warning();
@@ -790,7 +752,6 @@ void ESPADFSpeaker::watch_() {
         this->state_ = speaker::STATE_STOPPED;
         vTaskDelete(this->player_task_handle_);
         this->player_task_handle_ = nullptr;
-        update_playback_state("stopped");
         break;
       case TaskEventType::WARNING:
         ESP_LOGW(TAG, "Error writing to pipeline: %s", esp_err_to_name(event.err));
