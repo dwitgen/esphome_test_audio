@@ -272,7 +272,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
     esp_err_t ret;
 
     // Configure resample filter
-    int src_rate = is_http_stream ? 44100 : 44100;
+    int src_rate = is_http_stream ? 44100 : 16000;
     int dest_rate = is_http_stream ? 44100 : 16000;
     int dest_ch = 1;
 
@@ -396,6 +396,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
       
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
+            audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
             ESP_LOGE(TAG, "Failed to register RAW pipeline components");
             return nullptr;
