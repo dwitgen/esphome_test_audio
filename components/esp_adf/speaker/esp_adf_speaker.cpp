@@ -568,13 +568,15 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 }
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
-   if (this->state_ == speaker::STATE_STOPPING || this->state_ == speaker::STATE_STOPPED) {
-        ESP_LOGI(TAG, "Pipeline is already being stopped or stopped");
-        return;
-    }
+   //if (this->state_ == speaker::STATE_STOPPING || this->state_ == speaker::STATE_STOPPED) {
+   //     ESP_LOGI(TAG, "Pipeline is already being stopped or stopped");
+   //     return;
+   //}
 
     ESP_LOGI(TAG, "Setting speaker state to STOPPING");
-    this->state_ = speaker::STATE_STOPPING;
+    if (this->state_ != speaker::STATE_STOPPING) {
+        this->state_ = speaker::STATE_STOPPING;
+    }
     
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
@@ -643,7 +645,9 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     } else {
         ESP_LOGI(TAG, "PA was already disabled");
     }
-    this->state_ = speaker::STATE_STOPPED; 
+    if (this->state_ != speaker::STATE_STOPPED) {
+        this->state_ = speaker::STATE_STOPPED; 
+    }
     update_playback_state("stopped");
 }
 
