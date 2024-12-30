@@ -447,6 +447,24 @@ void ESPADFSpeaker::setup() {
     return;
   }
 
+   // Setting Playback State text sensor to provide state for media player and set to stopped
+  for (auto *text_sensor : App.get_text_sensors()) {
+      std::string name = text_sensor->get_name().c_str(); // Convert to std::string
+      ESP_LOGI(TAG, "Checking Text Sensor Name: %s", name.c_str());
+      if (name.find("Playback State") != std::string::npos) {
+        this->playback_state_text_sensor = text_sensor;
+        ESP_LOGI(TAG, "Matched Text Sensor: %s", name.c_str());
+        break;
+      }
+  }
+  if (this->playback_state_text_sensor == nullptr) {
+    ESP_LOGE(TAG, "Failed to initialize playback state text sensor.");
+  } else {
+    ESP_LOGI(TAG, "Playback state text sensor initialized successfully.");
+    // Set initial playback state as stopped
+    this->update_playback_state("stopped");
+  }
+
  //Adding intial setup for volume controls for the speaker
  // Find the key for the generic volume sensor
   uint32_t volume_sensor_key = 0;
@@ -714,7 +732,14 @@ void ESPADFSpeaker::stop() {
   data.stop = true;
   xQueueSendToFront(this->buffer_queue_.handle, &data, portMAX_DELAY);
 }
-
+void ESPADFSpeaker::update_playback_state(const char *state) {
+  ESP_LOGI(TAG, "Attempting to update state %s", state);
+   if (this->playback_state_text_sensor != nullptr) {
+    this->playback_state_text_sensor->publish_state(state);
+  } else {
+    ESP_LOGE(TAG, "Playback state sensor is not initialized");
+  }
+}
 void ESPADFSpeaker::watch_() {
   TaskEvent event;
   if (xQueueReceive(this->event_queue_, &event, 0) == pdTRUE) {
