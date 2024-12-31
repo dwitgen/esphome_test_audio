@@ -68,7 +68,7 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
         .volume = 0,
         .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE,
         .task_stack = I2S_STREAM_TASK_STACK,
-        .task_core = I2S_STREAM_TASK_CORE,
+        .task_core = 1, //I2S_STREAM_TASK_CORE,
         .task_prio = I2S_STREAM_TASK_PRIO,
         .stack_in_ext = false,
         .multi_out_num = 0,
