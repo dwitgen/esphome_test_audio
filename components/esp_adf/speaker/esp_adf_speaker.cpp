@@ -550,7 +550,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     }
     if (this->state_ != speaker::STATE_STOPPED) {
         ESP_LOGI(TAG, "Pipeline is stopped");
-        event.type = TaskEventType::STOPPING;
+        event.type = TaskEventType::STOPPED;
         xQueueSend(this->event_queue_, &event, portMAX_DELAY); 
     }
 }
