@@ -231,38 +231,6 @@ void ESPADFSpeaker::volume_down() {
     this->set_volume(current_volume - 10);
 }
 
-/*void ESPADFSpeaker::handle_mode_button() {
-    ESP_LOGI(TAG, "Mde button action");
-    // Add code for mode
-}
-
-void ESPADFSpeaker::handle_play_button() {
-    ESP_LOGI(TAG, "Play button action");
-    if (this->state_ != speaker::STATE_RUNNING && this->state_ != speaker::STATE_STARTING) {
-        ESP_LOGI(TAG, "Mode button, speaker stopped");
-         if (this->url_.empty()) {
-            ESP_LOGE(TAG, "No URL set to play!");
-            return;
-        }
-        this->play_url(this->url_);
-        //this->play_url("http://stream.rtlradio.de/plusedm/mp3-192/");
-    } else {
-        ESP_LOGI(TAG, "State is stopping");
-        this->cleanup_audio_pipeline();
-        this->stop();
-    }
-}
-
-void ESPADFSpeaker::handle_set_button() {
-    ESP_LOGI(TAG, "Set button action");
-    // Add code to handle set action
-}
-
-void ESPADFSpeaker::handle_rec_button() {
-    ESP_LOGI(TAG, "Record button action");
-    // Add code to start recording
-}
-*/
 audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
     esp_err_t ret;
 
@@ -335,60 +303,6 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to link HTTP pipeline components");
             return nullptr;
         }
-        /*
-         // Start the pipeline to fetch MP3 metadata
-        ESP_LOGI(TAG, "Starting pipeline temporarily to fetch MP3 metadata");
-        audio_pipeline_run(this->pipeline_);
-        vTaskDelay(pdMS_TO_TICKS(2000));
-        audio_pipeline_pause(pipeline_);
-        audio_pipeline_stop(pipeline_);
-        audio_pipeline_wait_for_stop(pipeline_);
-        
-        // Get MP3 metadata
-        audio_element_info_t mp3_info;
-        //esp_err_t ret = audio_element_getinfo(mp3_decoder, &mp3_info);
-        if (audio_element_getinfo(mp3_decoder, &mp3_info) == ESP_OK) {
-            ESP_LOGI(TAG, "MP3 Metadata - Sample Rate: %d Hz, Channels: %d, Bit Rate: %d kbps",
-                     mp3_info.sample_rates, mp3_info.channels, mp3_info.bps / 1000);
-        } else {
-            ESP_LOGE(TAG, "Failed to get MP3 metadata: %s", esp_err_to_name(ret));
-        }
-    
-        // Stop the pipeline after fetching metadata
-        ESP_LOGI(TAG, "Stopping pipeline after fetching MP3 metadata");
-        if (this->http_filter_ != nullptr) {
-            //audio_pipeline_pause(pipeline_);
-            //audio_pipeline_stop(pipeline_);
-            //audio_pipeline_wait_for_stop(pipeline_);
-            audio_pipeline_unregister(this->pipeline_, this->http_filter_);
-            audio_element_deinit(this->http_filter_);
-            this->http_filter_ = nullptr;
-            ESP_LOGI(TAG, "Unregistered and deinitialized HTTP filter");
-        }
-
-        // Reconfigure the resample filter based on the retrieved sample rate and channels
-        int src_rate = mp3_info.sample_rates; // From MP3 metadata
-        int dest_rate = 16000; // Desired output sample rate
-        int dest_ch = 1; // Mono output
-        
-        if (configure_resample_filter(&this->http_filter_, src_rate, dest_rate, dest_ch) != ESP_OK) {
-            ESP_LOGE(TAG, "Error reinitializing resample filter: %s", esp_err_to_name(ret));
-            return nullptr;
-        }
-        if (audio_pipeline_register(this->pipeline_, this->http_filter_, "filter") != ESP_OK) {
-            ESP_LOGE(TAG, "failed to re-register http filter");
-            return nullptr;
-        }
-        if(audio_pipeline_unlink(this->pipeline_) != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to unlink pipeline components");
-            return nullptr;
-        }
-        if (audio_pipeline_relink(this->pipeline_, link_tag, 4) != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to relink HTTP pipeline components");
-            return nullptr;
-        }
-        */
-      
     } else {
         if (audio_pipeline_register(this->pipeline_, this->raw_write_, "raw") != ESP_OK ||
             audio_pipeline_register(this->pipeline_, this->i2s_stream_writer_raw_, "i2s") != ESP_OK) {
