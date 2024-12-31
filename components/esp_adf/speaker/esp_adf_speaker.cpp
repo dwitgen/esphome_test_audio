@@ -601,7 +601,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     } else {
         ESP_LOGI(TAG, "Audio pipeline is already cleaned up");
     }
-    
+    this->state_ = speaker::STATE_STOPPED;
     int pa_state = gpio_get_level(PA_ENABLE_GPIO);
     if (pa_state == 1) {
         ESP_LOGI(TAG, "Disabling PA...");
