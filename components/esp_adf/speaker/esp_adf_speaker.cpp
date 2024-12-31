@@ -361,8 +361,8 @@ void ESPADFSpeaker::setup() {
     return;
   }
 
-   // Setting Playback State text sensor to provide state for media player and set to stopped
-  for (auto *text_sensor : App.get_text_sensors()) {
+ /*  // Setting Playback State text sensor to provide state for media player and set to stopped
+ for (auto *text_sensor : App.get_text_sensors()) {
       std::string name = text_sensor->get_name().c_str(); // Convert to std::string
       ESP_LOGI(TAG, "Checking Text Sensor Name: %s", name.c_str());
       if (name.find("Playback State") != std::string::npos) {
@@ -378,7 +378,7 @@ void ESPADFSpeaker::setup() {
     // Set initial playback state as stopped
     this->update_playback_state("stopped");
   }
-
+ */
  //Adding intial setup for volume controls for the speaker
  // Find the key for the generic volume sensor
   uint32_t volume_sensor_key = 0;
@@ -551,7 +551,7 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->state_ != speaker::STATE_STOPPED) {
         ESP_LOGI(TAG, "Pipeline is stopped");
         this->state_ = speaker::STATE_STOPPED; 
-        update_playback_state("stopped");
+        //update_playback_state("stopped");
     }
 }
 
@@ -656,6 +656,7 @@ void ESPADFSpeaker::stop() {
   data.stop = true;
   xQueueSendToFront(this->buffer_queue_.handle, &data, portMAX_DELAY);
 }
+/*
 void ESPADFSpeaker::update_playback_state(const char *state) {
   ESP_LOGI(TAG, "Attempting to update state %s", state);
    if (this->playback_state_text_sensor != nullptr) {
@@ -664,6 +665,7 @@ void ESPADFSpeaker::update_playback_state(const char *state) {
     ESP_LOGE(TAG, "Playback state sensor is not initialized");
   }
 }
+/*
 void ESPADFSpeaker::watch_() {
   TaskEvent event;
   if (xQueueReceive(this->event_queue_, &event, 0) == pdTRUE) {
@@ -673,7 +675,7 @@ void ESPADFSpeaker::watch_() {
         break;
       case TaskEventType::STARTED:
         this->state_ = speaker::STATE_RUNNING;
-        update_playback_state("running");
+        //update_playback_state("running");
         break;
       case TaskEventType::RUNNING:
         this->status_clear_warning();
@@ -683,7 +685,7 @@ void ESPADFSpeaker::watch_() {
         this->state_ = speaker::STATE_STOPPED;
         vTaskDelete(this->player_task_handle_);
         this->player_task_handle_ = nullptr;
-        update_playback_state("stopped");
+        //update_playback_state("stopped");
         break;
       case TaskEventType::WARNING:
         ESP_LOGW(TAG, "Error writing to pipeline: %s", esp_err_to_name(event.err));
