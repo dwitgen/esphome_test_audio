@@ -665,7 +665,7 @@ void ESPADFSpeaker::update_playback_state(const char *state) {
     ESP_LOGE(TAG, "Playback state sensor is not initialized");
   }
 }
-/*
+*/
 void ESPADFSpeaker::watch_() {
   TaskEvent event;
   if (xQueueReceive(this->event_queue_, &event, 0) == pdTRUE) {
