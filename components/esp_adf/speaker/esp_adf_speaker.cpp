@@ -300,6 +300,17 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
             ESP_LOGE(TAG, "Failed to initialize RAW write stream");
             return nullptr;
         }
+
+        // Add UDP socket logging here if raw_stream_init uses sockets
+        int raw_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+        if (raw_socket >= 0) {
+            struct sockaddr_in sock_info;
+            socklen_t sock_info_len = sizeof(sock_info);
+            if (getsockname(raw_socket, (struct sockaddr *)&sock_info, &sock_info_len) == 0) {
+                ESP_LOGI(TAG, "RAW pipeline UDP socket bound to port: %d", ntohs(sock_info.sin_port));
+            }
+            close(raw_socket);
+        }
     }
 
     // Initialize audio pipeline
