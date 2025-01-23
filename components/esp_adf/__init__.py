@@ -91,7 +91,7 @@ async def to_code(config):
      # --- Add Step to Clone or Fetch esp_peripherals ---
     # Directly add the `esp_peripherals` repository as an IDF component
     esp32.add_idf_component(
-        name="esp_peripherals",
+        name="my_esp_peripherals",
         repo="https://github.com/dwitgen/esp_peripherals.git",
         path="lib/adc_button",  # Only fetch the specific directory
         ref="main"
