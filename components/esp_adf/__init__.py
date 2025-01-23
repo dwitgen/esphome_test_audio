@@ -89,17 +89,13 @@ async def to_code(config):
     )
 
      # --- Add Step to Clone or Fetch esp_peripherals ---
-    peripherals_repo = "https://github.com/dwitgen/esp_peripherals.git"
-    peripherals_dest = os.path.join(cg.get_build_dir(), "components", "esp_peripherals")
-
-    if not os.path.exists(peripherals_dest):
-        print(f"Fetching esp_peripherals from {peripherals_repo}")
-        cg.add_idf_component(
-            name="esp_peripherals",
-            repo=peripherals_repo,
-            path="lib/adc_button",  # Only fetch the lib/adc_button directory
-            ref="main"
-        )
+    # Directly add the `esp_peripherals` repository as an IDF component
+    esp32.add_idf_component(
+        name="esp_peripherals",
+        repo="https://github.com/dwitgen/esp_peripherals.git",
+        path="lib/adc_button",  # Only fetch the specific directory
+        ref="main"
+    )
 
 
     if board := config.get(CONF_BOARD):
