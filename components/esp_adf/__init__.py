@@ -88,6 +88,20 @@ async def to_code(config):
         "board_build.embed_txtfiles", "components/dueros_service/duer_profile"
     )
 
+     # --- Add Step to Clone or Fetch esp_peripherals ---
+    peripherals_repo = "https://github.com/dwitgen/esp_peripherals.git"
+    peripherals_dest = os.path.join(cg.get_build_dir(), "components", "esp_peripherals")
+
+    if not os.path.exists(peripherals_dest):
+        print(f"Fetching esp_peripherals from {peripherals_repo}")
+        cg.add_idf_component(
+            name="esp_peripherals",
+            repo=peripherals_repo,
+            path="lib/adc_button",  # Only fetch the lib/adc_button directory
+            ref="main"
+        )
+
+
     if board := config.get(CONF_BOARD):
         cg.add_define("USE_ESP_ADF_BOARD")
 
