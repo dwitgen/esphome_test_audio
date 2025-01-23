@@ -29,7 +29,7 @@
 #include "driver/adc.h"
 #include "math.h"
 #include "audio_mem.h"
-#include "esp_adc_cal.h"
+//#include "esp_adc_cal.h"
 #include "string.h"
 #include "adc_button.h"
 #include "esp_log.h"
