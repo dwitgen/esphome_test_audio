@@ -88,16 +88,6 @@ async def to_code(config):
         "board_build.embed_txtfiles", "components/dueros_service/duer_profile"
     )
 
-     # --- Add Step to Clone or Fetch esp_peripherals ---
-    # Directly add the `esp_peripherals` repository as an IDF component
-    esp32.add_idf_component(
-        name="my_esp_peripherals",
-        repo="https://github.com/dwitgen/esp_peripherals.git",
-        path="lib/adc_button",  # Only fetch the specific directory
-        ref="main"
-    )
-
-
     if board := config.get(CONF_BOARD):
         cg.add_define("USE_ESP_ADF_BOARD")
 
