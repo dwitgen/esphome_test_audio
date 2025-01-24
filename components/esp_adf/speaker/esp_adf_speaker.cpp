@@ -415,8 +415,8 @@ void ESPADFSpeaker::setup() {
   this->set_volume(initial_volume);
   
   // Configure ADC for volume control
-  adc1_config_width(ADC_WIDTH_BIT);
-  adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
+ // adc1_config_width(ADC_WIDTH_BIT);
+ // adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
 
 }
 
