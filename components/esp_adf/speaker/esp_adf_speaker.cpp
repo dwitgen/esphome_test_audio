@@ -6,8 +6,8 @@
 // Added includes for button controls
 #include <driver/gpio.h>
 #include <driver/adc.h>
-//#include "<esp_adc_cal_internal_legacy.h>"
-#include <esp_adc/esp_adc_cal.h>
+#include "<esp_adc_cal_internal_legacy.h>"
+//#include <esp_adc_cal.h>
 #error "Testing whether this file is being compiled"
 
 #include "esphome/core/application.h"
