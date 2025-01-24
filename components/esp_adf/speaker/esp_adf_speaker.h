@@ -19,15 +19,7 @@
 #include <audio_hal.h>
 //#include "esp_peripherals.h"
 //#include "periph_adc_button.h"
-#ifdef USE_ESP32
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-#else
-#include "esp_peripherals.h"
-#include "periph_adc_button.h"
-#endif  // ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-#endif  // USE_ESP32
-
-#include "input_key_service.h"
+//#include "input_key_service.h"
 #include <board.h>
 #include <http_stream.h>
 
