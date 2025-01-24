@@ -7,7 +7,7 @@
 #include <driver/gpio.h>
 #include <driver/adc.h>
 //#include "<esp_adc_cal_internal_legacy.h>"
-#include <esp_adc_cal.h>
+#include <esp_adc/esp_adc_cal.h>
 
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
