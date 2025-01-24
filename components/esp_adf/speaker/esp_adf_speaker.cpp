@@ -8,19 +8,6 @@
 //#include <driver/adc.h>
 //#include <esp_adc_cal.h>
 
-#ifdef USE_ESP32
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-#include "hal/adc_types.h"  // This defines ADC_CHANNEL_MAX
-#include "esp_adc/adc_oneshot.h"
-#include "esp_adc/adc_cali.h"
-#include "esp_adc/adc_cali_scheme.h"
-#include "driver/adc_types_legacy.h"
-#else
-#include <esp_adc_cal.h>
-#include "driver/adc.h"
-#endif  // ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-#endif  // USE_ESP32
-
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
