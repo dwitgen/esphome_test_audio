@@ -104,7 +104,7 @@ async def to_code(config):
 
         esp32.add_idf_sdkconfig_option(SUPPORTED_BOARDS[board], True)
         
-       esp32.add_extra_script(
+        esp32.add_extra_script(
             "pre",
             "apply_adf_patches.py",
             os.path.join(os.path.dirname(__file__), "apply_adf_patches.py.script"),
