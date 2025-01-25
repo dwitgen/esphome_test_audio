@@ -88,6 +88,10 @@ async def to_code(config):
         "board_build.embed_txtfiles", "components/dueros_service/duer_profile"
     )
 
+    esp32.add_extra_build_file(
+        "esp_adf_patches/esp_adf_patch.diff"
+        "https://github.com/dwitgen/esphome_test_audio/components/esp_adf/esp_adf_patch.dif"
+    )
     if board := config.get(CONF_BOARD):
         cg.add_define("USE_ESP_ADF_BOARD")
 
