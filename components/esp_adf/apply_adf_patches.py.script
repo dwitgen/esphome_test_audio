@@ -39,7 +39,7 @@ for version_prefix, patch_path in PATCH_FILES.items():
     if idf_version.startswith(version_prefix):
         PATCH_FILE = patch_path
         break
-
+print(f"Patch file: {PATCH_FILE}")
 if not PATCH_FILE or not isfile(PATCH_FILE):
     raise ValueError(f"No patch file found for ESP-IDF version: {idf_version}")
 
