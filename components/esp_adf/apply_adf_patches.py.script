@@ -8,6 +8,8 @@ patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
 PROJECT_DIR = env.get('PROJECT_DIR')
 
 PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "idf_v4.4_freertos.patch")
+# Custom patch file
+CUSTOM_PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "esp_adf_patch.diff")
 
 # patch file only if we didn't do it before
 if not isfile(patchflag_path):
@@ -15,7 +17,12 @@ if not isfile(patchflag_path):
     assert isfile(PATCH_FILE)
 
     env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, PATCH_FILE))
-
+    
+    # Apply custom patch
+    if isfile(CUSTOM_PATCH_FILE):
+        print(CUSTOM_PATCH_FILE)
+        env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, CUSTOM_PATCH_FILE))
+    
     def _touch(path):
         with open(path, "w") as fp:
             fp.write("")
