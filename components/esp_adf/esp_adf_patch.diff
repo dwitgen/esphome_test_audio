@@ -2,7 +2,7 @@ diff --git a/components/audio_hal/include/audio_hal.h b/components/audio_hal/inc
 index 1a9cf12a..065218c1 100755
 --- a/components/audio_hal/include/audio_hal.h
 +++ b/components/audio_hal/include/audio_hal.h
-@@ -141,11 +141,11 @@ typedef struct audio_hal {
+@@ -140,12 +140,13 @@ typedef struct audio_hal {
      esp_err_t (*audio_codec_initialize)(audio_hal_codec_config_t *codec_cfg);                                /*!< initialize codec */
      esp_err_t (*audio_codec_deinitialize)(void);                                                             /*!< deinitialize codec */
      esp_err_t (*audio_codec_ctrl)(audio_hal_codec_mode_t mode, audio_hal_ctrl_t ctrl_state);                 /*!< control codec mode and state */
@@ -10,7 +10,30 @@ index 1a9cf12a..065218c1 100755
      esp_err_t (*audio_codec_set_mute) (bool mute);                                                           /*!< set codec mute */
      esp_err_t (*audio_codec_set_volume)(int volume);                                                         /*!< set codec volume */
      esp_err_t (*audio_codec_get_volume)(int *volume);                                                        /*!< get codec volume */
++    esp_err_t (*audio_codec_enable_pa) (bool enable);                                                        /*!< enable pa */
 -    xSemaphoreHandle audio_hal_lock;                                                                         /*!< semaphore of codec */
 +    SemaphoreHandle_t audio_hal_lock;                                                                         /*!< semaphore of codec */
      void *handle;                                                                                            /*!< handle of audio codec */
  } audio_hal_func_t;
+
+diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
+index ad4f9fe9..c6be4089 100644
+--- a/components/esp_peripherals/include/esp_peripherals.h
++++ b/components/esp_peripherals/include/esp_peripherals.h
+@@ -28,6 +28,7 @@
+ #include "audio_event_iface.h"
+ #include "audio_common.h"
+ #include "freertos/event_groups.h"
++#include "freertos/timers.h"
+
+ #ifdef __cplusplus
+ extern "C" {
+@@ -75,7 +76,7 @@ typedef struct esp_periph *esp_periph_handle_t;
+ typedef esp_err_t (*esp_periph_func)(esp_periph_handle_t periph);
+ typedef esp_err_t (*esp_periph_run_func)(esp_periph_handle_t periph, audio_event_iface_msg_t *msg);
+ typedef esp_err_t (*esp_periph_event_handle_t)(audio_event_iface_msg_t *event, void *context);
+-typedef void (*timer_callback)(xTimerHandle tmr);
++typedef void (*timer_callback)(TimerHandle_t tmr);
+
+ /**
+  * @brief Common peripherals configurations
