@@ -14,8 +14,7 @@ index 1a9cf12a..065218c1 100755
 -    xSemaphoreHandle audio_hal_lock;                                                                         /*!< semaphore of codec */
 +    SemaphoreHandle_t audio_hal_lock;                                                                         /*!< semaphore of codec */
      void *handle;                                                                                            /*!< handle of audio codec */
- } audio_hal_func_t;
- 
+ } audio_hal_func_t; 
 diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/components/esp_peripherals/include/esp_peripherals.h
