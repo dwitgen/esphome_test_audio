@@ -108,7 +108,7 @@ async def to_code(config):
         )
         with open(VERSION_FILE, "r") as f:
             idf_version = f.read().strip()
-            print(f"ESP-IDF v{idf_version})"
+            print(f"ESP-IDF v{idf_version}")
         # Detect ESP-IDF version
         #idf_version = get_idf_version()
     
