@@ -1,28 +1,39 @@
-
 from os.path import join, isfile
 import os
 
 Import("env")
 
+# Dynamically determine the framework directory and project-specific build directory
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
-patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
+PROJECT_DIR = env.get("PROJECT_DIR")
+BUILD_DIR = join(PROJECT_DIR, "build")
 
-PROJECT_DIR = env.get('PROJECT_DIR')
+# Dynamically find the actual build directory (e.g., homeassist03)
+subdirs = os.listdir(BUILD_DIR)
+if not subdirs:
+    print("Error: No build subdirectories found!")
+    env.Exit(1)
+elif len(subdirs) > 1:
+    print(f"Warning: Multiple build subdirectories found: {subdirs}. Using the first one.")
+BUILD_SUBDIR = subdirs[0]
+FINAL_BUILD_DIR = join(BUILD_DIR, BUILD_SUBDIR)
 
-# Custom patch file
+print(f"Framework directory: {FRAMEWORK_DIR}")
+print(f"Build directory: {FINAL_BUILD_DIR}")
+
+# Define the patch file
 PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "esp_adf_patch.diff")
 
-# patch files only if we didn't do it before
-#if not isfile(patchflag_path):
-print("Applying patch:", PATCH_FILE)
-assert isfile(PATCH_FILE)
+# Apply the patch
+if not isfile(PATCH_FILE):
+    print(f"Error: Patch file not found at {PATCH_FILE}")
+    env.Exit(1)
 
-env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, PATCH_FILE))
+print(f"Applying patch: {PATCH_FILE}")
+result = env.Execute(f"patch -p1 -d {FINAL_BUILD_DIR} -i {PATCH_FILE}")
 
-def _touch(path):
-    with open(path, "w") as fp:
-        fp.write("")
+if result != 0:
+    print("Error: Failed to apply the patch.")
+    env.Exit(1)
 
-env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
-#else:
-#    print("Patches already applied.")
+print("Patch applied successfully.")
