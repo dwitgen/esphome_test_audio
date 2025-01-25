@@ -12,11 +12,11 @@ PROJECT_DIR = env.get('PROJECT_DIR')
 
 # Define patch files for different versions
 PATCH_FILES = {
-    "v4.4": join(PROJECT_DIR, "esp_adf_patches", "idf_v4.4_freertos.patch"),
-    "v5.0": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.0_freertos.patch"),
-    "v5.1": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.1_freertos.patch"),
-    "v5.2": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.2_freertos.patch"),
-    "v5.3": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.3_freertos.patch"),
+    "4.4": join(PROJECT_DIR, "esp_adf_patches", "idf_v4.4_freertos.patch"),
+    "5.0": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.0_freertos.patch"),
+    "5.1": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.1_freertos.patch"),
+    "5.2": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.2_freertos.patch"),
+    "5.3": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.3_freertos.patch"),
 }
 
 with open(VERSION_FILE, "r") as f:
