@@ -8,20 +8,23 @@ patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
 
 PROJECT_DIR = env.get('PROJECT_DIR')
 
-# Custom patch file
+# Custom patch file path
 PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "esp_adf_patch.diff")
 
-# patch files only if we didn't do it before
-#if not isfile(patchflag_path):
-print("Applying patch:", PATCH_FILE)
-assert isfile(PATCH_FILE)
+# Check if patch file exists
+if not isfile(PATCH_FILE):
+    raise FileNotFoundError(f"Patch file not found: {PATCH_FILE}")
 
-env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, PATCH_FILE))
-
-def _touch(path):
-    with open(path, "w") as fp:
-        fp.write("")
-
-env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
-#else:
-#    print("Patches already applied.")
+# Apply patch only if not already applied
+if not isfile(patchflag_path):
+    print(f"Applying patch: {PATCH_FILE}")
+    try:
+        env.Execute(f"patch -p1 -d {FRAMEWORK_DIR} -i {PATCH_FILE}")
+        # Create a flag file to indicate patching is complete
+        with open(patchflag_path, "w") as f:
+            f.write("")
+    except Exception as e:
+        print(f"Failed to apply patch: {e}")
+        raise
+else:
+    print("Patch already applied, skipping.")
