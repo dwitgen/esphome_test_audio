@@ -1,73 +1,24 @@
-from os.path import join, isfile, isdir
-import time
+
+from os.path import join, isfile
 
 Import("env")
 
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
-if not FRAMEWORK_DIR or not isdir(FRAMEWORK_DIR):
-    print("[WARNING] ESP-IDF framework directory not found! Ensure PlatformIO is properly configured.")
-    FRAMEWORK_DIR = None  # Mark as None to skip further processing
+patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
 
-# If the directory exists, proceed with patching logic
-if FRAMEWORK_DIR:
-    VERSION_FILE = join(FRAMEWORK_DIR, "version.txt")
-    patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
-    PROJECT_DIR = env.get('PROJECT_DIR')
+PROJECT_DIR = env.get('PROJECT_DIR')
 
-    # Define patch files for different versions
-    PATCH_FILES = {
-        "4.4": join(PROJECT_DIR, "esp_adf_patches", "idf_v4.4_freertos.patch"),
-        "5.0": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.0_freertos.patch"),
-        "5.1": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.1_freertos.patch"),
-        "5.2": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.2_freertos.patch"),
-        "5.3": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.3_freertos.patch"),
-    }
+PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "idf_v4.4_freertos.patch")
 
-    # Wait for version.txt to be generated
-    MAX_RETRIES = 10
-    RETRY_DELAY = 5  # seconds
-    retries = 0
+# patch file only if we didn't do it before
+if not isfile(patchflag_path):
+    print(PATCH_FILE)
+    assert isfile(PATCH_FILE)
 
-    while not isfile(VERSION_FILE) and retries < MAX_RETRIES:
-        print(f"[INFO] Waiting for version.txt to be generated... (Attempt {retries + 1}/{MAX_RETRIES})")
-        time.sleep(RETRY_DELAY)
-        retries += 1
+    env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, PATCH_FILE))
 
-    if not isfile(VERSION_FILE):
-        print("[WARNING] version.txt not found after waiting. Skipping patching process.")
-        idf_version = None
-    else:
-        with open(VERSION_FILE, "r") as f:
-            idf_version = f.read().strip()
+    def _touch(path):
+        with open(path, "w") as fp:
+            fp.write("")
 
-    if idf_version:
-        # Find the matching patch file
-        PATCH_FILE = None
-        for version_prefix, patch_path in PATCH_FILES.items():
-            if idf_version.startswith(version_prefix):
-                PATCH_FILE = patch_path
-                break
-
-        print(f"Patch file: {PATCH_FILE}")
-        if not PATCH_FILE or not isfile(PATCH_FILE):
-            print(f"[WARNING] No patch file found for ESP-IDF version: {idf_version}. Skipping patching process.")
-        else:
-            # Apply the patch if it hasn't been applied before
-            if not isfile(patchflag_path):
-                print(f"Applying patch for ESP-IDF version {idf_version}: {PATCH_FILE}")
-                assert isfile(PATCH_FILE)
-                
-                env.Execute(f"patch -p1 -d {FRAMEWORK_DIR} -i {PATCH_FILE}")
-                
-                # Create the patch flag file to prevent re-patching
-                def _touch(path):
-                    with open(path, "w") as fp:
-                        fp.write("")
-                
-                env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
-            else:
-                print(f"[INFO] Patch already applied for ESP-IDF version {idf_version}.")
-    else:
-        print("[WARNING] Unable to determine ESP-IDF version. Skipping patching process.")
-else:
-    print("[WARNING] ESP-IDF framework directory not available. Skipping patching process.")
+    env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
