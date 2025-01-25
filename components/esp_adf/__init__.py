@@ -88,26 +88,28 @@ async def to_code(config):
         "board_build.embed_txtfiles", "components/dueros_service/duer_profile"
     )
 
-    if board := config.get(CONF_BOARD):
-        cg.add_define("USE_ESP_ADF_BOARD")
-
-        esp32.add_idf_sdkconfig_option(SUPPORTED_BOARDS[board], True)
+    esp32.add_extra_build_file(
+            "esp_adf_patches/esp_adf_patch.diff",
+            "https://github.com/dwitgen/esphome_test_audio/components/esp_adf/esp_adf_patch.dif"
+        )
         
-        esp32.add_extra_script(
+    esp32.add_extra_script(
             "pre",
             "apply_custom_patch.py",
             os.path.join(os.path.dirname(__file__), "apply_custom_patch.py.script"),
         )
 
-        esp32.add_extra_script(
+    if board := config.get(CONF_BOARD):
+        cg.add_define("USE_ESP_ADF_BOARD")
+
+        esp32.add_idf_sdkconfig_option(SUPPORTED_BOARDS[board], True)
+        
+       esp32.add_extra_script(
             "pre",
             "apply_adf_patches.py",
             os.path.join(os.path.dirname(__file__), "apply_adf_patches.py.script"),
         )
-        esp32.add_extra_build_file(
-            "esp_adf_patches/esp_adf_patch.diff",
-            "https://github.com/dwitgen/esphome_test_audio/components/esp_adf/esp_adf_patch.dif"
-        )
+        
         esp32.add_extra_build_file(
             "esp_adf_patches/idf_v4.4_freertos.patch",
             "https://github.com/espressif/esp-adf/raw/v2.5/idf_patches/idf_v4.4_freertos.patch",
