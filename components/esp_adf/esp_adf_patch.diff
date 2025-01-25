@@ -21,7 +21,7 @@ index ad4f9fe9..c6be4089 100644
  #include "freertos/event_groups.h"
 +#include "freertos/timers.h"
  
- #ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
