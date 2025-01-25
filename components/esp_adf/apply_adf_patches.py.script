@@ -4,6 +4,7 @@ import subprocess
 Import("env")
 
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
+print(f"FRAMEWORK_DIR: {FRAMEWORK_DIR}")
 VERSION_FILE = join(FRAMEWORK_DIR, "version.txt")
 
 patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
