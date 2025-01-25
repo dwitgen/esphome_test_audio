@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 import esphome.config_validation as cv
 import esphome.codegen as cg
@@ -25,6 +26,20 @@ SUPPORTED_BOARDS = {
     "esp32s3korvo1": "CONFIG_ESP32_S3_KORVO1_BOARD",
     "esp32korvo1": "CONFIG_ESP32_KORVO1_BOARD"
 }
+
+def get_idf_version():
+    try:
+        # Attempt to get the IDF version by calling idf.py --version
+        result = subprocess.run(
+            ["idf.py", "--version"], capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            # Parse and return the version
+            return result.stdout.strip().split(" ")[-1]
+        else:
+            raise RuntimeError(f"Failed to fetch IDF version: {result.stderr}")
+    except Exception as e:
+        raise RuntimeError(f"Error while determining IDF version: {e}")
 
 
 def _default_board(config):
@@ -105,7 +120,7 @@ async def to_code(config):
         )
     
         # Detect ESP-IDF version
-        idf_version = esp32.get_idf_version()
+        idf_version = get_idf_version()
     
         if idf_version.startswith("v4.4"):
             # Apply ESP-IDF 4.4-specific patch
