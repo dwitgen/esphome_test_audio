@@ -18,13 +18,6 @@ assert isfile(PATCH_FILE)
 
 env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, PATCH_FILE))
 
-# Apply custom patch
-if isfile(CUSTOM_PATCH_FILE):
-    print("Applying custom patch:", CUSTOM_PATCH_FILE)
-    env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, CUSTOM_PATCH_FILE))
-else:
-    print("Custom patch file not found:", CUSTOM_PATCH_FILE)
-
 def _touch(path):
     with open(path, "w") as fp:
         fp.write("")
