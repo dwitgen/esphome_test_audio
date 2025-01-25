@@ -1,7 +1,7 @@
-diff --git a/data/build/homeassist03/components/audio_hal/include/audio_hal.h b/data/build/homeassist03/components/audio_hal/include/audio_hal.h
+diff --git a/components/audio_hal/include/audio_hal.h b/components/audio_hal/include/audio_hal.h
 index 1a9cf12a..065218c1 100755
---- a/data/build/homeassist03/components/audio_hal/include/audio_hal.h
-+++ b/data/build/homeassist03/components/audio_hal/include/audio_hal.h
+--- a/components/audio_hal/include/audio_hal.h
++++ b/components/audio_hal/include/audio_hal.h
 @@ -147,7 +147,7 @@ typedef struct audio_hal {
      esp_err_t (*audio_codec_set_volume)(int volume);                                                         /*!< set codec volume */
      esp_err_t (*audio_codec_get_volume)(int *volume);                                                        /*!< get codec volume */
@@ -11,10 +11,10 @@ index 1a9cf12a..065218c1 100755
      void *handle;                                                                                            /*!< handle of audio codec */
  } audio_hal_func_t;
  
-diff --git a/data/build/homeassist03/components/esp_peripherals/include/esp_peripherals.h b/data/build/homeassist03/components/esp_peripherals/include/esp_peripherals.h
+diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
---- a/data/build/homeassist03/components/esp_peripherals/include/esp_peripherals.h
-+++ b/data/build/homeassist03/components/esp_peripherals/include/esp_peripherals.h
+--- a/components/esp_peripherals/include/esp_peripherals.h
++++ b/components/esp_peripherals/include/esp_peripherals.h
 @@ -29,6 +29,7 @@
  #include "audio_event_iface.h"
  #include "audio_common.h"
