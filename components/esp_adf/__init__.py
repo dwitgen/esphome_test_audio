@@ -9,6 +9,8 @@ from esphome.components import esp32
 
 from esphome.const import CONF_ID, CONF_BOARD
 
+Import("env")
+
 CODEOWNERS = [""]
 DEPENDENCIES = ["esp32"]
 
