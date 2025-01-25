@@ -166,8 +166,8 @@ async def to_code(config):
                 "esp_adf_patches/idf_v5.3_freertos.patch",
                 "https://github.com/espressif/esp-adf/raw/main/idf_patches/idf_v5.3_freertos.patch",
             )
-        else:
-            raise ValueError(f"Unsupported ESP-IDF version: {idf_version}")
+        #else:
+        #    raise ValueError(f"Unsupported ESP-IDF version: {idf_version}")
         
         esp32.add_extra_script(
             "pre",
