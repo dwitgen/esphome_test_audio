@@ -15,6 +15,9 @@ DEPENDENCIES = ["esp32"]
 CONF_ESP_ADF_ID = "esp_adf_id"
 CONF_ESP_ADF = "esp_adf"
 
+FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
+VERSION_FILE = join(FRAMEWORK_DIR, "version.txt")
+
 esp_adf_ns = cg.esphome_ns.namespace("esp_adf")
 ESPADF = esp_adf_ns.class_("ESPADF", cg.Component)
 ESPADFPipeline = esp_adf_ns.class_("ESPADFPipeline", cg.Parented.template(ESPADF))
@@ -26,21 +29,6 @@ SUPPORTED_BOARDS = {
     "esp32s3korvo1": "CONFIG_ESP32_S3_KORVO1_BOARD",
     "esp32korvo1": "CONFIG_ESP32_KORVO1_BOARD"
 }
-
-def get_idf_version():
-    try:
-        # Attempt to get the IDF version by calling idf.py --version
-        result = subprocess.run(
-            ["idf.py", "--version"], capture_output=True, text=True
-        )
-        if result.returncode == 0:
-            # Parse and return the version
-            return result.stdout.strip().split(" ")[-1]
-        else:
-            raise RuntimeError(f"Failed to fetch IDF version: {result.stderr}")
-    except Exception as e:
-        raise RuntimeError(f"Error while determining IDF version: {e}")
-
 
 def _default_board(config):
     config = config.copy()
@@ -118,43 +106,45 @@ async def to_code(config):
             "apply_custom_patch.py",
             os.path.join(os.path.dirname(__file__), "apply_custom_patch.py.script"),
         )
+        with open(VERSION_FILE, "r") as f:
+            idf_version = f.read().strip()
+            print(f"ESP-IDF v{idf_version})"
+        # Detect ESP-IDF version
+        #idf_version = get_idf_version()
     
-    # Detect ESP-IDF version
-    #idf_version = get_idf_version()
-
-    #if idf_version.startswith("v4.4"):
-        # Apply ESP-IDF 4.4-specific patch
-        esp32.add_extra_build_file(
-            "esp_adf_patches/idf_v4.4_freertos.patch",
-            "https://github.com/espressif/esp-adf/raw/v2.5/idf_patches/idf_v4.4_freertos.patch",
-        )
-    #elif idf_version.startswith("v5.0"):
-        # Apply ESP-IDF 5.0-specific patch
-        esp32.add_extra_build_file(
-            "esp_adf_patches/idf_v5.0_freertos.patch",
-            "https://github.com/espressif/esp-adf/raw/main/idf_patches/idf_v5.0_freertos.patch",
-        )
-    #elif idf_version.startswith("v5.1"):
-        # Apply ESP-IDF 5.1-specific patch
-        esp32.add_extra_build_file(
-            "esp_adf_patches/idf_v5.1_freertos.patch",
-            "https://github.com/espressif/esp-adf/raw/main/idf_patches/idf_v5.1_freertos.patch",
-        )
-    #elif idf_version.startswith("v5.2"):
-        # Apply ESP-IDF 5.2-specific patch
-        esp32.add_extra_build_file(
-            "esp_adf_patches/idf_v5.2_freertos.patch",
-            "https://github.com/espressif/esp-adf/raw/main/idf_patches/idf_v5.2_freertos.patch",
-        )
-    #elif idf_version.startswith("v5.3"):
-        # Apply ESP-IDF 5.3-specific patch
-        esp32.add_extra_build_file(
-            "esp_adf_patches/idf_v5.3_freertos.patch",
-            "https://github.com/espressif/esp-adf/raw/main/idf_patches/idf_v5.3_freertos.patch",
-        )
-    #else:
-    #    raise ValueError(f"Unsupported ESP-IDF version: {idf_version}")
-    
+        if idf_version.startswith("4.4"):
+            # Apply ESP-IDF 4.4-specific patch
+            esp32.add_extra_build_file(
+                "esp_adf_patches/idf_v4.4_freertos.patch",
+                "https://github.com/espressif/esp-adf/raw/v2.5/idf_patches/idf_v4.4_freertos.patch",
+            )
+        elif idf_version.startswith("5.0"):
+            # Apply ESP-IDF 5.0-specific patch
+            esp32.add_extra_build_file(
+                "esp_adf_patches/idf_v5.0_freertos.patch",
+                "https://github.com/espressif/esp-adf/raw/main/idf_patches/idf_v5.0_freertos.patch",
+            )
+        elif idf_version.startswith("5.1"):
+            # Apply ESP-IDF 5.1-specific patch
+            esp32.add_extra_build_file(
+                "esp_adf_patches/idf_v5.1_freertos.patch",
+                "https://github.com/espressif/esp-adf/raw/main/idf_patches/idf_v5.1_freertos.patch",
+            )
+        elif idf_version.startswith("5.2"):
+            # Apply ESP-IDF 5.2-specific patch
+            esp32.add_extra_build_file(
+                "esp_adf_patches/idf_v5.2_freertos.patch",
+                "https://github.com/espressif/esp-adf/raw/main/idf_patches/idf_v5.2_freertos.patch",
+            )
+        elif idf_version.startswith("5.3"):
+            # Apply ESP-IDF 5.3-specific patch
+            esp32.add_extra_build_file(
+                "esp_adf_patches/idf_v5.3_freertos.patch",
+                "https://github.com/espressif/esp-adf/raw/main/idf_patches/idf_v5.3_freertos.patch",
+            )
+        else:
+            raise ValueError(f"Unsupported ESP-IDF version: {idf_version}")
+        
         esp32.add_extra_script(
             "pre",
             "apply_adf_patches.py",
