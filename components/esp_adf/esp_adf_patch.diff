@@ -2,20 +2,20 @@ diff --git a/components/audio_hal/include/audio_hal.h b/components/audio_hal/inc
 index 1a9cf12a..065218c1 100755
 --- a/components/audio_hal/include/audio_hal.h
 +++ b/components/audio_hal/include/audio_hal.h
-@@ -147,7 +147,7 @@ typedef struct audio_hal {
+@@ -141,11 +141,11 @@ typedef struct audio_hal {
+     esp_err_t (*audio_codec_initialize)(audio_hal_codec_config_t *codec_cfg);                                /*!< initialize codec */
+     esp_err_t (*audio_codec_deinitialize)(void);                                                             /*!< deinitialize codec */
      esp_err_t (*audio_codec_ctrl)(audio_hal_codec_mode_t mode, audio_hal_ctrl_t ctrl_state);                 /*!< control codec mode and state */
      esp_err_t (*audio_codec_config_iface)(audio_hal_codec_mode_t mode, audio_hal_codec_i2s_iface_t *iface);  /*!< configure i2s interface */
      esp_err_t (*audio_codec_set_mute) (bool mute);                                                           /*!< set codec mute */
      esp_err_t (*audio_codec_set_volume)(int volume);                                                         /*!< set codec volume */
-     esp_err_t (*audio_codec_get_volume)(int *volume);                                                        /*!< get codec volume */-    
+     esp_err_t (*audio_codec_get_volume)(int *volume);                                                        /*!< get codec volume */
+     esp_err_t (*audio_codec_enable_pa) (bool enable);                                                        /*!< enable pa */
 -    xSemaphoreHandle audio_hal_lock;                                                                         /*!< semaphore of codec */
 +    SemaphoreHandle_t audio_hal_lock;                                                                         /*!< semaphore of codec */
      void *handle;                                                                                            /*!< handle of audio codec */
  } audio_hal_func_t;
  
- /**
-
-
 diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/components/esp_peripherals/include/esp_peripherals.h
@@ -37,5 +37,3 @@ index ad4f9fe9..c6be4089 100644
  
  /**
   * @brief Common peripherals configurations
-
- 
