@@ -1,4 +1,4 @@
-diff --git a/components/audio_hal/include/audio_hal.h b/components/audio_hal/include/audio_hal.h
+diff --git a/data/build/homeassist03/components/audio_hal/include/audio_hal.h b/data/build/homeassist03/components/audio_hal/include/audio_hal.h
 index 1a9cf12a..065218c1 100755
 --- a/data/build/homeassist03/components/audio_hal/include/audio_hal.h
 +++ b/data/build/homeassist03/components/audio_hal/include/audio_hal.h
@@ -11,7 +11,7 @@ index 1a9cf12a..065218c1 100755
      void *handle;                                                                                            /*!< handle of audio codec */
  } audio_hal_func_t;
  
-diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
+diff --git a/data/build/homeassist03/components/esp_peripherals/include/esp_peripherals.h b/data/build/homeassist03/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/data/build/homeassist03/components/esp_peripherals/include/esp_peripherals.h
 +++ b/data/build/homeassist03/components/esp_peripherals/include/esp_peripherals.h
