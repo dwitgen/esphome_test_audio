@@ -29,6 +29,7 @@ SUPPORTED_BOARDS = {
 }
 
 def get_idf_version():
+    
     # Try to get the framework directory from the environment
     framework_dir = os.getenv("PIO_FRAMEWORK_ESP_IDF_DIR")
 
@@ -37,20 +38,24 @@ def get_idf_version():
         framework_dir = "/data/cache/platformio/packages/framework-espidf"  # Replace with your actual path
 
     if not framework_dir or not os.path.isdir(framework_dir):
-        raise ValueError("ESP-IDF framework directory not found! Ensure PlatformIO is properly configured.")
+        print("[WARNING] ESP-IDF framework directory not found! Ensure PlatformIO is properly configured.")
+        print("[INFO] Skipping IDF version detection. Defaulting to unknown version.")
+        return "unknown"  # Return a default value or handle as necessary
 
     # Path to the version.txt file
-    version_file = join(framework_dir, "version.txt")
+    version_file = os.path.join(framework_dir, "version.txt")
 
     # Ensure the version.txt file exists
-    if not isfile(version_file):
-        raise FileNotFoundError(f"version.txt not found in {framework_dir}")
+    if not os.path.isfile(version_file):
+        print(f"[WARNING] version.txt not found in {framework_dir}. Defaulting to unknown version.")
+        return "unknown"  # Return a default value or handle as necessary
 
     # Read the version from the version.txt file
     with open(version_file, "r") as vf:
         idf_version = vf.read().strip()
-    
+
     return idf_version
+
     
 def _default_board(config):
     config = config.copy()
