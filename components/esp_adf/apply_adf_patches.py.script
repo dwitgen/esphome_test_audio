@@ -44,15 +44,15 @@ if not PATCH_FILE or not isfile(PATCH_FILE):
     raise ValueError(f"No patch file found for ESP-IDF version: {idf_version}")
 
 # Apply the patch if it hasn't been applied before
-if not isfile(patchflag_path):
-    print(f"Applying patch for ESP-IDF version {idf_version}: {PATCH_FILE}")
-    assert isfile(PATCH_FILE)
+#if not isfile(patchflag_path):
+print(f"Applying patch for ESP-IDF version {idf_version}: {PATCH_FILE}")
+assert isfile(PATCH_FILE)
 
-    env.Execute(f"patch -p1 -d {FRAMEWORK_DIR} -i {PATCH_FILE}")
+env.Execute(f"patch -p1 -d {FRAMEWORK_DIR} -i {PATCH_FILE}")
 
-    # Create the patch flag file to prevent re-patching
-    def _touch(path):
-        with open(path, "w") as fp:
-            fp.write("")
+# Create the patch flag file to prevent re-patching
+def _touch(path):
+    with open(path, "w") as fp:
+        fp.write("")
 
-    env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
+env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
