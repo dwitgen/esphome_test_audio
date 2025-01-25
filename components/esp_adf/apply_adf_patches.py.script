@@ -9,7 +9,7 @@ PROJECT_DIR = env.get('PROJECT_DIR')
 
 PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "idf_v4.4_freertos.patch")
 # Custom patch file
-CUSTOM_PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "esp_adf_patch.diff")
+CUSTOM_PATCH_FILE = join(PROJECT_DIR, "esp_adf_patch.diff")
 
 # patch file only if we didn't do it before
 if not isfile(patchflag_path):
