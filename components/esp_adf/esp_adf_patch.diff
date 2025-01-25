@@ -2,7 +2,7 @@ diff --git a/components/audio_hal/include/audio_hal.h b/components/audio_hal/inc
 index 1a9cf12a..065218c1 100755
 --- a/components/audio_hal/include/audio_hal.h
 +++ b/components/audio_hal/include/audio_hal.h
-@@ -141,11 +141,11 @@ typedef struct audio_hal {
+@@ -141,10 +141,11 @@ typedef struct audio_hal {
      esp_err_t (*audio_codec_initialize)(audio_hal_codec_config_t *codec_cfg);                                /*!< initialize codec */
      esp_err_t (*audio_codec_deinitialize)(void);                                                             /*!< deinitialize codec */
      esp_err_t (*audio_codec_ctrl)(audio_hal_codec_mode_t mode, audio_hal_ctrl_t ctrl_state);                 /*!< control codec mode and state */
