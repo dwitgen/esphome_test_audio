@@ -14,7 +14,8 @@ index 1a9cf12a..065218c1 100755
 -    xSemaphoreHandle audio_hal_lock;                                                                         /*!< semaphore of codec */
 +    SemaphoreHandle_t audio_hal_lock;                                                                         /*!< semaphore of codec */
      void *handle;                                                                                            /*!< handle of audio codec */
- } audio_hal_func_t; 
+ } audio_hal_func_t;
+ 
 diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/components/esp_peripherals/include/esp_peripherals.h
@@ -27,7 +28,7 @@ index ad4f9fe9..c6be4089 100644
  
  #ifdef __cplusplus
  extern "C" {
-@@ -76,7 +77,7 @@ typedef struct esp_periph *esp_periph_handle_t;
+@@ -76,7 +77,8 @@ typedef struct esp_periph *esp_periph_handle_t;
  typedef esp_err_t (*esp_periph_func)(esp_periph_handle_t periph);
  typedef esp_err_t (*esp_periph_run_func)(esp_periph_handle_t periph, audio_event_iface_msg_t *msg);
  typedef esp_err_t (*esp_periph_event_handle_t)(audio_event_iface_msg_t *event, void *context);
