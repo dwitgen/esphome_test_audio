@@ -1,4 +1,4 @@
-from os.path import join, isfile
+from os.path import join, isfile, isdir
 import os
 
 Import("env")
@@ -6,16 +6,21 @@ Import("env")
 # Dynamically determine the framework directory and project-specific build directory
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
 PROJECT_DIR = env.get("PROJECT_DIR")
-BUILD_DIR = join(PROJECT_DIR, "build")
+BUILD_DIR = join(PROJECT_DIR, ".esphome", "build")  # Adjust to the correct build path
 
-# Dynamically find the actual build directory (e.g., homeassist03)
+if not isdir(BUILD_DIR):
+    print(f"Error: Build directory does not exist: {BUILD_DIR}")
+    env.Exit(1)
+
+# Dynamically find the actual build subdirectory (e.g., homeassist03)
 subdirs = os.listdir(BUILD_DIR)
 if not subdirs:
     print("Error: No build subdirectories found!")
     env.Exit(1)
 elif len(subdirs) > 1:
     print(f"Warning: Multiple build subdirectories found: {subdirs}. Using the first one.")
-BUILD_SUBDIR = subdirs[0]
+
+BUILD_SUBDIR = subdirs[0]  # Choose the first subdirectory if multiple exist
 FINAL_BUILD_DIR = join(BUILD_DIR, BUILD_SUBDIR)
 
 print(f"Framework directory: {FRAMEWORK_DIR}")
