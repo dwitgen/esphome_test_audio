@@ -15,6 +15,3 @@ index 1a9cf12a..065218c1 100755
 +    SemaphoreHandle_t audio_hal_lock;                                                                         /*!< semaphore of codec */
      void *handle;                                                                                            /*!< handle of audio codec */
  } audio_hal_func_t;
-
- /**
-  * @brief Common peripherals configurations
