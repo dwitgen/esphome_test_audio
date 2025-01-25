@@ -4,9 +4,10 @@ import subprocess
 Import("env")
 
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
-patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
+#patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
 PROJECT_DIR = env.get('PROJECT_DIR')
-
+patchflag_path = join(PROJECT_DIR, ".adf-patching-done")
+print(f"Framework directory: {FRAMEWORK_DIR}")
 # Function to get the ESP-IDF version
 def get_idf_version():
     try:
