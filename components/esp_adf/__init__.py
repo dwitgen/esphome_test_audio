@@ -1,4 +1,5 @@
 import os
+from os.path import join, isfile
 import subprocess
 
 import esphome.config_validation as cv
