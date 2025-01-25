@@ -9,16 +9,11 @@ from esphome.components import esp32
 
 from esphome.const import CONF_ID, CONF_BOARD
 
-Import("env")
-
 CODEOWNERS = [""]
 DEPENDENCIES = ["esp32"]
 
 CONF_ESP_ADF_ID = "esp_adf_id"
 CONF_ESP_ADF = "esp_adf"
-
-FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
-VERSION_FILE = join(FRAMEWORK_DIR, "version.txt")
 
 esp_adf_ns = cg.esphome_ns.namespace("esp_adf")
 ESPADF = esp_adf_ns.class_("ESPADF", cg.Component)
@@ -32,6 +27,33 @@ SUPPORTED_BOARDS = {
     "esp32korvo1": "CONFIG_ESP32_KORVO1_BOARD"
 }
 
+def get_idf_version():
+    # Get the ESP-IDF framework directory from the PlatformIO environment
+    framework_dir = os.getenv("PIO_FRAMEWORK_ESP_IDF_DIR")
+    if not framework_dir:
+        raise ValueError("ESP-IDF framework directory not found! Ensure PlatformIO is properly configured.")
+
+    # Path to the version.txt file
+    version_file = join(framework_dir, "version.txt")
+
+    # Ensure the version.txt file exists
+    if not isfile(version_file):
+        raise FileNotFoundError(f"version.txt not found in {framework_dir}")
+
+    # Read the version from the version.txt file
+    with open(version_file, "r") as vf:
+        idf_version = vf.read().strip()
+    
+    return idf_version
+
+# Fetch the IDF version
+try:
+    idf_version = get_idf_version()
+    print(f"Detected ESP-IDF version: {idf_version}")
+except Exception as e:
+    print(f"Error determining ESP-IDF version: {e}")
+    raise
+    
 def _default_board(config):
     config = config.copy()
     if board := config.get(CONF_BOARD) is None:
@@ -108,11 +130,8 @@ async def to_code(config):
             "apply_custom_patch.py",
             os.path.join(os.path.dirname(__file__), "apply_custom_patch.py.script"),
         )
-        with open(VERSION_FILE, "r") as f:
-            idf_version = f.read().strip()
-            print(f"ESP-IDF v{idf_version}")
         # Detect ESP-IDF version
-        #idf_version = get_idf_version()
+        idf_version = get_idf_version()
     
         if idf_version.startswith("4.4"):
             # Apply ESP-IDF 4.4-specific patch
