@@ -75,7 +75,7 @@ async def to_code(config):
         path="components",
         ref="v2.5",
         components=["*"],
-        submodules=["components/esp-sr", "components/esp-adf-libs"],
+        submodules=["components/esp-sr", "components/esp-adf-libs", "components/audio_hal"],
     )
 
     esp32.add_idf_component(
