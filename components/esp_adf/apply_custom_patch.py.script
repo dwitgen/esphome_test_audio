@@ -19,7 +19,7 @@ PATCH_FILE = "/data/external_components/0d74c573/components/esp_adf/esp_adf_patc
 print("Applying patch:", PATCH_FILE)
 assert isfile(PATCH_FILE)
 
-env.Execute("patch -p2 -d %s -i %s" % (FRAMEWORK_DIR, PATCH_FILE))
+env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, PATCH_FILE))
 
 def _touch(path):
     with open(path, "w") as fp:
