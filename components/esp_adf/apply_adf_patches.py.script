@@ -4,26 +4,11 @@ import subprocess
 Import("env")
 
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
-#patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
-PROJECT_DIR = env.get('PROJECT_DIR')
-patchflag_path = join(PROJECT_DIR, ".adf-patching-done")
-print(f"Framework directory: {FRAMEWORK_DIR}")
-# Function to get the ESP-IDF version
-def get_idf_version():
-    try:
-        # Run `idf.py --version` or parse CMake version file
-        result = subprocess.run(
-            ["idf.py", "--version"], capture_output=True, text=True
-        )
-        if result.returncode == 0:
-            return result.stdout.strip().split(" ")[-1]  # Get version from the output
-    except Exception as e:
-        print(f"Error fetching ESP-IDF version: {e}")
-    return None
+VERSION_FILE = join(FRAMEWORK_DIR, "version.txt")
 
-idf_version = "v5.3" #get_idf_version()
-if not idf_version:
-    raise RuntimeError("Could not determine ESP-IDF version!")
+patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
+PROJECT_DIR = env.get('PROJECT_DIR')
+
 
 # Define patch files for different versions
 PATCH_FILES = {
@@ -33,6 +18,9 @@ PATCH_FILES = {
     "v5.2": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.2_freertos.patch"),
     "v5.3": join(PROJECT_DIR, "esp_adf_patches", "idf_v5.3_freertos.patch"),
 }
+
+with open(VERSION_FILE, "r") as f:
+    idf_version = f.read().strip()
 
 # Find the matching patch file
 PATCH_FILE = None
@@ -45,15 +33,15 @@ if not PATCH_FILE or not isfile(PATCH_FILE):
     raise ValueError(f"No patch file found for ESP-IDF version: {idf_version}")
 
 # Apply the patch if it hasn't been applied before
-#if not isfile(patchflag_path):
-print(f"Applying patch for ESP-IDF version {idf_version}: {PATCH_FILE}")
-assert isfile(PATCH_FILE)
-
-env.Execute(f"patch -p1 -d {FRAMEWORK_DIR} -i {PATCH_FILE}")
-
-# Create the patch flag file to prevent re-patching
-def _touch(path):
-    with open(path, "w") as fp:
-        fp.write("")
-
-env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
+if not isfile(patchflag_path):
+    print(f"Applying patch for ESP-IDF version {idf_version}: {PATCH_FILE}")
+    assert isfile(PATCH_FILE)
+    
+    env.Execute(f"patch -p1 -d {FRAMEWORK_DIR} -i {PATCH_FILE}")
+    
+    # Create the patch flag file to prevent re-patching
+    def _touch(path):
+        with open(path, "w") as fp:
+            fp.write("")
+    
+    env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
