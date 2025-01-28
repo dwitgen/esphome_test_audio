@@ -88,7 +88,7 @@ async def to_code(config):
         name="audio_hal", 
         repo="https://github.com/dwitgen/custom_audio_hal", 
         ref="main", 
-        components=[audio_hal]
+        
     )
 
     cg.add_platformio_option(
