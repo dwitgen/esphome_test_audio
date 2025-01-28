@@ -71,9 +71,8 @@ async def to_code(config):
 
     esp32.add_idf_component(
         name="esp-adf",
-        repo="https://github.com/espressif/esp-adf",
+        repo="https://github.com/dwitgen/esp-adf",
         path="components",
-        ref="v2.7",
         components=["*"],
         submodules=["components/esp-sr", "components/esp-adf-libs"],
     )
