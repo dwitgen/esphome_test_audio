@@ -5,7 +5,7 @@
 #include <driver/i2s_std.h>
 // Added includes for button controls
 #include <driver/gpio.h>
-//#include <driver/adc.h>
+#include <driver/adc.h>
 //#include <esp_adc_cal.h>
 
 #include "esphome/core/application.h"
