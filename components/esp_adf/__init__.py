@@ -91,6 +91,20 @@ async def to_code(config):
         
     )
 
+     esp32.add_idf_component(
+        name="jsmn", 
+        repo="https://github.com/dwitgen/jsmn", 
+        ref="main", 
+        
+    )
+
+     esp32.add_idf_component(
+        name="nghttp", 
+        repo="https://github.com/dwitgen/nghttp", 
+        ref="main", 
+        
+    )
+
     cg.add_platformio_option(
         "board_build.embed_txtfiles", "components/dueros_service/duer_profile"
     )
