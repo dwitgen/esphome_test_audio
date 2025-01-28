@@ -101,7 +101,7 @@ async def to_code(config):
     esp32.add_idf_component(
         name="nghttp", 
         repo="https://github.com/dwitgen/nghttp", 
-        ref="master", 
+        ref="main", 
         
     )
 
