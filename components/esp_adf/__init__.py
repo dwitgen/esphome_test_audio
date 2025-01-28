@@ -84,6 +84,13 @@ async def to_code(config):
         ref="v1.2.0",
     )
 
+    esp32.add_idf_component(
+        name="audio_hal", 
+        repo="https://github.com/dwitgen/custom_audio_hal", 
+        ref="main", 
+        components=[components/audio_hal]
+    )
+
     cg.add_platformio_option(
         "board_build.embed_txtfiles", "components/dueros_service/duer_profile"
     )
