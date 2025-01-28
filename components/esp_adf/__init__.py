@@ -88,12 +88,6 @@ async def to_code(config):
         name="audio_hal", 
         repo="https://github.com/dwitgen/audio_hal", 
         ref="main", 
-        
-    )
-    esp32.add_idf_component(
-        name="jsmn", 
-        repo="https://github.com/dwitgen/jsmn", 
-        ref="main", 
     )
     
     cg.add_platformio_option(
