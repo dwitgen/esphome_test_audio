@@ -86,7 +86,7 @@ async def to_code(config):
 
     esp32.add_idf_component(
         name="audio_hal", 
-        repo="https://github.com/dwitgen/custom_audio_hal", 
+        repo="https://github.com/dwitgen/audio_hal", 
         ref="main", 
         
     )
