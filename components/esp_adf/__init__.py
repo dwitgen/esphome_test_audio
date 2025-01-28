@@ -91,14 +91,14 @@ async def to_code(config):
         
     )
 
-    esp32.add_idf_component(
+    esp32.add_idf_managed_component(
         name="jsmn", 
         repo="https://github.com/dwitgen/jsmn", 
         ref="master", 
         
     )
 
-    esp32.add_idf_component(
+    esp32.add_idf_managed_component(
         name="nghttp", 
         repo="https://github.com/dwitgen/nghttp", 
         ref="main", 
