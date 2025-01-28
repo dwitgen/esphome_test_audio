@@ -2,7 +2,7 @@
 
 #ifdef USE_ESP_IDF
 
-#include <driver/i2s.h>
+#include <driver/i2s_std.h>
 
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
@@ -93,42 +93,50 @@ void ESPADFMicrophone::read_task(void *params) {
   };
   audio_pipeline_handle_t pipeline = audio_pipeline_init(&pipeline_cfg);
 
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-  i2s_driver_config_t i2s_config = {
-      .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_RX),
-      .sample_rate = 16000,
-      .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
-      .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
-      .communication_format = I2S_COMM_FORMAT_STAND_I2S,
-      .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM,
-      .dma_buf_count = 8,
-      .dma_buf_len = 1024, //128,
-      .use_apll = false,
-      .tx_desc_auto_clear = true,
-      .fixed_mclk = 0,
-      .mclk_multiple = I2S_MCLK_MULTIPLE_256,
-      .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT,
-  };
-  #pragma GCC diagnostic pop
-
+ // Microphone Configuration with New I2S Standard API
   i2s_stream_cfg_t i2s_cfg = {
-      .type = AUDIO_STREAM_READER,
-      .i2s_config = i2s_config,
-      .i2s_port = static_cast<i2s_port_t>(CODEC_ADC_I2S_PORT),
-      .use_alc = false,
-      .volume = 0,
-      .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE,
-      .task_stack = I2S_STREAM_TASK_STACK,
-      .task_core = I2S_STREAM_TASK_CORE,
-      .task_prio = I2S_STREAM_TASK_PRIO,
-      .stack_in_ext = false,
-      .multi_out_num = 0,
-      .uninstall_drv = true,
-      .need_expand = false,
-      .expand_src_bits = I2S_BITS_PER_SAMPLE_16BIT,
+      .type = AUDIO_STREAM_READER,               // Stream type: reader
+      .transmit_mode = I2S_COMM_MODE_STD,        // Standard I2S mode
+      .chan_cfg = {                              // Channel configuration
+          .id = CODEC_ADC_I2S_PORT,              // I2S port (static_cast<i2s_port_t> if needed)
+          .role = I2S_ROLE_MASTER,               // Master role
+          .dma_desc_num = 8,                     // Number of DMA descriptors
+          .dma_frame_num = 1024,                 // Number of frames per DMA descriptor
+          .auto_clear = true,                    // Auto-clear DMA buffer
+      },
+      .std_cfg = {                               // Standard I2S configuration
+          .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(16000), // 16 kHz sample rate
+          .slot_cfg = {                          // Slot configuration
+              .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT, // 16-bit data width
+              .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,  // Auto slot width
+              .slot_mode = I2S_SLOT_MODE_STEREO,          // Stereo mode
+              .slot_mask = I2S_STD_SLOT_BOTH,             // Use both slots (left and right)
+              .ws_width = 16,                             // WS width
+              .ws_pol = false,                            // WS polarity
+              .bit_shift = true,                          // MSB first
+              .msb_right = true,                          // MSB alignment
+          },
+      },
+      .use_alc = false,                          // Automatic Level Control
+      .volume = 0,                               // Initial volume
+      .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE, // Ring buffer size
+      .task_stack = I2S_STREAM_TASK_STACK,       // Task stack size
+      .task_core = 1,                            // Run on core 1
+      .task_prio = I2S_STREAM_TASK_PRIO,         // Task priority
+      .stack_in_ext = false,                     // Do not allocate stack in external memory
+      .multi_out_num = 0,                        // Single output
+      .uninstall_drv = true,                     // Uninstall driver on destruction
+      .need_expand = false,                      // No data expansion needed
+      .expand_src_bits = I2S_DATA_BIT_WIDTH_16BIT, // Source bit width
   };
+
+  // Initialize the I2S stream reader
   audio_element_handle_t i2s_stream_reader = i2s_stream_init(&i2s_cfg);
+  if (i2s_stream_reader == nullptr) {
+      ESP_LOGE(TAG, "Failed to initialize I2S stream reader");
+  } else {
+      ESP_LOGI(TAG, "I2S stream reader initialized successfully");
+  }
 
   rsp_filter_cfg_t rsp_cfg = {
       .src_rate = 16000,
