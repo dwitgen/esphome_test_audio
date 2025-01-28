@@ -104,6 +104,6 @@ async def to_code(config):
             os.path.join(os.path.dirname(__file__), "apply_adf_patches.py.script"),
         )
         esp32.add_extra_build_file(
-            "esp_adf_patches/idf_v4.4_freertos.patch",
-            "https://github.com/espressif/esp-adf/raw/v2.5/idf_patches/idf_v4.4_freertos.patch",
+            "esp_adf_patches/idf_v5.1_freertos.patch",
+            "https://github.com/espressif/esp-adf/raw/v2.5/idf_patches/idf_v5.1_freertos.patch",
         )
