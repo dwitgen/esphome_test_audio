@@ -98,7 +98,7 @@ void ESPADFMicrophone::read_task(void *params) {
       .type = AUDIO_STREAM_READER,               // Stream type: reader
       .transmit_mode = I2S_COMM_MODE_STD,        // Standard I2S mode
       .chan_cfg = {                              // Channel configuration
-          .id = CODEC_ADC_I2S_PORT,              // I2S port (static_cast<i2s_port_t> if needed)
+          .id = static_cast<i2s_port_t>(CODEC_ADC_I2S_PORT),              // I2S port (static_cast<i2s_port_t> if needed)
           .role = I2S_ROLE_MASTER,               // Master role
           .dma_desc_num = 8,                     // Number of DMA descriptors
           .dma_frame_num = 1024,                 // Number of frames per DMA descriptor
@@ -144,7 +144,7 @@ void ESPADFMicrophone::read_task(void *params) {
       .dest_rate = 16000,
       .dest_bits = 16,
       .dest_ch = 1,
-      .src_bits = I2S_BITS_PER_SAMPLE_16BIT,
+      .src_bits = I2S_DATA_BIT_WIDTH_16BIT,
       .mode = RESAMPLE_DECODE_MODE,
       .max_indata_bytes = RSP_FILTER_BUFFER_BYTE,
       .out_len_bytes = RSP_FILTER_BUFFER_BYTE,
