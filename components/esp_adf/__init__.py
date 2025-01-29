@@ -83,11 +83,11 @@ async def to_code(config):
         ref="v1.2.0",
     )
 
-    esp32.add_idf_component(
-        name="audio_hal", 
-        repo="https://github.com/dwitgen/audio_hal", 
-        ref="main", 
-    )
+    #esp32.add_idf_component(
+    #    name="audio_hal", 
+    #    repo="https://github.com/dwitgen/audio_hal", 
+    #    ref="main", 
+    #)
     
     cg.add_platformio_option(
         "board_build.embed_txtfiles", "components/dueros_service/duer_profile"
@@ -103,7 +103,25 @@ async def to_code(config):
             "apply_adf_patches.py",
             os.path.join(os.path.dirname(__file__), "apply_adf_patches.py.script"),
         )
+        esp32.add_extra_script(
+            "pre",
+            "apply_custom_esp_adf_patches.py",
+            os.path.join(os.path.dirname(__file__), "apply_custom_esp_adf_patches.py.script"),
+        )
+        esp32.add_extra_script(
+            "pre",
+            "apply_custom_esp_adf_libs_patches.py",
+            os.path.join(os.path.dirname(__file__), "apply_custom_esp_adf_patches_libs.py.script"),
+        )
+        esp32.add_extra_build_file(
+            "esp_adf_patches/custom_esp_adf.diff",
+            "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf.dif",
+        )
+         esp32.add_extra_build_file(
+            "esp_adf_patches/custom_esp_adf_libs.diff",
+            "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf_libs.dif",
+        )
         esp32.add_extra_build_file(
             "esp_adf_patches/idf_v5.1_freertos.patch",
-            "https://github.com/espressif/esp-adf/raw/v2.5/idf_patches/idf_v5.1_freertos.patch",
+            "https://github.com/espressif/esp-adf/raw/master/idf_patches/idf_v5.1_freertos.patch",
         )
