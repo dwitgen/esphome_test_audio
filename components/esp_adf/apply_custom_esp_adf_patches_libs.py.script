@@ -9,7 +9,7 @@ PROJECT_DIR = env.get('PROJECT_DIR')
 
 PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "custom_esp_adf_libs.diff")
 
-TO_PATCH_DIR = join(PROJECT_DIR, "components" , "esp-adf-libs"
+TO_PATCH_DIR = join(PROJECT_DIR, "components" , "esp-adf-libs" )
 
 # patch file only if we didn't do it before
 #if not isfile(patchflag_path):
