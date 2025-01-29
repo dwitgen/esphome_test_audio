@@ -69,10 +69,19 @@ async def to_code(config):
 
     cg.add_platformio_option("build_unflags", "-Wl,--end-group")
 
+    #esp32.add_idf_component(
+    #    name="esp-adf",
+    #    repo="https://github.com/dwitgen/esp-adf",
+    #    path="components",
+    #    components=["*"],
+    #    submodules=["components/esp-sr", "components/esp-adf-libs"],
+    #)
+
     esp32.add_idf_component(
         name="esp-adf",
-        repo="https://github.com/dwitgen/esp-adf",
+        repo="https://github.com/espressif/esp-adf",
         path="components",
+        ref="master",
         components=["*"],
         submodules=["components/esp-sr", "components/esp-adf-libs"],
     )
