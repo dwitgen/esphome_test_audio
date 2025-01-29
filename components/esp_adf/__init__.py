@@ -81,7 +81,7 @@ async def to_code(config):
         name="esp-adf",
         repo="https://github.com/espressif/esp-adf",
         path="components",
-        ref="v2.7",
+        ref="master",
         components=["*"],
         submodules=["components/esp-sr", "components/esp-adf-libs"],
     )
