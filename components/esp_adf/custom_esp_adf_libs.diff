@@ -1,0 +1,72 @@
+diff --git a/esp_codec/audio_forge.c b/esp_codec/audio_forge.c
+index f70f0ad..6652e4b 100755
+--- a/esp_codec/audio_forge.c
++++ b/esp_codec/audio_forge.c
+@@ -118,7 +118,7 @@ typedef struct {
+     int sonic_num;
+     audio_forge_stop_mode_t stop_mode;
+     int status;
+-    xSemaphoreHandle lock; 
++    SemaphoreHandle_t lock; 
+ #ifdef AUDIO_FORGE_SPEED_ANALYSIS
+     codec_tick_handle_t *audio_forge_tick_handle;
+ #endif
+@@ -1214,4 +1214,4 @@ audio_element_handle_t audio_forge_init(audio_forge_cfg_t *config)
+ exit:
+     audio_forge_destroy(el);
+     return NULL;
+-}
+\ No newline at end of file
++}
+diff --git a/media_lib_sal/port/media_lib_os_freertos.c b/media_lib_sal/port/media_lib_os_freertos.c
+index c2b76c0..f96b802 100644
+--- a/media_lib_sal/port/media_lib_os_freertos.c
++++ b/media_lib_sal/port/media_lib_os_freertos.c
+@@ -25,6 +25,7 @@
+  *
+  */
+ 
++
+ #include <stdlib.h>
+ #include <string.h>
+ #include "freertos/FreeRTOS.h"
+@@ -160,7 +161,7 @@ static int _thread_create(media_lib_thread_handle_t *handle, const char *name,
+                                                .ulParameters = 0x00,
+                                            }}};
+         if (xTaskCreateRestrictedPinnedToCore(
+-                &xRegParameters, (xTaskHandle *)handle, core) != pdPASS) {
++                &xRegParameters, (TaskHandle_t *)handle, core) != pdPASS) {
+             ESP_LOGE(TAG, "Error creating RestrictedPinnedToCore %s", name);
+             break;
+         }
+@@ -177,7 +178,7 @@ static int _thread_create(media_lib_thread_handle_t *handle, const char *name,
+                           int prio, int core)
+ {
+     if (xTaskCreatePinnedToCore(body, name, stack_size, arg, prio,
+-                                (xTaskHandle *)handle, core) != pdPASS) {
++                                (TaskHandle_t *)handle, core) != pdPASS) {
+         ESP_LOGE(TAG, "Fail to create thread %s\n", name);
+         return ESP_FAIL;
+     }
+@@ -188,18 +189,18 @@ static int _thread_create(media_lib_thread_handle_t *handle, const char *name,
+ static void _thread_destroy(media_lib_thread_handle_t handle)
+ {
+     // allow NULL to destroy self
+-    vTaskDelete((xTaskHandle)handle);
++    vTaskDelete((TaskHandle_t)handle);
+ }
+ 
+ static bool _thread_set_priority(media_lib_thread_handle_t handle, int prio)
+ {
+-    vTaskPrioritySet((xTaskHandle)handle, prio);
++    vTaskPrioritySet((TaskHandle_t)handle, prio);
+     return true;
+ }
+ 
+ static void _thread_sleep(uint32_t ms)
+ {
+-    vTaskDelay(ms / portTICK_RATE_MS);
++    vTaskDelay(ms / portTICK_PERIOD_MS);
+ }
+ 
+ static int _sema_create(media_lib_sema_handle_t *sema)
