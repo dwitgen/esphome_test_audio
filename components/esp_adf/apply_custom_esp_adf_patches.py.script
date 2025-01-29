@@ -10,14 +10,14 @@ PROJECT_DIR = env.get('PROJECT_DIR')
 PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "custom_esp_adf.diff")
 
 # patch file only if we didn't do it before
-if not isfile(patchflag_path):
-    print(PATCH_FILE)
-    assert isfile(PATCH_FILE)
+#if not isfile(patchflag_path):
+print(PATCH_FILE)
+assert isfile(PATCH_FILE)
 
-    env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, PATCH_FILE))
+env.Execute("patch -p1 -d %s -i %s" % (FRAMEWORK_DIR, PATCH_FILE))
 
-    def _touch(path):
-        with open(path, "w") as fp:
-            fp.write("")
+def _touch(path):
+    with open(path, "w") as fp:
+        fp.write("")
 
-    env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
+env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
