@@ -126,7 +126,7 @@ async def to_code(config):
             "esp_adf_patches/custom_esp_adf.diff",
             "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf.diff",
         )
-         esp32.add_extra_build_file(
+        esp32.add_extra_build_file(
             "esp_adf_patches/custom_esp_adf_libs.diff",
             "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf_libs.diff",
         )
