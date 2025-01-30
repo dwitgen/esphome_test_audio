@@ -123,8 +123,8 @@ async def to_code(config):
             os.path.join(os.path.dirname(__file__), "apply_custom_esp_adf_patches_libs.py.script"),
         )
         esp32.add_extra_build_file(
-            "esp_adf_patches/custom_esp_adf.diff",
-            "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf.diff",
+            "esp_adf_patches/custom_esp_adf_master.patch",
+            "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf_master.patch",
         )
         esp32.add_extra_build_file(
             "esp_adf_patches/custom_esp_adf_libs.diff",
