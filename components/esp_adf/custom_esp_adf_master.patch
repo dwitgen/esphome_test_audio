@@ -1,17 +1,3 @@
-diff --git a/.gitmodules b/.gitmodules
-index 2093ecbb..e20a7a43 100644
---- a/.gitmodules
-+++ b/.gitmodules
-@@ -3,7 +3,8 @@
- 	url = https://github.com/espressif/esp-idf
- [submodule "components/esp-adf-libs"]
- 	path = components/esp-adf-libs
--	url = https://github.com/espressif/esp-adf-libs
-+	url = https://github.com/dwitgen/esp-adf-libs
-+	branch = master
- [submodule "components/esp-sr"]
- 	path = components/esp-sr
- 	url = https://github.com/espressif/esp-sr.git
 diff --git a/components/audio_board/include/board_pins_config.h b/components/audio_board/include/board_pins_config.h
 index 62893921..c9a3064b 100644
 --- a/components/audio_board/include/board_pins_config.h
@@ -412,20 +398,6 @@ index 878d7648..8fe1adb6 100644
      service_state_t         duer_state;
      EventGroupHandle_t      duer_evt;
  } dueros_service_t;
-diff --git a/components/esp_codec_dev/Kconfig b/components/esp_codec_dev/Kconfig
-index 7f1c8193..86f3c2e4 100755
---- a/components/esp_codec_dev/Kconfig
-+++ b/components/esp_codec_dev/Kconfig
-@@ -1,7 +1,7 @@
- menu "Audio Codec Device Configuration"
-    config ESP_IDF_VERSION
--       string
--       option env="ESP_IDF_VERSION"
-+        string "ESP-IDF Version"
-+        default "5.1"
-        
-     config CODEC_I2C_BACKWARD_COMPATIBLE
-         bool "Enable backward compatibility for the I2C driver (force use of the old i2c_driver above v5.3)"
 diff --git a/components/esp_event_cast/esp_event_cast.c b/components/esp_event_cast/esp_event_cast.c
 index 8cad8f4f..e8214bff 100644
 --- a/components/esp_event_cast/esp_event_cast.c
