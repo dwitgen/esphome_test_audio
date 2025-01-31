@@ -64,6 +64,28 @@ index 1a9cf12a..065218c1 100755
      void *handle;                                                                                            /*!< handle of audio codec */
  } audio_hal_func_t;
  
+diff --git a/components/audio_pipeline/audio_element.c b/components/audio_pipeline/audio_element.c
+index 39b24468..bb26cdcc 100644
+--- a/components/audio_pipeline/audio_element.c
++++ b/components/audio_pipeline/audio_element.c
+@@ -37,7 +37,7 @@
+ #include "audio_thread.h"
+ 
+ static const char *TAG = "AUDIO_ELEMENT";
+-#define DEFAULT_MAX_WAIT_TIME       (2000/portTICK_RATE_MS)
++#define DEFAULT_MAX_WAIT_TIME       (2000/portTICK_PERIOD_MS)
+ 
+ /**
+  *  I/O Element Abstract
+@@ -106,7 +106,7 @@ struct audio_element {
+     int                         task_stack;
+     int                         task_prio;
+     int                         task_core;
+-    xSemaphoreHandle            lock;
++    SemaphoreHandle_t            lock;
+     audio_element_info_t        info;
+     audio_element_info_t        *report_info;
+ 
 diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/components/esp_peripherals/include/esp_peripherals.h
