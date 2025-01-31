@@ -397,11 +397,14 @@ index e6c6fb43..b9972701 100644
      bool (*do_post)(char *url, uint32_t *data, size_t len);
  } coredump_upload_t;
 diff --git a/components/dueros_service/dueros_service.c b/components/dueros_service/dueros_service.c
-index 878d7648..54cf3aaa 100644
+index 878d7648..8fe1adb6 100644
 --- a/components/dueros_service/dueros_service.c
 +++ b/components/dueros_service/dueros_service.c
-@@ -80,7 +80,7 @@ typedef enum {
+@@ -78,9 +78,10 @@ typedef enum {
+     DUER_CMD_WIFI_ST_REPORT,
+ } duer_task_cmd_t;
  
++
  typedef struct {
      bool                    login;
 -    xQueueHandle            duer_que;
