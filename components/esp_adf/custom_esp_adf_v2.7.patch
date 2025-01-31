@@ -147,6 +147,19 @@ index 222433ae..4a5b88cf 100644
      EventGroupHandle_t sync_events;
  
      vol_monitor_handle_t vol_monitor;
+diff --git a/components/coredump_upload_service/coredump_upload_service.c b/components/coredump_upload_service/coredump_upload_service.c
+index 16604bad..ac410cdf 100644
+--- a/components/coredump_upload_service/coredump_upload_service.c
++++ b/components/coredump_upload_service/coredump_upload_service.c
+@@ -49,7 +49,7 @@
+ #endif
+ 
+ typedef struct {
+-    xQueueHandle cmd_q;
++    QueueHandle_t cmd_q;
+     EventGroupHandle_t sync_evt;
+     bool (*do_post)(char *url, uint8_t *data, size_t len);
+ } coredump_upload_t;
 diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/components/esp_peripherals/include/esp_peripherals.h
