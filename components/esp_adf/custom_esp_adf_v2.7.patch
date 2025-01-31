@@ -86,6 +86,23 @@ index 39b24468..bb26cdcc 100644
      audio_element_info_t        info;
      audio_element_info_t        *report_info;
  
+diff --git a/components/audio_pipeline/audio_pipeline.c b/components/audio_pipeline/audio_pipeline.c
+index 8be8365c..7c36fbff 100644
+--- a/components/audio_pipeline/audio_pipeline.c
++++ b/components/audio_pipeline/audio_pipeline.c
+@@ -315,10 +315,10 @@ esp_err_t audio_pipeline_resume(audio_pipeline_handle_t pipeline)
+             continue;
+         }
+         if (wait_first_el) {
+-            ret |= audio_element_resume(el_item->el, 0, 2000 / portTICK_RATE_MS);
++            ret |= audio_element_resume(el_item->el, 0, 2000 / portTICK_PERIOD_MS);
+             wait_first_el = false;
+         } else {
+-            ret |= audio_element_resume(el_item->el, 0, 2000 / portTICK_RATE_MS);
++            ret |= audio_element_resume(el_item->el, 0, 2000 / portTICK_PERIOD_MS);
+         }
+     }
+     audio_pipeline_change_state(pipeline, AEL_STATE_RUNNING);
 diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/components/esp_peripherals/include/esp_peripherals.h
