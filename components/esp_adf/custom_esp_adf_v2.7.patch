@@ -134,6 +134,19 @@ index c3326f94..5deaaab4 100644
      pwm->is_open = true;
      return res;
  }
+diff --git a/components/battery_service/battery_service.c b/components/battery_service/battery_service.c
+index 222433ae..4a5b88cf 100644
+--- a/components/battery_service/battery_service.c
++++ b/components/battery_service/battery_service.c
+@@ -35,7 +35,7 @@
+ #include "battery_service.h"
+ 
+ typedef struct battery_service {
+-    xQueueHandle serv_q;
++    QueueHandle_t serv_q;
+     EventGroupHandle_t sync_events;
+ 
+     vol_monitor_handle_t vol_monitor;
 diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/components/esp_peripherals/include/esp_peripherals.h
