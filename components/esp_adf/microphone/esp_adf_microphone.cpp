@@ -126,8 +126,8 @@ void ESPADFMicrophone::read_task(void *params) {
       .stack_in_ext = false,                     // Do not allocate stack in external memory
       .multi_out_num = 0,                        // Single output
       .uninstall_drv = true,                     // Uninstall driver on destruction
-      .need_expand = false,                      // No data expansion needed
       .expand_src_bits = I2S_DATA_BIT_WIDTH_16BIT, // Source bit width
+      .need_expand = false,                      // No data expansion needed      
   };
 
   // Initialize the I2S stream reader
