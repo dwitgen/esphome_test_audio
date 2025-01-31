@@ -120,7 +120,7 @@ async def to_code(config):
             "esp_adf_patches/custom_esp_adf_master.patch",
             "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf_master.patch",
         )
-        sp32.add_extra_build_file(
+        esp32.add_extra_build_file(
             "components/dueros_service/dueros_service.c",
             "https://github.com/dwitgen/esp-adf/raw/master/components/dueros_service/dueros_service.c",
         )
