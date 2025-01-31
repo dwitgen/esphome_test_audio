@@ -75,7 +75,7 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
         .multi_out_num = 0,                        // Single output
         .uninstall_drv = true,                     // Uninstall driver on destruction
         .need_expand = false,                      // No data expansion needed
-        .expand_src_bits = I2S_DATA_BIT_WIDTH_16BIT, // Source bit width
+        //.expand_src_bits = I2S_DATA_BIT_WIDTH_16BIT, // Source bit width
         .buffer_len = I2S_STREAM_BUF_SIZE,
     };
     
