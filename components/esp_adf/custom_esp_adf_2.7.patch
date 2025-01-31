@@ -1,0 +1,28 @@
+diff --git a/components/audio_board/include/board_pins_config.h b/components/audio_board/include/board_pins_config.h
+index 62893921..f536ee46 100644
+--- a/components/audio_board/include/board_pins_config.h
++++ b/components/audio_board/include/board_pins_config.h
+@@ -29,6 +29,7 @@
+ #include "driver/spi_common.h"
+ #include "driver/spi_master.h"
+ #include "driver/spi_slave.h"
++#include "driver/i2s_std.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -61,13 +62,13 @@ esp_err_t get_i2c_pins(i2c_port_t port, i2c_config_t *i2c_config);
+  * @brief                  Get i2s pins configuration
+  *
+  * @param      port        i2s port number to get configuration
+- * @param      i2s_config  i2s configuration parameters
++ * @param      gpio_cfg    i2s configuration parameters
+  *
+  * @return
+  *     - ESP_OK
+  *     - ESP_FAIL
+  */
+-esp_err_t get_i2s_pins(int port, board_i2s_pin_t *i2s_config);
++esp_err_t get_i2s_pins(int port, i2s_std_gpio_config_t *gpio_cfg);
+ 
+ /**
+  * @brief                  Get spi pins configuration
