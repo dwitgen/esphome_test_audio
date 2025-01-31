@@ -81,7 +81,7 @@ async def to_code(config):
         name="esp-adf",
         repo="https://github.com/espressif/esp-adf",
         path="components",
-        ref="master",
+        ref="v2.7",
         components=["*"],
         submodules=["components/esp-sr", "components/esp-adf-libs"],
     )
@@ -117,30 +117,30 @@ async def to_code(config):
             os.path.join(os.path.dirname(__file__), "apply_custom_esp_adf_patches_libs.py.script"),
         )
         esp32.add_extra_build_file(
-            "esp_adf_patches/custom_esp_adf_master.patch",
-            "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf_master.patch",
+            "esp_adf_patches/custom_esp_adf_v2.7.patch",
+            "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf_v2.7.patch",
         )
-        esp32.add_extra_build_file(
-            "components/dueros_service/dueros_service.c",
-            "https://github.com/dwitgen/esp-adf/raw/master/components/dueros_service/dueros_service.c",
-        )
-        esp32.add_extra_build_file(
-            "components/esp_event_cast/esp_event_cast.c",
-            "https://github.com/dwitgen/esp-adf/raw/master/components/esp_event_cast/esp_event_cast.c",
-        )
-        esp32.add_extra_build_file(
-            "components/esp_codec_dev/Kconfig",
-            "https://github.com/dwitgen/esp-adf/raw/master/components/esp_codec_dev/Kconfig",
-        )
-        esp32.add_extra_build_file(
-            "components/wifi_service/src/wifi_service.c",
-            "https://github.com/dwitgen/esp-adf/raw/master/components/wifi_service/src/wifi_service.c",
-        )
+        #esp32.add_extra_build_file(
+        #    "components/dueros_service/dueros_service.c",
+        #    "https://github.com/dwitgen/esp-adf/raw/master/components/dueros_service/dueros_service.c",
+        #)
+        #esp32.add_extra_build_file(
+        #    "components/esp_event_cast/esp_event_cast.c",
+        #    "https://github.com/dwitgen/esp-adf/raw/master/components/esp_event_cast/esp_event_cast.c",
+        #)
+        #esp32.add_extra_build_file(
+        #    "components/esp_codec_dev/Kconfig",
+        #    "https://github.com/dwitgen/esp-adf/raw/master/components/esp_codec_dev/Kconfig",
+        #)
+        #esp32.add_extra_build_file(
+        #    "components/wifi_service/src/wifi_service.c",
+        #    "https://github.com/dwitgen/esp-adf/raw/master/components/wifi_service/src/wifi_service.c",
+        #)
         esp32.add_extra_build_file(
             "esp_adf_patches/custom_esp_adf_libs.diff",
             "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf_libs.diff",
         )
         esp32.add_extra_build_file(
             "esp_adf_patches/idf_v5.1_freertos.patch",
-            "https://github.com/espressif/esp-adf/raw/master/idf_patches/idf_v5.1_freertos.patch",
+            "https://github.com/espressif/esp-adf/raw/v2.7/idf_patches/idf_v5.1_freertos.patch",
         )
