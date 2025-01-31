@@ -87,9 +87,18 @@ index 39b24468..bb26cdcc 100644
      audio_element_info_t        *report_info;
  
 diff --git a/components/audio_pipeline/audio_pipeline.c b/components/audio_pipeline/audio_pipeline.c
-index 8be8365c..7c36fbff 100644
+index 8be8365c..3cd1001b 100644
 --- a/components/audio_pipeline/audio_pipeline.c
 +++ b/components/audio_pipeline/audio_pipeline.c
+@@ -66,7 +66,7 @@ struct audio_pipeline {
+     audio_element_list_t        el_list;
+     ringbuf_list_t              rb_list;
+     audio_element_state_t       state;
+-    xSemaphoreHandle            lock;
++    SemaphoreHandle_t            lock;
+     bool                        linked;
+     audio_event_iface_handle_t  listener;
+ };
 @@ -315,10 +315,10 @@ esp_err_t audio_pipeline_resume(audio_pipeline_handle_t pipeline)
              continue;
          }
