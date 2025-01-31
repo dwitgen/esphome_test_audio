@@ -399,7 +399,7 @@ index 878d7648..8fe1adb6 100644
      EventGroupHandle_t      duer_evt;
  } dueros_service_t;
 diff --git a/components/esp_event_cast/esp_event_cast.c b/components/esp_event_cast/esp_event_cast.c
-index 8cad8f4f..e8214bff 100644
+index 8cad8f4f..200da31c 100644
 --- a/components/esp_event_cast/esp_event_cast.c
 +++ b/components/esp_event_cast/esp_event_cast.c
 @@ -37,13 +37,13 @@ static const char *TAG = "EVT_CAST";
@@ -407,7 +407,7 @@ index 8cad8f4f..e8214bff 100644
  typedef struct esp_evt_cast_item {
      STAILQ_ENTRY(esp_evt_cast_item)     next;
 -    xQueueHandle                        que;
-+    QueueHandle_t                        que;
++    QueueHandle_t                       que;
  } esp_evt_cast_item_t;
  
  typedef STAILQ_HEAD(esp_event_cast_list, esp_evt_cast_item) esp_event_cast_list_t;
