@@ -90,7 +90,7 @@ async def to_code(config):
         name="esp-adf",
         repo="https://github.com/dwitgen/esp-adf",
         path="components",
-        components=["esp_dueros_serice"]
+        components=["dueros_serice"]
     )
 
     esp32.add_idf_component(
