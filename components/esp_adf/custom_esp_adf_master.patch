@@ -41,10 +41,73 @@ index 62893921..c9a3064b 100644
  /**
   * @brief                  Get spi pins configuration
 diff --git a/components/audio_hal/CMakeLists.txt b/components/audio_hal/CMakeLists.txt
-index cb9d365d..5a26cadf 100644
+index cb9d365d..67782b13 100644
 --- a/components/audio_hal/CMakeLists.txt
 +++ b/components/audio_hal/CMakeLists.txt
-@@ -18,8 +18,8 @@ IF (NOT ((CONFIG_IDF_TARGET STREQUAL "esp32c3") OR (CONFIG_IDF_TARGET STREQUAL "
+@@ -1,3 +1,62 @@
++<<<<<<< HEAD
++set(COMPONENT_ADD_INCLUDEDIRS ./include
++                            ./driver/es8388
++                            ./driver/es8374
++                            ./driver/es8311
++                            ./driver/es8156
++                            ./driver/es7243
++                            ./driver/es7148
++                            ./driver/es7210
++                            ./driver/es7243e
++                            ./driver/tas5805m
++                            ./driver/include)
++IF (NOT ((CONFIG_IDF_TARGET STREQUAL "esp32c3") OR (CONFIG_IDF_TARGET STREQUAL "esp32c6")))
++    list(APPEND COMPONENT_ADD_INCLUDEDIRS 
++    ./driver/zl38063
++    ./driver/zl38063/api_lib
++    ./driver/zl38063/example_apps
++    ./driver/zl38063/firmware)
++    
++endif()
++
++
++# Edit following two lines to set component requirements (see docs)
++set(COMPONENT_REQUIRES esp_peripherals)
++set(COMPONENT_PRIV_REQUIRES audio_sal audio_board mbedtls display_service esp_dispatcher)
++
++set(COMPONENT_SRCS ./audio_hal.c
++                    ./audio_volume.c
++                    ./driver/es8388/es8388.c
++                    ./driver/es8388/headphone_detect.c
++                    ./driver/es8374/es8374.c
++                    ./driver/es8311/es8311.c
++                    ./driver/es8156/es8156.c
++                    ./driver/es7243/es7243.c
++                    ./driver/es7148/es7148.c
++                    ./driver/es7210/es7210.c
++                    ./driver/es7243e/es7243e.c
++                    ./driver/tas5805m/tas5805m.c
++                    )
++
++IF (NOT ((CONFIG_IDF_TARGET STREQUAL "esp32c3") OR (CONFIG_IDF_TARGET STREQUAL "esp32c6") OR (CONFIG_IDF_TARGET STREQUAL "esp32p4")))
++    list(APPEND COMPONENT_SRCS 
++    ./driver/zl38063/zl38063.c
++    ./driver/zl38063/api_lib/vprocTwolf_access.c
++    ./driver/zl38063/api_lib/vproc_common.c
++    ./driver/zl38063/example_apps/tw_hal_verify.c
++    ./driver/zl38063/example_apps/tw_ldcfg.c
++    ./driver/zl38063/example_apps/tw_ldfw.c
++    ./driver/zl38063/example_apps/tw_ldfwcfg.c
++    ./driver/zl38063/example_apps/tw_spi_access.c)
++endif()
++
++register_component()
++
++IF (NOT ((CONFIG_IDF_TARGET STREQUAL "esp32c3") OR (CONFIG_IDF_TARGET STREQUAL "esp32c6") OR (CONFIG_IDF_TARGET STREQUAL "esp32p4")))
++    target_link_libraries(${COMPONENT_TARGET} INTERFACE "-L${CMAKE_CURRENT_LIST_DIR}/driver/zl38063/firmware")
++    target_link_libraries(${COMPONENT_TARGET} INTERFACE firmware)
++ENDIF()
++=======
+ set(COMPONENT_ADD_INCLUDEDIRS ./include
+                             ./driver/es8388
+                             ./driver/es8374
+@@ -18,8 +77,8 @@ IF (NOT ((CONFIG_IDF_TARGET STREQUAL "esp32c3") OR (CONFIG_IDF_TARGET STREQUAL "
  endif()
  
  # Edit following two lines to set component requirements (see docs)
@@ -55,11 +118,11 @@ index cb9d365d..5a26cadf 100644
  
  set(COMPONENT_SRCS ./audio_hal.c
                      ./audio_volume.c
-@@ -53,3 +53,4 @@ IF (NOT ((CONFIG_IDF_TARGET STREQUAL "esp32c3") OR (CONFIG_IDF_TARGET STREQUAL "
+@@ -53,3 +112,4 @@ IF (NOT ((CONFIG_IDF_TARGET STREQUAL "esp32c3") OR (CONFIG_IDF_TARGET STREQUAL "
      target_link_libraries(${COMPONENT_TARGET} INTERFACE "-L${CMAKE_CURRENT_LIST_DIR}/driver/zl38063/firmware")
      target_link_libraries(${COMPONENT_TARGET} INTERFACE firmware)
  ENDIF()
-+
++>>>>>>> 432c0fb4 (Attempt tio fix eol issue)
 diff --git a/components/audio_hal/audio_hal.c b/components/audio_hal/audio_hal.c
 old mode 100755
 new mode 100644
@@ -334,11 +397,15 @@ index e6c6fb43..b9972701 100644
      bool (*do_post)(char *url, uint32_t *data, size_t len);
  } coredump_upload_t;
 diff --git a/components/dueros_service/dueros_service.c b/components/dueros_service/dueros_service.c
-index 878d7648..147bb710 100644
+index 878d7648..ef4d8aa6 100644
 --- a/components/dueros_service/dueros_service.c
 +++ b/components/dueros_service/dueros_service.c
-@@ -80,7 +80,7 @@ typedef enum {
- 
+@@ -77,10 +77,10 @@ typedef enum {
+     DUER_CMD_WIFI_CFG_STOP,
+     DUER_CMD_WIFI_ST_REPORT,
+ } duer_task_cmd_t;
+-
++// comment to remove possible eol issue
  typedef struct {
      bool                    login;
 -    xQueueHandle            duer_que;
@@ -361,7 +428,7 @@ index 7f1c8193..86f3c2e4 100755
      config CODEC_I2C_BACKWARD_COMPATIBLE
          bool "Enable backward compatibility for the I2C driver (force use of the old i2c_driver above v5.3)"
 diff --git a/components/esp_event_cast/esp_event_cast.c b/components/esp_event_cast/esp_event_cast.c
-index 8cad8f4f..dad60fab 100644
+index 8cad8f4f..e8214bff 100644
 --- a/components/esp_event_cast/esp_event_cast.c
 +++ b/components/esp_event_cast/esp_event_cast.c
 @@ -37,13 +37,13 @@ static const char *TAG = "EVT_CAST";
@@ -746,7 +813,7 @@ index d6b2ed0c..e7b2c8ba 100644
      }
  
 diff --git a/components/wifi_service/src/wifi_service.c b/components/wifi_service/src/wifi_service.c
-index ce6c41ea..5ef76bf8 100644
+index ce6c41ea..b1a8039f 100644
 --- a/components/wifi_service/src/wifi_service.c
 +++ b/components/wifi_service/src/wifi_service.c
 @@ -68,7 +68,7 @@ typedef struct wifi_setting_item {
