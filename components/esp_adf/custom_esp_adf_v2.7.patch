@@ -313,3 +313,60 @@ index 53b18fb4..ec22accf 100644
              if (console->total_bytes) {
                  ESP_LOGD(TAG, "Read line: %s", console->buffer);
              }
+diff --git a/components/esp_peripherals/periph_led.c b/components/esp_peripherals/periph_led.c
+index 1cde6b1e..a9ec70e7 100644
+--- a/components/esp_peripherals/periph_led.c
++++ b/components/esp_peripherals/periph_led.c
+@@ -222,7 +222,7 @@ esp_err_t periph_led_blink(esp_periph_handle_t periph, int gpio_num, int time_on
+     }
+     ch->stop = false;
+     ch->level = level;
+-    esp_periph_start_timer(periph, portTICK_RATE_MS, led_timer_handler);
++    esp_periph_start_timer(periph, portTICK_PERIOD_MS, led_timer_handler);
+     return ESP_OK;
+ }
+ 
+diff --git a/components/esp_peripherals/periph_wifi.c b/components/esp_peripherals/periph_wifi.c
+index c11cfd98..38bdda7b 100644
+--- a/components/esp_peripherals/periph_wifi.c
++++ b/components/esp_peripherals/periph_wifi.c
+@@ -279,7 +279,7 @@ esp_err_t periph_wifi_config_wait_done(esp_periph_handle_t periph, TickType_t ti
+     return ESP_FAIL;
+ }
+ 
+-static void wifi_reconnect_timer(xTimerHandle tmr)
++static void wifi_reconnect_timer(TimerHandle_t tmr)
+ {
+     esp_periph_handle_t periph = (esp_periph_handle_t)pvTimerGetTimerID(tmr);
+     periph_wifi_handle_t periph_wifi = (periph_wifi_handle_t)esp_periph_get_data(periph);
+@@ -326,7 +326,7 @@ static void _wifi_event_callback(void *arg, esp_event_base_t event_base,
+         if (periph_wifi->disable_auto_reconnect) {
+             return;
+         }
+-        esp_periph_start_timer(self, periph_wifi->reconnect_timeout_ms / portTICK_RATE_MS, wifi_reconnect_timer);
++        esp_periph_start_timer(self, periph_wifi->reconnect_timeout_ms / portTICK_PERIOD_MS, wifi_reconnect_timer);
+ 
+     } else {
+         ESP_LOGW(TAG, "WiFi Event cb, Unhandle event_base:%s, event_id:%d", event_base, (int)event_id);
+@@ -368,7 +368,7 @@ static esp_err_t _wifi_event_callback(void *ctx, system_event_t *event)
+             if (periph_wifi->disable_auto_reconnect) {
+                 break;
+             }
+-            esp_periph_start_timer(self, periph_wifi->reconnect_timeout_ms / portTICK_RATE_MS, wifi_reconnect_timer);
++            esp_periph_start_timer(self, periph_wifi->reconnect_timeout_ms / portTICK_PERIOD_MS, wifi_reconnect_timer);
+             break;
+         default:
+             break;
+diff --git a/components/wifi_service/src/wifi_service.c b/components/wifi_service/src/wifi_service.c
+index ce6c41ea..f0353715 100644
+--- a/components/wifi_service/src/wifi_service.c
++++ b/components/wifi_service/src/wifi_service.c
+@@ -68,7 +68,7 @@ typedef struct wifi_setting_item {
+ typedef STAILQ_HEAD(wifi_setting_list, wifi_setting_item) wifi_setting_list_t;
+ 
+ typedef struct {
+-    xQueueHandle                     wifi_serv_que;
++    QueueHandle_t                    wifi_serv_que;
+     wifi_service_event_t             wifi_serv_state;
+     wifi_config_t                    info;
+     wifi_setting_list_t              setting_list;
