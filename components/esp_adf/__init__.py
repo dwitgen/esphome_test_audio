@@ -122,7 +122,7 @@ async def to_code(config):
         )
         esp32.add_extra_build_file(
             "components/dueros_service/dueros_service.c",
-            "https://github.com/dwitgen/esp-adf/raw/master/components/dueros_service/dueros_service.c",
+            "https://github.com/dwitgen/esp-adf/raw/v2.7-dev/components/dueros_service/dueros_service.c",
         )
         #esp32.add_extra_build_file(
         #    "components/esp_event_cast/esp_event_cast.c",
