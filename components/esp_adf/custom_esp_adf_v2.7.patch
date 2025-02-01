@@ -165,11 +165,12 @@ index 878d7648..147bb710 100644
 --- a/components/dueros_service/dueros_service.c
 +++ b/components/dueros_service/dueros_service.c
 @@ -82,5 +82,5 @@ typedef struct {
-    bool                    login;
-    xQueueHandle            duer_que;
-    service_state_t         duer_state;
-    EventGroupHandle_t      duer_evt;
-} dueros_service_t;
+     bool                    login;
+-    xQueueHandle            duer_que;
++    QueueHandle_t            duer_que;
+     service_state_t         duer_state;
+     EventGroupHandle_t      duer_evt;
+ } dueros_service_t;
 diff --git a/components/esp_event_cast/esp_event_cast.c b/components/esp_event_cast/esp_event_cast.c
 index 8cad8f4f..0c91fdff 100644
 --- a/components/esp_event_cast/esp_event_cast.c
@@ -224,7 +225,7 @@ index aff08edf..6322872a 100644
  /**
   * @brief Broadcasting the data to receiver
 diff --git a/components/esp_peripherals/esp_peripherals.c b/components/esp_peripherals/esp_peripherals.c
-index 0f85c53e..9e216147 100644
+index 0f85c53e..fd5c2ef9 100644
 --- a/components/esp_peripherals/esp_peripherals.c
 +++ b/components/esp_peripherals/esp_peripherals.c
 @@ -35,7 +35,7 @@
@@ -236,6 +237,15 @@ index 0f85c53e..9e216147 100644
  
  struct esp_periph {
      char                       *tag;
+@@ -54,7 +54,7 @@ struct esp_periph {
+ 
+ typedef struct esp_periph_sets {
+     EventGroupHandle_t                              state_event_bits;
+-    xSemaphoreHandle                                lock;
++    SemaphoreHandle_t                               lock;
+     int                                             task_stack;
+     int                                             task_prio;
+     int                                             task_core;
 @@ -89,7 +89,7 @@ static esp_err_t process_peripheral_event(audio_event_iface_msg_t *msg, void *co
  
  esp_err_t esp_periph_set_change_waiting_time(esp_periph_set_handle_t periph_set_handle, int time_ms)
@@ -287,4 +297,3 @@ index 0719d18c..f929e624 100644
 +    esp_periph_start_timer(self, 50/portTICK_PERIOD_MS, button_timer_handler);
      return ret;
  }
- 
