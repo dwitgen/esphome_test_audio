@@ -160,6 +160,19 @@ index 16604bad..ac410cdf 100644
      EventGroupHandle_t sync_evt;
      bool (*do_post)(char *url, uint8_t *data, size_t len);
  } coredump_upload_t;
+diff --git a/components/dueros_service/dueros_service.c b/components/dueros_service/dueros_service.c
+index 878d7648..147bb710 100644
+--- a/components/dueros_service/dueros_service.c
++++ b/components/dueros_service/dueros_service.c
+@@ -80,7 +80,7 @@ typedef enum {
+ 
+ typedef struct {
+     bool                    login;
+-    xQueueHandle            duer_que;
++    QueueHandle_t            duer_que;
+     service_state_t         duer_state;
+     EventGroupHandle_t      duer_evt;
+ } dueros_service_t;
 diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/components/esp_peripherals/include/esp_peripherals.h
