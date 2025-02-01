@@ -164,7 +164,9 @@ diff --git a/components/dueros_service/dueros_service.c b/components/dueros_serv
 index 878d7648..147bb710 100644
 --- a/components/dueros_service/dueros_service.c
 +++ b/components/dueros_service/dueros_service.c
-@@ -82,5 +82,5 @@ typedef struct {
+@@ -80,7 +80,7 @@ typedef enum {
+ 
+ typedef struct {
      bool                    login;
 -    xQueueHandle            duer_que;
 +    QueueHandle_t            duer_que;
@@ -297,3 +299,17 @@ index 0719d18c..f929e624 100644
 +    esp_periph_start_timer(self, 50/portTICK_PERIOD_MS, button_timer_handler);
      return ret;
  }
+ 
+diff --git a/components/esp_peripherals/periph_console.c b/components/esp_peripherals/periph_console.c
+index 53b18fb4..ec22accf 100644
+--- a/components/esp_peripherals/periph_console.c
++++ b/components/esp_peripherals/periph_console.c
+@@ -211,7 +211,7 @@ static void _console_task(void *pv)
+     }
+     printf("\r\n%s ", prompt_string);
+     while (console->run) {
+-        if (console_get_line(console, console->buffer_size, 10 / portTICK_RATE_MS)) {
++        if (console_get_line(console, console->buffer_size, 10 / portTICK_PERIOD_MS)) {
+             if (console->total_bytes) {
+                 ESP_LOGD(TAG, "Read line: %s", console->buffer);
+             }
