@@ -234,9 +234,18 @@ index aff08edf..6322872a 100644
  /**
   * @brief Broadcasting the data to receiver
 diff --git a/components/esp_peripherals/driver/i2c_bus/i2c_bus.c b/components/esp_peripherals/driver/i2c_bus/i2c_bus.c
-index 32f3c21c..936cf9c9 100644
+index 32f3c21c..ecf6b1a7 100644
 --- a/components/esp_peripherals/driver/i2c_bus/i2c_bus.c
 +++ b/components/esp_peripherals/driver/i2c_bus/i2c_bus.c
+@@ -43,7 +43,7 @@ typedef struct {
+     i2c_config_t     i2c_conf;   /*!<I2C bus parameters*/
+     i2c_port_t       i2c_port;   /*!<I2C port number */
+     int              ref_count;  /*!<Reference Count for multiple client */
+-    xSemaphoreHandle bus_lock;   /*!<Lock for bus */
++    SemaphoreHandle_t bus_lock;   /*!<Lock for bus */
+ } i2c_bus_t;
+ 
+ static const char *TAG = "I2C_BUS";
 @@ -109,7 +109,7 @@ esp_err_t i2c_bus_write_bytes(i2c_bus_handle_t bus, int addr, uint8_t *reg, int
      ret |= i2c_master_write(cmd, reg, regLen, I2C_ACK_CHECK_EN);
      ret |= i2c_master_write(cmd, data, datalen, I2C_ACK_CHECK_EN);
@@ -403,6 +412,19 @@ index fb3f8e06..29a204e0 100644
 +    esp_periph_start_timer(self, 1000 / portTICK_PERIOD_MS, sdcard_timer_handler);
      return ESP_OK;
  }
+ 
+diff --git a/components/esp_peripherals/periph_touch.c b/components/esp_peripherals/periph_touch.c
+index d6904d4f..58d899b2 100644
+--- a/components/esp_peripherals/periph_touch.c
++++ b/components/esp_peripherals/periph_touch.c
+@@ -65,7 +65,7 @@ static esp_err_t _touch_run(esp_periph_handle_t self, audio_event_iface_msg_t *m
+     return ESP_OK;
+ }
+ 
+-static void touch_timer_handler(xTimerHandle tmr)
++static void touch_timer_handler(TimerHandle_t tmr)
+ {
+     esp_periph_handle_t periph = (esp_periph_handle_t) pvTimerGetTimerID(tmr);
  
 diff --git a/components/esp_peripherals/periph_wifi.c b/components/esp_peripherals/periph_wifi.c
 index c11cfd98..38bdda7b 100644
