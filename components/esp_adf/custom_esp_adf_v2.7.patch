@@ -164,16 +164,12 @@ diff --git a/components/dueros_service/dueros_service.c b/components/dueros_serv
 index 878d7648..147bb710 100644
 --- a/components/dueros_service/dueros_service.c
 +++ b/components/dueros_service/dueros_service.c
-@@ -80,7 +80,7 @@ typedef enum {
-
- 
- typedef struct {
-     bool                    login;
--    xQueueHandle            duer_que;
-+    QueueHandle_t            duer_que;
-     service_state_t         duer_state;
-     EventGroupHandle_t      duer_evt;
- } dueros_service_t;
+@@ -82,5 +82,5 @@ typedef struct {
+    bool                    login;
+    xQueueHandle            duer_que;
+    service_state_t         duer_state;
+    EventGroupHandle_t      duer_evt;
+} dueros_service_t;
 diff --git a/components/esp_event_cast/esp_event_cast.c b/components/esp_event_cast/esp_event_cast.c
 index 8cad8f4f..0c91fdff 100644
 --- a/components/esp_event_cast/esp_event_cast.c
