@@ -323,9 +323,18 @@ index 53b18fb4..ec22accf 100644
                  ESP_LOGD(TAG, "Read line: %s", console->buffer);
              }
 diff --git a/components/esp_peripherals/periph_led.c b/components/esp_peripherals/periph_led.c
-index 1cde6b1e..a9ec70e7 100644
+index 1cde6b1e..8453485b 100644
 --- a/components/esp_peripherals/periph_led.c
 +++ b/components/esp_peripherals/periph_led.c
+@@ -136,7 +136,7 @@ static periph_led_channel_t *_find_led_channel(periph_led_t *periph_led, int gpi
+     return ch;
+ }
+ 
+-static void led_timer_handler(xTimerHandle tmr)
++static void led_timer_handler(TimerHandle_t tmr)
+ {
+     esp_periph_handle_t periph = (esp_periph_handle_t) pvTimerGetTimerID(tmr);
+ 
 @@ -222,7 +222,7 @@ esp_err_t periph_led_blink(esp_periph_handle_t periph, int gpio_num, int time_on
      }
      ch->stop = false;
