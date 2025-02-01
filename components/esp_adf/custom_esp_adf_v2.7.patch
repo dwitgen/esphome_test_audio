@@ -479,6 +479,19 @@ index 2008c503..5415c0a8 100755
  
      return ESP_OK;
  }
+diff --git a/components/ota_service/ota_service.c b/components/ota_service/ota_service.c
+index 9a199ceb..960601dc 100644
+--- a/components/ota_service/ota_service.c
++++ b/components/ota_service/ota_service.c
+@@ -44,7 +44,7 @@ typedef enum {
+ 
+ typedef struct {
+     int state;
+-    xQueueHandle srv_q;
++    QueueHandle_t srv_q;
+     ota_upgrade_ops_t *upgrade_list;
+     int list_len;
+     int result;
 diff --git a/components/wifi_service/src/wifi_service.c b/components/wifi_service/src/wifi_service.c
 index ce6c41ea..f0353715 100644
 --- a/components/wifi_service/src/wifi_service.c
