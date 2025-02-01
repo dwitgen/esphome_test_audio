@@ -164,7 +164,7 @@ diff --git a/components/dueros_service/dueros_service.c b/components/dueros_serv
 index 878d7648..147bb710 100644
 --- a/components/dueros_service/dueros_service.c
 +++ b/components/dueros_service/dueros_service.c
-@@ -81,7 +81,7 @@ typedef enum {
+@@ -79,7 +79,7 @@ typedef enum {
  
  typedef struct {
      bool                    login;
