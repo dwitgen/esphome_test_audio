@@ -492,6 +492,19 @@ index 9a199ceb..960601dc 100644
      ota_upgrade_ops_t *upgrade_list;
      int list_len;
      int result;
+diff --git a/components/playlist/playlist.c b/components/playlist/playlist.c
+index c1d4b8db..f7fd789d 100644
+--- a/components/playlist/playlist.c
++++ b/components/playlist/playlist.c
+@@ -46,7 +46,7 @@ typedef struct playlist_info {
+ struct playlist_handle {
+     uint8_t list_num;                                           /*!< The number of all the playlists in the handle */
+     playlist_info_t *cur_playlist;                              /*!< Pointer of current playlist */
+-    xSemaphoreHandle playlist_operate_lock;                     /*!< A semaphore of operations */
++    SemaphoreHandle_t playlist_operate_lock;                     /*!< A semaphore of operations */
+     STAILQ_HEAD(list_info, playlist_info) playlist_info_list;   /*!< List head of playlists */
+ };
+ 
 diff --git a/components/wifi_service/src/wifi_service.c b/components/wifi_service/src/wifi_service.c
 index ce6c41ea..f0353715 100644
 --- a/components/wifi_service/src/wifi_service.c
