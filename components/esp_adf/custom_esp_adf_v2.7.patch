@@ -174,10 +174,10 @@ index 878d7648..54cf3aaa 100644
      EventGroupHandle_t      duer_evt;
  } dueros_service_t;
 diff --git a/components/esp_event_cast/esp_event_cast.c b/components/esp_event_cast/esp_event_cast.c
-index 8cad8f4f..0c91fdff 100644
+index 8cad8f4f..dad60fab 100644
 --- a/components/esp_event_cast/esp_event_cast.c
 +++ b/components/esp_event_cast/esp_event_cast.c
-@@ -37,7 +37,7 @@ static const char *TAG = "EVT_CAST";
+@@ -37,13 +37,13 @@ static const char *TAG = "EVT_CAST";
  
  typedef struct esp_evt_cast_item {
      STAILQ_ENTRY(esp_evt_cast_item)     next;
@@ -186,6 +186,13 @@ index 8cad8f4f..0c91fdff 100644
  } esp_evt_cast_item_t;
  
  typedef STAILQ_HEAD(esp_event_cast_list, esp_evt_cast_item) esp_event_cast_list_t;
+ 
+ typedef struct esp_event_cast {
+-    xSemaphoreHandle        _mux;
++    SemaphoreHandle_t        _mux;
+     esp_event_cast_list_t   evt_list;
+ } esp_event_cast_t;
+ 
 @@ -75,7 +75,7 @@ esp_err_t esp_event_cast_destroy(esp_event_cast_handle_t handle)
      return ESP_FAIL;
  }
@@ -389,7 +396,7 @@ index 2008c503..5415c0a8 100755
      return ESP_OK;
  }
 diff --git a/components/wifi_service/src/wifi_service.c b/components/wifi_service/src/wifi_service.c
-index ce6c41ea..f0353715 100644
+index ce6c41ea..9c7b15d1 100644
 --- a/components/wifi_service/src/wifi_service.c
 +++ b/components/wifi_service/src/wifi_service.c
 @@ -68,7 +68,7 @@ typedef struct wifi_setting_item {
