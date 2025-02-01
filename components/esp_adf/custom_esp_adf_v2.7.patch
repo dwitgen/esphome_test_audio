@@ -505,6 +505,62 @@ index c1d4b8db..f7fd789d 100644
      STAILQ_HEAD(list_info, playlist_info) playlist_info_list;   /*!< List head of playlists */
  };
  
+diff --git a/components/wifi_service/airkiss_config/airkiss_config.c b/components/wifi_service/airkiss_config/airkiss_config.c
+index d6b2ed0c..c57f31a5 100644
+--- a/components/wifi_service/airkiss_config/airkiss_config.c
++++ b/components/wifi_service/airkiss_config/airkiss_config.c
+@@ -166,7 +166,7 @@ static void airkiss_notify_task(void *pvParameters)
+         send_socket = socket(AF_INET, SOCK_DGRAM, 0);
+         if (send_socket == -1) {
+             ESP_LOGE(TAG, "failed to create sock!");
+-            vTaskDelay(1000 / portTICK_RATE_MS);
++            vTaskDelay(1000 / portTICK_PERIOD_MS);
+         }
+     } while (send_socket == -1);
+ 
+@@ -180,7 +180,7 @@ static void airkiss_notify_task(void *pvParameters)
+         fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); //IPPROTO_UDP
+         if (fd == -1) {
+             ESP_LOGE(TAG, "failed to create sock!");
+-            vTaskDelay(1000 / portTICK_RATE_MS);
++            vTaskDelay(1000 / portTICK_PERIOD_MS);
+         }
+     } while (fd == -1);
+ 
+@@ -306,7 +306,7 @@ static void airkiss_send_ack_task(void *pvParameters)
+     buf[0] = (uint8_t)ak_random_num;
+     esp_wifi_get_mac(WIFI_IF_STA, &buf[1]);
+ 
+-    vTaskDelay(200 / portTICK_RATE_MS);
++    vTaskDelay(200 / portTICK_PERIOD_MS);
+ 
+     while (1) {
+         /* Get local IP address of station */
+@@ -322,13 +322,13 @@ static void airkiss_send_ack_task(void *pvParameters)
+             send_socket = socket(AF_INET, SOCK_DGRAM, 0);
+             if (send_socket < 0) {
+                 ESP_LOGE(TAG, "Create airkiss udp socket failed");
+-                vTaskDelay(1000 / portTICK_RATE_MS);
++                vTaskDelay(1000 / portTICK_PERIOD_MS);
+                 continue;
+             }
+ 
+             while (1) {
+                 /* Send airkiss ACK every 100ms. */
+-                vTaskDelay(100 / portTICK_RATE_MS);
++                vTaskDelay(100 / portTICK_PERIOD_MS);
+ 
+                 sendlen = sendto(send_socket, buf, 7, 0,
+                                  (struct sockaddr *) &server_addr, sin_size);
+@@ -348,7 +348,7 @@ static void airkiss_send_ack_task(void *pvParameters)
+                 }
+             }
+         } else {
+-            vTaskDelay((portTickType) (100 / portTICK_RATE_MS));
++            vTaskDelay((portTickType) (100 / portTICK_PERIOD_MS));
+         }
+     }
+ 
 diff --git a/components/wifi_service/src/wifi_service.c b/components/wifi_service/src/wifi_service.c
 index ce6c41ea..f0353715 100644
 --- a/components/wifi_service/src/wifi_service.c
