@@ -164,8 +164,8 @@ diff --git a/components/dueros_service/dueros_service.c b/components/dueros_serv
 index 878d7648..147bb710 100644
 --- a/components/dueros_service/dueros_service.c
 +++ b/components/dueros_service/dueros_service.c
-@@ -80,7 +80,7 @@
-
+@@ -80,7 +80,7 @@ typedef enum {
+ 
  typedef struct {
      bool                    login;
 -    xQueueHandle            duer_que;
@@ -226,6 +226,28 @@ index aff08edf..6322872a 100644
  
  /**
   * @brief Broadcasting the data to receiver
+diff --git a/components/esp_peripherals/esp_peripherals.c b/components/esp_peripherals/esp_peripherals.c
+index 0f85c53e..9e216147 100644
+--- a/components/esp_peripherals/esp_peripherals.c
++++ b/components/esp_peripherals/esp_peripherals.c
+@@ -35,7 +35,7 @@
+ 
+ static const char *TAG = "ESP_PERIPH";
+ 
+-#define DEFAULT_ESP_PERIPH_WAIT_TICK       (10/portTICK_RATE_MS)
++#define DEFAULT_ESP_PERIPH_WAIT_TICK       (10/portTICK_PERIOD_MS)
+ 
+ struct esp_periph {
+     char                       *tag;
+@@ -89,7 +89,7 @@ static esp_err_t process_peripheral_event(audio_event_iface_msg_t *msg, void *co
+ 
+ esp_err_t esp_periph_set_change_waiting_time(esp_periph_set_handle_t periph_set_handle, int time_ms)
+ {
+-    audio_event_iface_set_cmd_waiting_timeout(esp_periph_set_get_event_iface(periph_set_handle), time_ms / portTICK_RATE_MS);
++    audio_event_iface_set_cmd_waiting_timeout(esp_periph_set_get_event_iface(periph_set_handle), time_ms / portTICK_PERIOD_MS);
+     return ESP_OK;
+ }
+ 
 diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
 index ad4f9fe9..c6be4089 100644
 --- a/components/esp_peripherals/include/esp_peripherals.h
@@ -247,3 +269,25 @@ index ad4f9fe9..c6be4089 100644
  
  /**
   * @brief Common peripherals configurations
+diff --git a/components/esp_peripherals/periph_button.c b/components/esp_peripherals/periph_button.c
+index 0719d18c..f929e624 100644
+--- a/components/esp_peripherals/periph_button.c
++++ b/components/esp_peripherals/periph_button.c
+@@ -82,7 +82,7 @@ static void IRAM_ATTR button_intr_handler(void* param)
+     esp_periph_send_cmd_from_isr(periph, 0, NULL, 0);
+ }
+ 
+-static void button_timer_handler(xTimerHandle tmr)
++static void button_timer_handler(TimerHandle_t tmr)
+ {
+     esp_periph_handle_t periph = (esp_periph_handle_t) pvTimerGetTimerID(tmr);
+     esp_periph_send_cmd_from_isr(periph, 0, NULL, 0);
+@@ -102,7 +102,7 @@ static esp_err_t _button_init(esp_periph_handle_t self)
+     };
+     periph_btn->btn = button_init(&btn_config);
+ 
+-    esp_periph_start_timer(self, 50/portTICK_RATE_MS, button_timer_handler);
++    esp_periph_start_timer(self, 50/portTICK_PERIOD_MS, button_timer_handler);
+     return ret;
+ }
+ 
