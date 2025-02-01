@@ -161,43 +161,11 @@ index 16604bad..ac410cdf 100644
      bool (*do_post)(char *url, uint8_t *data, size_t len);
  } coredump_upload_t;
 diff --git a/components/dueros_service/dueros_service.c b/components/dueros_service/dueros_service.c
-index 878d7648..373e9bff 100644
+index 878d7648..54cf3aaa 100644
 --- a/components/dueros_service/dueros_service.c
 +++ b/components/dueros_service/dueros_service.c
-@@ -62,25 +62,25 @@
- #define RECORD_DEBUG                0
+@@ -80,7 +80,7 @@ typedef enum {
  
- static const char *TAG = "DUEROS";
--
-+//
- typedef enum {
--    DUER_CMD_UNKNOWN,
--    DUER_CMD_LOGIN,
--    DUER_CMD_CONNECTED,
--    DUER_CMD_START,
--    DUER_CMD_STOP,
--    DUER_CMD_QUIT,
--    DUER_CMD_UPLOAD,
--    DUER_CMD_CANCEL,
--    DUER_CMD_DESTROY,
--    DUER_CMD_WIFI_CFG_START,
--    DUER_CMD_WIFI_CFG_STOP,
--    DUER_CMD_WIFI_ST_REPORT,
-+    DUER_CMD_UNKNOWN, //
-+    DUER_CMD_LOGIN, //
-+    DUER_CMD_CONNECTED, //
-+    DUER_CMD_START, //
-+    DUER_CMD_STOP, //
-+    DUER_CMD_QUIT, //
-+    DUER_CMD_UPLOAD, //
-+    DUER_CMD_CANCEL, //
-+    DUER_CMD_DESTROY, //
-+    DUER_CMD_WIFI_CFG_START, //
-+    DUER_CMD_WIFI_CFG_STOP, //
-+    DUER_CMD_WIFI_ST_REPORT, //
- } duer_task_cmd_t;
--
-+//
  typedef struct {
      bool                    login;
 -    xQueueHandle            duer_que;
