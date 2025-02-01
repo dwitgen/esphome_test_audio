@@ -506,7 +506,7 @@ index c1d4b8db..f7fd789d 100644
  };
  
 diff --git a/components/wifi_service/airkiss_config/airkiss_config.c b/components/wifi_service/airkiss_config/airkiss_config.c
-index d6b2ed0c..c57f31a5 100644
+index d6b2ed0c..e7b2c8ba 100644
 --- a/components/wifi_service/airkiss_config/airkiss_config.c
 +++ b/components/wifi_service/airkiss_config/airkiss_config.c
 @@ -166,7 +166,7 @@ static void airkiss_notify_task(void *pvParameters)
@@ -557,7 +557,7 @@ index d6b2ed0c..c57f31a5 100644
              }
          } else {
 -            vTaskDelay((portTickType) (100 / portTICK_RATE_MS));
-+            vTaskDelay((portTickType) (100 / portTICK_PERIOD_MS));
++            vTaskDelay((TickType_t) (100 / portTICK_PERIOD_MS));
          }
      }
  
