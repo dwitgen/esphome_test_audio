@@ -161,9 +161,18 @@ index 16604bad..ac410cdf 100644
      bool (*do_post)(char *url, uint8_t *data, size_t len);
  } coredump_upload_t;
 diff --git a/components/dueros_service/dueros_service.c b/components/dueros_service/dueros_service.c
-index 878d7648..147bb710 100644
+index 878d7648..9bdaf9f6 100644
 --- a/components/dueros_service/dueros_service.c
 +++ b/components/dueros_service/dueros_service.c
+@@ -60,7 +60,7 @@
+ #define DUER_EVT_WIFI_ST_REPORT     (BIT3)
+ 
+ #define RECORD_DEBUG                0
+-
++// Comment to text patch
+ static const char *TAG = "DUEROS";
+ 
+ typedef enum {
 @@ -80,7 +80,7 @@ typedef enum {
  
  typedef struct {
