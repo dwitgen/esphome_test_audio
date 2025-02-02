@@ -114,7 +114,7 @@ void ESPADFMicrophone::read_task(void *params) {
               .ws_width = 16,                             // WS width
               .ws_pol = false,                            // WS polarity
               .bit_shift = true,                          // MSB first
-              .msb_right = true,                          // MSB alignment
+              //.msb_right = true,                          // MSB alignment
           },
       },
       .use_alc = false,                          // Automatic Level Control
