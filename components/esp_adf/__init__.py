@@ -101,7 +101,7 @@ async def to_code(config):
 
     esp32.add_idf_component(
         name="esp-tls",
-        repo="https://github.com/espressif/esp-adf",
+        repo="https://github.com/espressif/esp-idf",
         path="components",
         ref="v5.1.5",
         components=["esp-tls"],
