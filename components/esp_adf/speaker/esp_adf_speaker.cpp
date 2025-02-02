@@ -55,7 +55,7 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
                 .ws_width = 16,                             // WS width
                 .ws_pol = false,                            // WS polarity
                 .bit_shift = true,                          // MSB first
-                .msb_right = true,                          // MSB alignment
+                //.msb_right = true,                          // MSB alignment
             },
             //.gpio_cfg = {                          // GPIO configuration
             //   .mclk = GPIO_NUM_0,                // MCLK pin
