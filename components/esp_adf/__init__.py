@@ -78,12 +78,9 @@ async def to_code(config):
     #)
 
     esp32.add_idf_component(
-        name="esp-adf",
-        repo="https://github.com/espressif/esp-adf",
-        path="components",
-        ref="v2.7",
-        components=["*"],
-        submodules=["components/esp-adf-libs"],
+        name="esp-dsp",
+        repo="https://github.com/espressif/esp-dsp",
+        ref="v1.2.1",
     )
 
     esp32.add_idf_component(
@@ -93,11 +90,15 @@ async def to_code(config):
     )
 
     esp32.add_idf_component(
-        name="esp-dsp",
-        repo="https://github.com/espressif/esp-dsp",
-        ref="v1.2.1",
+        name="esp-adf",
+        repo="https://github.com/espressif/esp-adf",
+        path="components",
+        ref="v2.7",
+        components=["*"],
+        submodules=["components/esp-adf-libs"],
     )
 
+        
     cg.add_platformio_option(
         "board_build.embed_txtfiles", "components/dueros_service/duer_profile"
     )
