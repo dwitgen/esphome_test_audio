@@ -1,0 +1,14 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3f63b0a..2aee4ad 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -210,6 +210,9 @@ set(include_dirs                "modules/dotprod/include"
+ set(priv_include_dirs           "modules/dotprod/float"
+                                 "modules/dotprod/fixed")
+ 
++set_property(TARGET ${COMPONENT_LIB} PROPERTY COMPONENT_LIB "esp_dsp_lib")
++
++
+ idf_component_register(SRCS ${srcs}
+                       INCLUDE_DIRS ${include_dirs}
+                       PRIV_INCLUDE_DIRS ${priv_include_dirs})
