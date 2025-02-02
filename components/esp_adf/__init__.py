@@ -80,21 +80,22 @@ async def to_code(config):
     esp32.add_idf_component(
         name="esp-dsp",
         repo="https://github.com/espressif/esp-dsp",
-        ref="v1.2.0",
+        ref="v1.5.1",
     )
 
-    esp32.add_idf_component(
-        name="esp-sr",
-        repo="https://github.com/espressif/esp-sr",
-        ref="v1.2.0",
-    )
+    #esp32.add_idf_component(
+    #    name="esp-sr",
+    #    repo="https://github.com/espressif/esp-sr",
+    #    ref="v1.2.0",
+    #)
 
     esp32.add_idf_component(
         name="esp-adf",
         repo="https://github.com/espressif/esp-adf",
         path="components",
         ref="v2.7",
-        submodules=["components/esp-adf-libs"],
+        components=["*"],
+        submodules=["components/esp-sr", "components/esp-adf-libs"],
     )
 
         
