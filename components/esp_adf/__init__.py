@@ -99,6 +99,15 @@ async def to_code(config):
         submodules=["components/esp-adf-libs"],
     )
 
+    esp32.add_idf_component(
+        name="esp-tls",
+        repo="https://github.com/espressif/esp-adf",
+        path="components",
+        ref="v5.1.5",
+        components=["esp-tls"],
+        submodules=["components/esp-adf-libs"],
+    )
+
         
     cg.add_platformio_option(
         "board_build.embed_txtfiles", "components/dueros_service/duer_profile"
