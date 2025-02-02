@@ -479,6 +479,19 @@ index 2008c503..5415c0a8 100755
  
      return ESP_OK;
  }
+diff --git a/components/ota_service/CMakeLists.txt b/components/ota_service/CMakeLists.txt
+index 7d6184e0..c3b24ff1 100644
+--- a/components/ota_service/CMakeLists.txt
++++ b/components/ota_service/CMakeLists.txt
+@@ -6,7 +6,7 @@ set(COMPONENT_REQUIRES app_update esp_https_ota)
+ set(COMPONENT_PRIV_REQUIRES esp_peripherals audio_pipeline audio_sal audio_stream)
+ 
+ if (idf_version VERSION_GREATER_EQUAL "5.0")
+-list(APPEND COMPONENT_REQUIRES esp_app_format)
++list(APPEND COMPONENT_REQUIRES esp_app_format esp-tls)
+ endif()
+ 
+ set(COMPONENT_SRCS ./esp_fs_ota.c
 diff --git a/components/ota_service/ota_service.c b/components/ota_service/ota_service.c
 index 9a199ceb..960601dc 100644
 --- a/components/ota_service/ota_service.c
