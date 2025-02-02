@@ -97,7 +97,6 @@ async def to_code(config):
         ref="v2.7",
         components=["*"],
         submodules=["components/esp-adf-libs"],
-        requires=["esp-tls"],
     )
 
         
