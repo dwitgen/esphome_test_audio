@@ -125,6 +125,11 @@ async def to_code(config):
         )
         esp32.add_extra_script(
             "pre",
+            "apply_custom_esp_sr_patches.py",
+            os.path.join(os.path.dirname(__file__), "apply_custom_esp_sr_patches.py.script"),
+        )
+        esp32.add_extra_script(
+            "pre",
             "apply_custom_esp_adf_libs_patches.py",
             os.path.join(os.path.dirname(__file__), "apply_custom_esp_adf_patches_libs.py.script"),
         )
@@ -135,6 +140,10 @@ async def to_code(config):
         esp32.add_extra_build_file(
             "esp_adf_patches/custom_esp_dsp_v1.5.1.patch",
             "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_dsp_v1.5.1.patch",
+        )
+        esp32.add_extra_build_file(
+            "esp_adf_patches/custom_esp_sr.patch",
+            "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_sr.patch",
         )
         #esp32.add_extra_build_file(
         #    "components/dueros_service/dueros_service.c",

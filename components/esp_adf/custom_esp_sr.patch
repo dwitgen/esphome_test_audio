@@ -1,0 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5f768f9..973ba42 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -58,6 +58,7 @@ elseif(${IDF_TARGET} STREQUAL "esp32s3")
+     set(requires
+         json
+         spiffs
++        esp-dsp
+         )
+ 
+     IF (IDF_VERSION_MAJOR GREATER 4)
+@@ -112,7 +113,7 @@ elseif(${IDF_TARGET} STREQUAL "esp32s3")
+         VERBATIM)
+ 
+     add_custom_target(srmodels_bin ALL DEPENDS ${image_file})
+-    add_dependencies(flash srmodels_bin)
++    add_dependencies(flash srmodels_bin esp-dsp)
+ 
+     partition_table_get_partition_info(size "--partition-name model" "size")
+     partition_table_get_partition_info(offset "--partition-name model" "offset")
