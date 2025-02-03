@@ -99,13 +99,13 @@ async def to_code(config):
         submodules=["components/esp-adf-libs"],
     )
 
-    esp32.add_idf_component(
-        name="esp-tls",
-        repo="https://github.com/espressif/esp-idf",
-        path="components",
-        ref="v5.1.5",
-        components=["esp-tls"],
-    )
+    #esp32.add_idf_component(
+    #    name="esp-tls",
+    #    repo="https://github.com/espressif/esp-idf",
+    #    path="components",
+    #    ref="v5.1.5",
+    #    components=["esp-tls"],
+    #)
 
         
     cg.add_platformio_option(
@@ -162,10 +162,10 @@ async def to_code(config):
         #    "components/esp_event_cast/esp_event_cast.c",
         #    "https://github.com/dwitgen/esp-adf/raw/master/components/esp_event_cast/esp_event_cast.c",
         #)
-        esp32.add_extra_build_file(
-            "components/esp_codec_dev/Kconfig",
-            "https://github.com/dwitgen/esp-adf/raw/master/components/esp_codec_dev/Kconfig",
-        )
+        #esp32.add_extra_build_file(
+        #    "components/esp_codec_dev/Kconfig",
+        #    "https://github.com/dwitgen/esp-adf/raw/master/components/esp_codec_dev/Kconfig",
+        #)
         #esp32.add_extra_build_file(
         #    "components/wifi_service/src/wifi_service.c",
         #    "https://github.com/dwitgen/esp-adf/raw/master/components/wifi_service/src/wifi_service.c",
