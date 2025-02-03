@@ -96,7 +96,7 @@ void ESPADFMicrophone::read_task(void *params) {
  // Microphone Configuration with New I2S Standard API
   i2s_stream_cfg_t i2s_cfg = {
       .type = AUDIO_STREAM_READER,               // Stream type: reader
-      .transmit_mode = I2S_COMM_MODE_PHILIPS,        // Standard I2S mode
+      .transmit_mode = I2S_COMM_MODE_STD,        // Standard I2S mode
       .chan_cfg = {                              // Channel configuration
           .id = static_cast<i2s_port_t>(CODEC_ADC_I2S_PORT),              // I2S port (static_cast<i2s_port_t> if needed)
           .role = I2S_ROLE_MASTER,               // Master role
@@ -106,16 +106,17 @@ void ESPADFMicrophone::read_task(void *params) {
       },
       .std_cfg = {                               // Standard I2S configuration
           .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(16000), // 16 kHz sample rate
-          .slot_cfg = {                          // Slot configuration
-              .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT, // 16-bit data width
-              .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,  // Auto slot width
-              .slot_mode = I2S_SLOT_MODE_STEREO,          // Stereo mode
-              .slot_mask = I2S_STD_SLOT_BOTH,             // Use both slots (left and right)
-              .ws_width = 16,                             // WS width
-              .ws_pol = false,                            // WS polarity
-              .bit_shift = true,                          // MSB first
+          .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
+          //.slot_cfg = {                          // Slot configuration
+          //    .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT, // 16-bit data width
+          //    .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,  // Auto slot width
+          //    .slot_mode = I2S_SLOT_MODE_STEREO,          // Stereo mode
+          //    .slot_mask = I2S_STD_SLOT_BOTH,             // Use both slots (left and right)
+          //    .ws_width = 16,                             // WS width
+          //    .ws_pol = false,                            // WS polarity
+          //    .bit_shift = true,                          // MSB first
               //.msb_right = true,                          // MSB alignment
-          },
+          //},
       },
       .use_alc = false,                          // Automatic Level Control
       .volume = 0,                               // Initial volume
