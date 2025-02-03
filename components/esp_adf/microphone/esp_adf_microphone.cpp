@@ -96,7 +96,7 @@ void ESPADFMicrophone::read_task(void *params) {
  // Microphone Configuration with New I2S Standard API
   i2s_stream_cfg_t i2s_cfg = {
       .type = AUDIO_STREAM_READER,               // Stream type: reader
-      .transmit_mode = I2S_COMM_MODE_STD,        // Standard I2S mode
+      .transmit_mode = I2S_COMM_MODE_PHILIPS,        // Standard I2S mode
       .chan_cfg = {                              // Channel configuration
           .id = static_cast<i2s_port_t>(CODEC_ADC_I2S_PORT),              // I2S port (static_cast<i2s_port_t> if needed)
           .role = I2S_ROLE_MASTER,               // Master role
