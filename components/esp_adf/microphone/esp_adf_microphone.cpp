@@ -104,21 +104,29 @@ void ESPADFMicrophone::read_task(void *params) {
           .dma_frame_num = 312,                  // Number of frames per DMA descriptor
           .auto_clear = true,                    // Auto-clear DMA buffer
       },
-      .tdm_cfg = {                               // TDM Mode Configuration
-          .clk_cfg = {
-              .clk_src = I2S_CLK_SRC_DEFAULT,    // Default clock source
-              .sample_rate_hz = 48000,           // 48 kHz sample rate
-              .mclk_multiple = I2S_MCLK_MULTIPLE_256,
-          },
-          slot_mask = static_cast<i2s_tdm_slot_mask_t>(I2S_TDM_SLOT0 | I2S_TDM_SLOT1 | I2S_TDM_SLOT2 | I2S_TDM_SLOT3), 
-          .gpio_cfg = {
-              .mclk = GPIO_NUM_20,   // Master clock (MCLK)
-              .bclk = GPIO_NUM_10,   // Bit clock (BCLK)
-              .ws = GPIO_NUM_9,      // Word select (WS)
-              .dout = GPIO_NUM_NC,   // No data output
-              .din = GPIO_NUM_11,    // Data in (DIN)
-          },
-      },
+      .tdm_cfg = {
+        .clk_cfg = {
+            .clk_src = I2S_CLK_SRC_DEFAULT,
+            .sample_rate_hz = 48000,
+            .mclk_multiple = I2S_MCLK_MULTIPLE_256
+        },
+        .slot_cfg = {
+            .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT,
+            .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,
+            .slot_mode = I2S_SLOT_MODE_STEREO,
+            .slot_mask = static_cast<i2s_tdm_slot_mask_t>(I2S_TDM_SLOT0 | I2S_TDM_SLOT1 | I2S_TDM_SLOT2 | I2S_TDM_SLOT3),
+            .ws_width = 16,
+            .ws_pol = false,
+            .bit_shift = true,
+        },
+        .gpio_cfg = {
+            .mclk = GPIO_NUM_20,
+            .bclk = GPIO_NUM_10,
+            .ws   = GPIO_NUM_9,
+            .din  = GPIO_NUM_11,
+            .dout = GPIO_NUM_NC,
+        },
+    };
       .use_alc = false,                          // Automatic Level Control disabled
       .volume = 0,                               // Initial volume
       .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE, // Ring buffer size
