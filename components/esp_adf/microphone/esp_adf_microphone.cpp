@@ -110,10 +110,7 @@ void ESPADFMicrophone::read_task(void *params) {
               .sample_rate_hz = 48000,           // 48 kHz sample rate
               .mclk_multiple = I2S_MCLK_MULTIPLE_256,
           },
-          .slot_cfg = I2S_TDM_PHILIPS_SLOT_DEFAULT_CONFIG(
-              I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO, 
-              I2S_TDM_SLOT0 | I2S_TDM_SLOT1 | I2S_TDM_SLOT2 | I2S_TDM_SLOT3
-          ),
+          slot_mask = static_cast<i2s_tdm_slot_mask_t>(I2S_TDM_SLOT0 | I2S_TDM_SLOT1 | I2S_TDM_SLOT2 | I2S_TDM_SLOT3), 
           .gpio_cfg = {
               .mclk = GPIO_NUM_20,   // Master clock (MCLK)
               .bclk = GPIO_NUM_10,   // Bit clock (BCLK)
