@@ -110,7 +110,7 @@ void ESPADFMicrophone::read_task(void *params) {
               .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT, // 16-bit data width
               .slot_bit_width = I2S_SLOT_BIT_WIDTH_16BIT, // Slot bit width (must match ES7210)
               .slot_mode = I2S_SLOT_MODE_STEREO,          // Stereo Mode (Adjust as needed)
-              .slot_mask = I2S_TDM_SLOT0 | I2S_TDM_SLOT1, // Use slots 0 & 1 (Adjust for ES7210)
+              .slot_mask = static_cast<i2s_tdm_slot_mask_t>(I2S_TDM_SLOT0 | I2S_TDM_SLOT1), // Use slots 0 & 1 (Adjust for ES7210)
               .ws_width = 16,               // Word Select (WS) width
               .ws_pol = false,               // Word Select polarity
               .bit_shift = true,             // Data left-aligned (Philips I2S format)
