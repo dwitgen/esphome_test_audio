@@ -271,10 +271,10 @@ size_t ESPADFMicrophone::read(int16_t *buf, size_t len) {
   }
   size_t bytes_read = this->ring_buffer_->read((void *) buf, len);
 
-  ESP_LOGI(TAG, "Read %d bytes from ring buffer", bytes_read);
-  for (int i = 0; i < bytes_read / sizeof(int16_t); i += 3) { // Assuming 3 mics
-    ESP_LOGI(TAG, "Mic1: %d, Mic2: %d, Mic3: %d", buf[i], buf[i+1], buf[i+2]);
-  }
+  //ESP_LOGI(TAG, "Read %d bytes from ring buffer", bytes_read);
+  //for (int i = 0; i < bytes_read / sizeof(int16_t); i += 3) { // Assuming 3 mics
+  //  ESP_LOGI(TAG, "Mic1: %d, Mic2: %d, Mic3: %d", buf[i], buf[i+1], buf[i+2]);
+  //}
 
 
   if (bytes_read == 0) {
