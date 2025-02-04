@@ -105,11 +105,7 @@ void ESPADFMicrophone::read_task(void *params) {
           .auto_clear = true,                    // Auto-clear DMA buffer
       },
       .tdm_cfg = {                               // TDM Mode Configuration
-          .clk_cfg = {
-              .clk_src = I2S_CLK_SRC_DEFAULT,    // Default clock source
-              .sample_rate_hz = 48000,           // 48 kHz sample rate
-              .mclk_multiple = I2S_MCLK_MULTIPLE_256,
-          },
+          .clk_cfg = I2S_TDM_CLK_DEFAULT_CONFIG(44100),
           .slot_cfg = {
             .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT,
             .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,
