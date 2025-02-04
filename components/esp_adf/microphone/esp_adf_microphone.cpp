@@ -2,7 +2,8 @@
 
 #ifdef USE_ESP_IDF
 
-#include <driver/i2s_std.h>
+//#include <driver/i2s_std.h>
+#include <driver/i2s_tdm.h>
 
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
