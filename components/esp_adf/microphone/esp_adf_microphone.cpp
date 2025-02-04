@@ -2,13 +2,11 @@
 
 #ifdef USE_ESP_IDF
 
-//#include <driver/i2s_std.h>
 #include <driver/i2s_tdm.h>
 
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
 
-#include <algorithm_stream.h>
 #include <audio_element.h>
 #include <audio_hal.h>
 #include <audio_pipeline.h>
@@ -116,13 +114,6 @@ void ESPADFMicrophone::read_task(void *params) {
             .ws_pol = false,
             .bit_shift = true,
           },
-          //.gpio_cfg = {
-          //    .mclk = GPIO_NUM_20,   // Master clock (MCLK)
-          //    .bclk = GPIO_NUM_10,   // Bit clock (BCLK)
-          //    .ws = GPIO_NUM_9,      // Word select (WS)
-          //    .dout = GPIO_NUM_NC,   // No data output
-          //    .din = GPIO_NUM_11,    // Data in (DIN)
-          //},
       },
       .use_alc = false,                          // Automatic Level Control disabled
       .volume = 0,                               // Initial volume
@@ -134,7 +125,6 @@ void ESPADFMicrophone::read_task(void *params) {
       .multi_out_num = 0,                        // Single output
       .uninstall_drv = true,                     // Uninstall driver on destruction
       .need_expand = false,                      // No data expansion needed
-      //.expand_src_bits = I2S_DATA_BIT_WIDTH_16BIT, // Source bit width
       .buffer_len = I2S_STREAM_BUF_SIZE,         // Buffer length
   };
 
@@ -147,26 +137,6 @@ if (i2s_stream_reader == nullptr) {
 }
 
 
-  rsp_filter_cfg_t rsp_cfg = {
-      .src_rate = 16000,
-      .src_ch = 2,
-      .dest_rate = 16000,
-      .dest_bits = 16,
-      .dest_ch = 1,
-      .src_bits = I2S_DATA_BIT_WIDTH_16BIT,
-      .mode = RESAMPLE_DECODE_MODE,
-      .max_indata_bytes = RSP_FILTER_BUFFER_BYTE,
-      .out_len_bytes = RSP_FILTER_BUFFER_BYTE,
-      .type = ESP_RESAMPLE_TYPE_AUTO,
-      .complexity = 2,
-      .down_ch_idx = 0,
-      .prefer_flag = ESP_RSP_PREFER_TYPE_SPEED,
-      .out_rb_size = RSP_FILTER_RINGBUFFER_SIZE,
-      .task_stack = RSP_FILTER_TASK_STACK,
-      .task_core = RSP_FILTER_TASK_CORE,
-      .task_prio = RSP_FILTER_TASK_PRIO,
-      .stack_in_ext = true,
-  };
   audio_element_handle_t filter = rsp_filter_init(&rsp_cfg);
 
   raw_stream_cfg_t raw_cfg = {
@@ -176,10 +146,9 @@ if (i2s_stream_reader == nullptr) {
   audio_element_handle_t raw_read = raw_stream_init(&raw_cfg);
 
   audio_pipeline_register(pipeline, i2s_stream_reader, "i2s");
-  //audio_pipeline_register(pipeline, filter, "filter");
   audio_pipeline_register(pipeline, raw_read, "raw");
 
-  const char *link_tag[2] = {"i2s", "raw"};//"filter", "raw"};
+  const char *link_tag[2] = {"i2s", "raw"};
   audio_pipeline_link(pipeline, &link_tag[0], 2);
 
   audio_pipeline_run(pipeline);
@@ -210,12 +179,9 @@ if (i2s_stream_reader == nullptr) {
       xQueueSend(this_mic->read_event_queue_, &event, 0);
       continue;
     }
-    //ESP_LOGI(TAG, "Received %d bytes of audio data", bytes_read);
-    //for (int i = 0; i < bytes_read / sizeof(int16_t); i += 3) { // Step by 3 for 3 mics
-    //        ESP_LOGI(TAG, "Mic1: %d, Mic2: %d, Mic3: %d", buffer[i], buffer[i+1], buffer[i+2]);
-    //    }
+    
     size_t written = this_mic->ring_buffer_->write((void *) buffer, bytes_read);
-    //ESP_LOGI(TAG, "Ring buffer wrote %d bytes (out of %d)", written, bytes_read);
+    
     event.type = TaskEventType::RUNNING;
     event.err = written;
     if (xQueueSend(this_mic->read_event_queue_, &event, 0) != pdTRUE) {
@@ -233,14 +199,10 @@ if (i2s_stream_reader == nullptr) {
   xQueueSend(this_mic->read_event_queue_, &event, portMAX_DELAY);
 
   audio_pipeline_unregister(pipeline, i2s_stream_reader);
-  audio_pipeline_unregister(pipeline, filter);
-  // audio_pipeline_unregister(pipeline, algo_stream);
   audio_pipeline_unregister(pipeline, raw_read);
 
   audio_pipeline_deinit(pipeline);
   audio_element_deinit(i2s_stream_reader);
-  audio_element_deinit(filter);
-  // audio_element_deinit(algo_stream);
   audio_element_deinit(raw_read);
 
   event.type = TaskEventType::STOPPED;
@@ -270,12 +232,6 @@ size_t ESPADFMicrophone::read(int16_t *buf, size_t len) {
     return 0;  // No data
   }
   size_t bytes_read = this->ring_buffer_->read((void *) buf, len);
-
-  //ESP_LOGI(TAG, "Read %d bytes from ring buffer", bytes_read);
-  //for (int i = 0; i < bytes_read / sizeof(int16_t); i += 3) { // Assuming 3 mics
-  //  ESP_LOGI(TAG, "Mic1: %d, Mic2: %d, Mic3: %d", buf[i], buf[i+1], buf[i+2]);
-  //}
-
 
   if (bytes_read == 0) {
     // No data in buffers to read.
