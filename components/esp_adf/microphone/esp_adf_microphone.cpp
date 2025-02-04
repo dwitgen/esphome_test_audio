@@ -114,7 +114,6 @@ void ESPADFMicrophone::read_task(void *params) {
               .ws_width = 16,                             // WS width
               .ws_pol = false,                            // WS polarity
               .bit_shift = true,                          // MSB first
-              //.msb_right = true,                          // MSB alignment
           },
       },
       .use_alc = false,                          // Automatic Level Control
@@ -127,7 +126,6 @@ void ESPADFMicrophone::read_task(void *params) {
       .multi_out_num = 0,                        // Single output
       .uninstall_drv = true,                     // Uninstall driver on destruction
       .need_expand = false,                      // No data expansion needed
-      //.expand_src_bits = I2S_DATA_BIT_WIDTH_16BIT, // Source bit width
       .buffer_len = I2S_STREAM_BUF_SIZE,      
   };
 

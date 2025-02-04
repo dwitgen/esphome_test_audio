@@ -3,10 +3,8 @@
 #ifdef USE_ESP_IDF
 
 #include <driver/i2s_std.h>
-// Added includes for button controls
 #include <driver/gpio.h>
 #include <driver/adc.h>
-//#include <esp_adc_cal.h>
 
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
@@ -55,18 +53,10 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
                 .ws_width = 16,                             // WS width
                 .ws_pol = false,                            // WS polarity
                 .bit_shift = true,                          // MSB first
-                //.msb_right = true,                          // MSB alignment
             },
-            //.gpio_cfg = {                          // GPIO configuration
-            //   .mclk = GPIO_NUM_0,                // MCLK pin
-            //  .bclk = GPIO_NUM_25,               // BCLK pin
-            //    .ws = GPIO_NUM_22,                 // WS pin
-            //    .dout = GPIO_NUM_13,               // Data out pin
-            //    .din = GPIO_NUM_NC,                // Data in not connected
-            //},
         },
         .use_alc = false,                          // Automatic Level Control
-        .volume = 9,                               // Initial volume
+        .volume = 0,                               // Initial volume
         .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE, // Ring buffer size
         .task_stack = I2S_STREAM_TASK_STACK,       // Task stack size
         .task_core = 1,                            // Run on core 1
@@ -75,7 +65,6 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
         .multi_out_num = 0,                        // Single output
         .uninstall_drv = true,                     // Uninstall driver on destruction
         .need_expand = false,                      // No data expansion needed
-        //.expand_src_bits = I2S_DATA_BIT_WIDTH_16BIT, // Source bit width
         .buffer_len = I2S_STREAM_BUF_SIZE,
     };
     
