@@ -200,14 +200,16 @@ if (i2s_stream_reader == nullptr) {
 
     if (bytes_read == -2 || bytes_read == 0) {
       // No data in buffers to read.
+      ESP_LOGE(TAG, "No data from microphone!");
       continue;
     } else if (bytes_read < 0) {
       event.type = TaskEventType::WARNING;
       event.err = bytes_read;
+      ESP_LOGE(TAG, "Error reading microphone data: %s", esp_err_to_name(bytes_read));
       xQueueSend(this_mic->read_event_queue_, &event, 0);
       continue;
     }
-
+    ESP_LOGI(TAG, "Received %d bytes of audio data", bytes_read);
     size_t written = this_mic->ring_buffer_->write((void *) buffer, bytes_read);
 
     event.type = TaskEventType::RUNNING;
