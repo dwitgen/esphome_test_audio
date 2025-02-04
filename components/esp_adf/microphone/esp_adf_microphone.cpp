@@ -137,8 +137,6 @@ if (i2s_stream_reader == nullptr) {
 }
 
 
-  audio_element_handle_t filter = rsp_filter_init(&rsp_cfg);
-
   raw_stream_cfg_t raw_cfg = {
       .type = AUDIO_STREAM_READER,
       .out_rb_size = 8 * 1024,
