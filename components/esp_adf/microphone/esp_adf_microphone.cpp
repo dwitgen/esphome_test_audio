@@ -105,7 +105,7 @@ void ESPADFMicrophone::read_task(void *params) {
           .auto_clear = true,                    // Auto-clear DMA buffer
       },
       .tdm_cfg = {                               // TDM Mode Configuration
-          .clk_cfg = I2S_TDM_CLK_DEFAULT_CONFIG(44100),
+          .clk_cfg = I2S_TDM_CLK_DEFAULT_CONFIG(16000),
           .slot_cfg = {
             .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT,
             .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,
@@ -175,11 +175,11 @@ if (i2s_stream_reader == nullptr) {
   audio_element_handle_t raw_read = raw_stream_init(&raw_cfg);
 
   audio_pipeline_register(pipeline, i2s_stream_reader, "i2s");
-  audio_pipeline_register(pipeline, filter, "filter");
+  //audio_pipeline_register(pipeline, filter, "filter");
   audio_pipeline_register(pipeline, raw_read, "raw");
 
-  const char *link_tag[3] = {"i2s", "filter", "raw"};
-  audio_pipeline_link(pipeline, &link_tag[0], 3);
+  const char *link_tag[2] = {"i2s", "raw"};//"filter", "raw"};
+  audio_pipeline_link(pipeline, &link_tag[0], 2);
 
   audio_pipeline_run(pipeline);
 
