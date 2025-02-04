@@ -106,7 +106,7 @@ void ESPADFMicrophone::read_task(void *params) {
       .tdm_cfg = {                               // TDM Mode Configuration
           .clk_cfg = I2S_TDM_CLK_DEFAULT_CONFIG(CODEC_ADC_SAMPLE_RATE),
           .slot_cfg = {
-            .data_bit_width = CODEC_ADC_BITS_PER_SAMPLE, //I2S_DATA_BIT_WIDTH_16BIT,
+            .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT,
             .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,
             .slot_mode = I2S_SLOT_MODE_MONO,
             .slot_mask = static_cast<i2s_tdm_slot_mask_t>(I2S_TDM_SLOT0 | I2S_TDM_SLOT1 | I2S_TDM_SLOT2),
