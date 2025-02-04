@@ -100,8 +100,8 @@ void ESPADFMicrophone::read_task(void *params) {
       .chan_cfg = {                              // Channel configuration
           .id = static_cast<i2s_port_t>(CODEC_ADC_I2S_PORT),              // I2S port (static_cast<i2s_port_t> if needed)
           .role = I2S_ROLE_MASTER,               // Master role
-          .dma_desc_num = 8,                     // Number of DMA descriptors
-          .dma_frame_num = 1024,                 // Number of frames per DMA descriptor
+          .dma_desc_num = 3,                     // Number of DMA descriptors
+          .dma_frame_num = 312,                 // Number of frames per DMA descriptor
           .auto_clear = true,                    // Auto-clear DMA buffer
       },
       .std_cfg = {                               // Standard I2S configuration
