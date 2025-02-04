@@ -209,15 +209,17 @@ if (i2s_stream_reader == nullptr) {
       xQueueSend(this_mic->read_event_queue_, &event, 0);
       continue;
     }
-    ESP_LOGI(TAG, "Received %d bytes of audio data", bytes_read);
-    for (int i = 0; i < bytes_read / sizeof(int16_t); i += 3) { // Step by 3 for 3 mics
-            ESP_LOGI(TAG, "Mic1: %d, Mic2: %d, Mic3: %d", buffer[i], buffer[i+1], buffer[i+2]);
-        }
+    //ESP_LOGI(TAG, "Received %d bytes of audio data", bytes_read);
+    //for (int i = 0; i < bytes_read / sizeof(int16_t); i += 3) { // Step by 3 for 3 mics
+    //        ESP_LOGI(TAG, "Mic1: %d, Mic2: %d, Mic3: %d", buffer[i], buffer[i+1], buffer[i+2]);
+    //    }
     size_t written = this_mic->ring_buffer_->write((void *) buffer, bytes_read);
-
+    ESP_LOGI(TAG, "Ring buffer wrote %d bytes (out of %d)", written, bytes_read);
     event.type = TaskEventType::RUNNING;
     event.err = written;
-    xQueueSend(this_mic->read_event_queue_, &event, 0);
+    if (xQueueSend(this_mic->read_event_queue_, &event, 0) != pdTRUE) {
+    ESP_LOGE(TAG, "Failed to send event to queue!");
+}
   }
 
   allocator.deallocate(buffer, BUFFER_SIZE / sizeof(int16_t));
