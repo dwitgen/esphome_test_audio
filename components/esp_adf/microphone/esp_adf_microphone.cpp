@@ -115,13 +115,13 @@ void ESPADFMicrophone::read_task(void *params) {
             .ws_pol = false,
             .bit_shift = true,
           },
-          .gpio_cfg = {
-              .mclk = GPIO_NUM_20,   // Master clock (MCLK)
-              .bclk = GPIO_NUM_10,   // Bit clock (BCLK)
-              .ws = GPIO_NUM_9,      // Word select (WS)
-              .dout = GPIO_NUM_NC,   // No data output
-              .din = GPIO_NUM_11,    // Data in (DIN)
-          },
+          //.gpio_cfg = {
+          //    .mclk = GPIO_NUM_20,   // Master clock (MCLK)
+          //    .bclk = GPIO_NUM_10,   // Bit clock (BCLK)
+          //    .ws = GPIO_NUM_9,      // Word select (WS)
+          //    .dout = GPIO_NUM_NC,   // No data output
+          //    .din = GPIO_NUM_11,    // Data in (DIN)
+          //},
       },
       .use_alc = false,                          // Automatic Level Control disabled
       .volume = 0,                               // Initial volume
