@@ -210,6 +210,9 @@ if (i2s_stream_reader == nullptr) {
       continue;
     }
     ESP_LOGI(TAG, "Received %d bytes of audio data", bytes_read);
+    for (int i = 0; i < bytes_read / sizeof(int16_t); i += 3) { // Step by 3 for 3 mics
+            ESP_LOGI(TAG, "Mic1: %d, Mic2: %d, Mic3: %d", buffer[i], buffer[i+1], buffer[i+2]);
+        }
     size_t written = this_mic->ring_buffer_->write((void *) buffer, bytes_read);
 
     event.type = TaskEventType::RUNNING;
