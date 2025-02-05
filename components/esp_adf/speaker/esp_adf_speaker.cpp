@@ -46,8 +46,8 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
         .std_cfg = {                               // Standard I2S configuration
             //.clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(static_cast<uint32_t>(sample_rate)),
             .clk_cfg = {
-                .clk_src = (ES8311_MCLK_SOURCE == 0) ? I2S_CLK_SRC_EXTERNAL : I2S_CLK_SRC_DEFAULT,
-                .mclk_multiple = (ES8311_MCLK_SOURCE == 0) ? I2S_MCLK_MULTIPLE_256 : I2S_MCLK_MULTIPLE_DEFAULT,
+                .clk_src = I2S_CLK_SRC_DEFAULT,
+                .mclk_multiple = I2S_MCLK_MULTIPLE_256,
             },
             .slot_cfg = {                          // Slot configuration
                 .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT, // 16-bit data width
