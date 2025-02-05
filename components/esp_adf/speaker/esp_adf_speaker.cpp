@@ -44,11 +44,7 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
             .auto_clear = true,                    // Auto-clear DMA buffer
         },
         .std_cfg = {                               // Standard I2S configuration
-            //.clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(static_cast<uint32_t>(sample_rate)),
-            .clk_cfg = {
-                .clk_src = I2S_CLK_SRC_DEFAULT,
-                .mclk_multiple = I2S_MCLK_MULTIPLE_256,
-            },
+            .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(static_cast<uint32_t>(sample_rate)),
             .slot_cfg = {                          // Slot configuration
                 .data_bit_width = I2S_DATA_BIT_WIDTH_16BIT, // 16-bit data width
                 .slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO,  // Auto slot width
