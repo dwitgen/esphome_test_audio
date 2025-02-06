@@ -3,13 +3,13 @@ from os.path import join, isfile
 Import("env")
 
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
-patchflag_path = join(FRAMEWORK_DIR, ".custom_adf_libs-patching-done")
+patchflag_path = join(FRAMEWORK_DIR, ".custom_esphome_dev-patching-done")
 
 PROJECT_DIR = env.get('PROJECT_DIR')
 
 PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "custom_esphome_dev.patch")
 
-TO_PATCH_DIR = join(PROJECT_DIR, "src", "esphome", "components", "adc" )
+TO_PATCH_DIR = join(PROJECT_DIR, "src" )
 
 # patch file only if we didn't do it before
 #if not isfile(patchflag_path):
