@@ -80,7 +80,7 @@ async def to_code(config):
     esp32.add_idf_component(
         name="adc",
         repo="https://github.com/dwitgen/esphome",
-        path="components",
+        path="esphome/components",
         ref="adc_upgrade_testing",
         components=["adc"],
     )
