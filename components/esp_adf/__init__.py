@@ -106,11 +106,11 @@ async def to_code(config):
         )
         esp32.add_extra_build_file(
             "esp_adf_patches/custom_esp_adf_v2.7.patch",
-            "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf_v2.7.patch",
+            "https://github.com/dwitgen/esphome_test_audio/raw/korvo-1_esp32_idf5.1.5/components/esp_adf/custom_esp_adf_v2.7.patch",
         )
         esp32.add_extra_build_file(
             "esp_adf_patches/custom_esp_adf_libs.diff",
-            "https://github.com/dwitgen/esphome_test_audio/raw/5.x_test/components/esp_adf/custom_esp_adf_libs.diff",
+            "https://github.com/dwitgen/esphome_test_audio/raw/korvo-1_esp32_idf5.1.5/components/esp_adf/custom_esp_adf_libs.diff",
         )
         esp32.add_extra_build_file(
             "esp_adf_patches/idf_v5.1_freertos.patch",
