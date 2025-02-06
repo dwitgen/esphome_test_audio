@@ -9,7 +9,7 @@ PROJECT_DIR = env.get('PROJECT_DIR')
 
 PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "custom_esphome_dev.patch")
 
-TO_PATCH_DIR = join(PROJECT_DIR, "src", "esphome", "components" )
+TO_PATCH_DIR = join(PROJECT_DIR, "src", "esphome", "components", "adc" )
 
 # patch file only if we didn't do it before
 #if not isfile(patchflag_path):
