@@ -1,8 +1,8 @@
 diff --git a/esphome/components/adc/adc_sensor.h b/esphome/components/adc/adc_sensor.h
-index 7a3e1c8da..80567ddf9 100644
+index 7a3e1c8da..f4789689f 100644
 --- a/esphome/components/adc/adc_sensor.h
 +++ b/esphome/components/adc/adc_sensor.h
-@@ -6,22 +6,26 @@
+@@ -6,22 +6,23 @@
  #include "esphome/core/hal.h"
  
  #ifdef USE_ESP32
@@ -25,34 +25,46 @@ index 7a3e1c8da..80567ddf9 100644
 -// clang-format off
 +// Compatibility for attenuation settings
  #if (ESP_IDF_VERSION_MAJOR == 4 && ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 7)) || \
-     (ESP_IDF_VERSION_MAJOR == 5 && \
-      ((ESP_IDF_VERSION_MINOR == 0 && ESP_IDF_VERSION_PATCH >= 5) || \
-       (ESP_IDF_VERSION_MINOR == 1 && ESP_IDF_VERSION_PATCH >= 3) || \
+-    (ESP_IDF_VERSION_MAJOR == 5 && \
+-     ((ESP_IDF_VERSION_MINOR == 0 && ESP_IDF_VERSION_PATCH >= 5) || \
+-      (ESP_IDF_VERSION_MINOR == 1 && ESP_IDF_VERSION_PATCH >= 3) || \
 -      (ESP_IDF_VERSION_MINOR >= 2)) \
 -    )
 -// clang-format on
-+      (ESP_IDF_VERSION_MINOR >= 2)))
++    (ESP_IDF_VERSION_MAJOR >= 5)
  static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_12;
  #else
  static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_11;
-@@ -31,26 +35,33 @@ static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_11;
+@@ -31,26 +32,37 @@ static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_11;
  class ADCSensor : public sensor::Sensor, public PollingComponent, public voltage_sampler::VoltageSampler {
   public:
  #ifdef USE_ESP32
 -  /// Set the attenuation for this pin. Only available on the ESP32.
 +  /// Set attenuation
    void set_attenuation(adc_atten_t attenuation) { this->attenuation_ = attenuation; }
+-  void set_channel1(adc1_channel_t channel) {
+-    this->channel1_ = channel;
+-    this->channel2_ = ADC2_CHANNEL_MAX;
+-  }
+-  void set_channel2(adc2_channel_t channel) {
+-    this->channel2_ = channel;
+-    this->channel1_ = ADC1_CHANNEL_MAX;
+-  }
 +
-+  /// Configure ADC channels (separate for ADC1 and ADC2)
-   void set_channel1(adc1_channel_t channel) {
-     this->channel1_ = channel;
-     this->channel2_ = ADC2_CHANNEL_MAX;
-   }
-+
-   void set_channel2(adc2_channel_t channel) {
-     this->channel2_ = channel;
-     this->channel1_ = ADC1_CHANNEL_MAX;
-   }
++  #if ESP_IDF_VERSION_MAJOR >= 5
++    /// For ESP-IDF v5: Single channel setup
++    void set_channel(adc_channel_t channel) { this->channel_ = channel; }
++  #else
++    /// For older ESP-IDF versions: Separate ADC1 and ADC2 channels
++    void set_channel1(adc1_channel_t channel) {
++      this->channel1_ = channel;
++      this->channel2_ = ADC2_CHANNEL_MAX;
++    }
++    void set_channel2(adc2_channel_t channel) {
++      this->channel2_ = channel;
++      this->channel1_ = ADC1_CHANNEL_MAX;
++    }
++  #endif
 +
 +  /// Enable auto-range mode
    void set_autorange(bool autorange) { this->autorange_ = autorange; }
@@ -72,9 +84,12 @@ index 7a3e1c8da..80567ddf9 100644
    void set_pin(InternalGPIOPin *pin) { this->pin_ = pin; }
    void set_output_raw(bool output_raw) { this->output_raw_ = output_raw; }
    void set_sample_count(uint8_t sample_count);
-@@ -78,11 +89,13 @@ class ADCSensor : public sensor::Sensor, public PollingComponent, public voltage
-   adc1_channel_t channel1_{ADC1_CHANNEL_MAX};
-   adc2_channel_t channel2_{ADC2_CHANNEL_MAX};
+@@ -75,14 +87,17 @@ class ADCSensor : public sensor::Sensor, public PollingComponent, public voltage
+ 
+ #ifdef USE_ESP32
+   adc_atten_t attenuation_{ADC_ATTEN_DB_0};
+-  adc1_channel_t channel1_{ADC1_CHANNEL_MAX};
+-  adc2_channel_t channel2_{ADC2_CHANNEL_MAX};
    bool autorange_{false};
 -#if ESP_IDF_VERSION_MAJOR >= 5
 -  esp_adc_cal_characteristics_t cal_characteristics_[SOC_ADC_ATTEN_NUM] = {};
@@ -85,7 +100,10 @@ index 7a3e1c8da..80567ddf9 100644
 +  #if ESP_IDF_VERSION_MAJOR >= 5
 +    adc_oneshot_unit_handle_t adc_handle_;
 +    adc_cali_handle_t cal_handle_;
++    adc_channel_t channel_;  // Single channel for IDF v5
 +  #else
++    adc1_channel_t channel1_{ADC1_CHANNEL_MAX};
++    adc2_channel_t channel2_{ADC2_CHANNEL_MAX};
 +    esp_adc_cal_characteristics_t cal_characteristics_[ADC_ATTEN_MAX] = {};
 +  #endif
  #endif  // USE_ESP32
