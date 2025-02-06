@@ -1,5 +1,5 @@
 diff --git a/esphome/components/adc/adc_sensor.h b/esphome/components/adc/adc_sensor.h
-index 7a3e1c8da..3d016eec4 100644
+index 7a3e1c8da..d22daff19 100644
 --- a/esphome/components/adc/adc_sensor.h
 +++ b/esphome/components/adc/adc_sensor.h
 @@ -6,32 +6,30 @@
@@ -32,10 +32,10 @@ index 7a3e1c8da..3d016eec4 100644
 -// clang-format on
 -static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_12;
 +#if (ESP_IDF_VERSION_MAJOR >= 5)
-+  static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_12;  
++  static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_12;
  #else
 -static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_11;
-+  static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_11;  
++  static const adc_atten_t ADC_ATTEN_DB_12_COMPAT = ADC_ATTEN_DB_11;
  #endif
  #endif  // USE_ESP32
  
@@ -46,14 +46,19 @@ index 7a3e1c8da..3d016eec4 100644
    void set_attenuation(adc_atten_t attenuation) { this->attenuation_ = attenuation; }
    void set_channel1(adc1_channel_t channel) {
      this->channel1_ = channel;
-@@ -42,49 +40,104 @@ class ADCSensor : public sensor::Sensor, public PollingComponent, public voltage
-     this->channel1_ = ADC1_CHANNEL_MAX;
-   }
+@@ -44,26 +42,23 @@ class ADCSensor : public sensor::Sensor, public PollingComponent, public voltage
    void set_autorange(bool autorange) { this->autorange_ = autorange; }
--#endif  // USE_ESP32
-+#endif
+ #endif  // USE_ESP32
  
 -  /// Update ADC values
++#ifdef USE_ESP8266
++  std::string unique_id() override;
++#endif  // USE_ESP8266
++
++#ifdef USE_RP2040
++  void set_is_temperature() { this->is_temperature_ = true; }
++#endif  // USE_RP2040
++
    void update() override;
 -  /// Setup ADC
    void setup() override;
@@ -76,14 +81,7 @@ index 7a3e1c8da..3d016eec4 100644
   protected:
    InternalGPIOPin *pin_;
    bool output_raw_{false};
-   uint8_t sample_count_{1};
- 
--#ifdef USE_RP2040
--  bool is_temperature_{false};
--#endif  // USE_RP2040
--
- #ifdef USE_ESP32
-   adc_atten_t attenuation_{ADC_ATTEN_DB_0};
+@@ -78,12 +73,14 @@ class ADCSensor : public sensor::Sensor, public PollingComponent, public voltage
    adc1_channel_t channel1_{ADC1_CHANNEL_MAX};
    adc2_channel_t channel2_{ADC2_CHANNEL_MAX};
    bool autorange_{false};
@@ -103,73 +101,223 @@ index 7a3e1c8da..3d016eec4 100644
 +#endif
  };
  
-+// ========================== SETUP ==========================
-+
-+void ADCSensor::setup() {
-+#ifdef USE_ESP32
-+  #if ESP_IDF_VERSION_MAJOR >= 5
-+    adc_oneshot_unit_init_cfg_t adc_init_cfg = {
-+      .unit_id = ADC_UNIT_1
-+    };
-+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&adc_init_cfg, &adc_handle_));
-+
-+    adc_oneshot_chan_cfg_t channel_config = {
-+      .atten = attenuation_,
-+      .bitwidth = ADC_BITWIDTH_DEFAULT
-+    };
-+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle_, channel1_, &channel_config));
-+
-+    // Calibration
-+    adc_cali_line_fitting_config_t cal_cfg = {
-+      .unit_id = ADC_UNIT_1,
-+      .atten = attenuation_,
-+      .bitwidth = ADC_BITWIDTH_DEFAULT,
-+    };
-+    ESP_ERROR_CHECK(adc_cali_create_scheme_line_fitting(&cal_cfg, &cal_handle_));
-+
-+  #else
-+    esp_adc_cal_characteristics_t *chars = &cal_characteristics_[attenuation_];
-+    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
-+        ADC_UNIT_1, attenuation_, ADC_WIDTH_BIT_12, 1100, chars);
-+  #endif
-+#endif
+ }  // namespace adc
+diff --git a/esphome/components/adc/adc_sensor_common.cpp b/esphome/components/adc/adc_sensor_common.cpp
+index 2dccd55fc..873c4630e 100644
+--- a/esphome/components/adc/adc_sensor_common.cpp
++++ b/esphome/components/adc/adc_sensor_common.cpp
+@@ -18,7 +18,9 @@ void ADCSensor::set_sample_count(uint8_t sample_count) {
+   }
+ }
+ 
+-float ADCSensor::get_setup_priority() const { return setup_priority::DATA; }
++float ADCSensor::get_setup_priority() const { 
++  return setup_priority::DATA; 
 +}
-+
-+// ========================== SAMPLE ==========================
-+
-+float ADCSensor::sample() {
-+#ifdef USE_ESP32
-+  int raw = 0;
-+  #if ESP_IDF_VERSION_MAJOR >= 5
-+    ESP_ERROR_CHECK(adc_oneshot_read(adc_handle_, channel1_, &raw));
-+    int voltage = 0;
-+    ESP_ERROR_CHECK(adc_cali_raw_to_voltage(cal_handle_, raw, &voltage));
-+    return output_raw_ ? raw : voltage / 1000.0f;  // Convert to volts
-+  #else
-+    raw = adc1_get_raw(channel1_);
-+    uint32_t voltage = esp_adc_cal_raw_to_voltage(raw, &cal_characteristics_[attenuation_]);
-+    return output_raw_ ? raw : voltage / 1000.0f;
-+  #endif
-+#endif
-+  return 0.0f;
-+}
-+
-+// ========================== UPDATE ==========================
-+
-+void ADCSensor::update() {
-+  float value = this->sample();
-+  this->publish_state(value);
-+}
-+
-+// ========================== CONFIG ==========================
-+
-+void ADCSensor::dump_config() {
-+  ESP_LOGCONFIG("ADC Sensor", "Configured on Channel %d", channel1_);
-+}
-+
-+float ADCSensor::get_setup_priority() const {
-+  return setup_priority::HARDWARE_LATE;
-+}
-+
+ 
  }  // namespace adc
  }  // namespace esphome
+diff --git a/esphome/components/adc/adc_sensor_esp32.cpp b/esphome/components/adc/adc_sensor_esp32.cpp
+index 24e375009..482a9649e 100644
+--- a/esphome/components/adc/adc_sensor_esp32.cpp
++++ b/esphome/components/adc/adc_sensor_esp32.cpp
+@@ -8,153 +8,78 @@ namespace adc {
+ 
+ static const char *const TAG = "adc.esp32";
+ 
+-static const adc_bits_width_t ADC_WIDTH_MAX_SOC_BITS = static_cast<adc_bits_width_t>(ADC_WIDTH_MAX - 1);
+-
+-#ifndef SOC_ADC_RTC_MAX_BITWIDTH
+-#if USE_ESP32_VARIANT_ESP32S2
+-static const int32_t SOC_ADC_RTC_MAX_BITWIDTH = 13;
+-#else
+-static const int32_t SOC_ADC_RTC_MAX_BITWIDTH = 12;
+-#endif  // USE_ESP32_VARIANT_ESP32S2
+-#endif  // SOC_ADC_RTC_MAX_BITWIDTH
+-
+-static const int ADC_MAX = (1 << SOC_ADC_RTC_MAX_BITWIDTH) - 1;
+-static const int ADC_HALF = (1 << SOC_ADC_RTC_MAX_BITWIDTH) >> 1;
++#if ESP_IDF_VERSION_MAJOR >= 5
++  #include "esp_adc/adc_cali.h"
++  #include "esp_adc/adc_oneshot.h"
++#endif
+ 
+ void ADCSensor::setup() {
+   ESP_LOGCONFIG(TAG, "Setting up ADC '%s'...", this->get_name().c_str());
+ 
++#if ESP_IDF_VERSION_MAJOR >= 5
++  adc_oneshot_unit_init_cfg_t init_cfg = {
++    .unit_id = ADC_UNIT_1
++  };
++  ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_cfg, &adc_handle_));
++
++  adc_oneshot_chan_cfg_t channel_cfg = {
++    .atten = this->attenuation_,
++    .bitwidth = ADC_BITWIDTH_DEFAULT
++  };
++  ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle_, this->channel1_, &channel_cfg));
++
++  adc_cali_curve_fitting_config_t cal_cfg = {
++    .unit_id = ADC_UNIT_1,
++    .atten = this->attenuation_,
++    .bitwidth = ADC_BITWIDTH_DEFAULT
++  };
++  ESP_ERROR_CHECK(adc_cali_create_scheme_curve_fitting(&cal_cfg, &cal_handle_));
++
++#else
+   if (this->channel1_ != ADC1_CHANNEL_MAX) {
+-    adc1_config_width(ADC_WIDTH_MAX_SOC_BITS);
+-    if (!this->autorange_) {
+-      adc1_config_channel_atten(this->channel1_, this->attenuation_);
+-    }
++    adc1_config_width(ADC_WIDTH_BIT_12);
++    adc1_config_channel_atten(this->channel1_, this->attenuation_);
+   } else if (this->channel2_ != ADC2_CHANNEL_MAX) {
+-    if (!this->autorange_) {
+-      adc2_config_channel_atten(this->channel2_, this->attenuation_);
+-    }
++    adc2_config_channel_atten(this->channel2_, this->attenuation_);
+   }
+ 
+-  for (int32_t i = 0; i <= ADC_ATTEN_DB_12_COMPAT; i++) {
+-    auto adc_unit = this->channel1_ != ADC1_CHANNEL_MAX ? ADC_UNIT_1 : ADC_UNIT_2;
+-    auto cal_value = esp_adc_cal_characterize(adc_unit, (adc_atten_t) i, ADC_WIDTH_MAX_SOC_BITS,
+-                                              1100,  // default vref
+-                                              &this->cal_characteristics_[i]);
+-    switch (cal_value) {
+-      case ESP_ADC_CAL_VAL_EFUSE_VREF:
+-        ESP_LOGV(TAG, "Using eFuse Vref for calibration");
+-        break;
+-      case ESP_ADC_CAL_VAL_EFUSE_TP:
+-        ESP_LOGV(TAG, "Using two-point eFuse Vref for calibration");
+-        break;
+-      case ESP_ADC_CAL_VAL_DEFAULT_VREF:
+-      default:
+-        break;
+-    }
+-  }
++  esp_adc_cal_characterize(ADC_UNIT_1, this->attenuation_, ADC_WIDTH_BIT_12, 1100, &cal_characteristics_[this->attenuation_]);
++#endif
+ }
+ 
+ void ADCSensor::dump_config() {
+   LOG_SENSOR("", "ADC Sensor", this);
+   LOG_PIN("  Pin: ", this->pin_);
+-  if (this->autorange_) {
+-    ESP_LOGCONFIG(TAG, "  Attenuation: auto");
+-  } else {
+-    switch (this->attenuation_) {
+-      case ADC_ATTEN_DB_0:
+-        ESP_LOGCONFIG(TAG, "  Attenuation: 0db");
+-        break;
+-      case ADC_ATTEN_DB_2_5:
+-        ESP_LOGCONFIG(TAG, "  Attenuation: 2.5db");
+-        break;
+-      case ADC_ATTEN_DB_6:
+-        ESP_LOGCONFIG(TAG, "  Attenuation: 6db");
+-        break;
+-      case ADC_ATTEN_DB_12_COMPAT:
+-        ESP_LOGCONFIG(TAG, "  Attenuation: 12db");
+-        break;
+-      default:  // This is to satisfy the unused ADC_ATTEN_MAX
+-        break;
+-    }
+-  }
+-  ESP_LOGCONFIG(TAG, "  Samples: %i", this->sample_count_);
++  ESP_LOGCONFIG(TAG, "  Attenuation: %d", this->attenuation_);
++  ESP_LOGCONFIG(TAG, "  Samples: %d", this->sample_count_);
+   LOG_UPDATE_INTERVAL(this);
+ }
+ 
+ float ADCSensor::sample() {
+-  if (!this->autorange_) {
+-    uint32_t sum = 0;
+-    for (uint8_t sample = 0; sample < this->sample_count_; sample++) {
+-      int raw = -1;
+-      if (this->channel1_ != ADC1_CHANNEL_MAX) {
+-        raw = adc1_get_raw(this->channel1_);
+-      } else if (this->channel2_ != ADC2_CHANNEL_MAX) {
+-        adc2_get_raw(this->channel2_, ADC_WIDTH_MAX_SOC_BITS, &raw);
+-      }
+-      if (raw == -1) {
+-        return NAN;
+-      }
+-      sum += raw;
+-    }
+-    sum = (sum + (this->sample_count_ >> 1)) / this->sample_count_;  // NOLINT(clang-analyzer-core.DivideZero)
+-    if (this->output_raw_) {
+-      return sum;
+-    }
+-    uint32_t mv = esp_adc_cal_raw_to_voltage(sum, &this->cal_characteristics_[(int32_t) this->attenuation_]);
+-    return mv / 1000.0f;
+-  }
++#if ESP_IDF_VERSION_MAJOR >= 5
++  int raw = 0;
++  ESP_ERROR_CHECK(adc_oneshot_read(adc_handle_, this->channel1_, &raw));
++
++  int voltage = 0;
++  ESP_ERROR_CHECK(adc_cali_raw_to_voltage(cal_handle_, raw, &voltage));
+ 
+-  int raw12 = ADC_MAX, raw6 = ADC_MAX, raw2 = ADC_MAX, raw0 = ADC_MAX;
++  return this->output_raw_ ? raw : voltage / 1000.0f;
+ 
++#else
++  int raw = 0;
+   if (this->channel1_ != ADC1_CHANNEL_MAX) {
+-    adc1_config_channel_atten(this->channel1_, ADC_ATTEN_DB_12_COMPAT);
+-    raw12 = adc1_get_raw(this->channel1_);
+-    if (raw12 < ADC_MAX) {
+-      adc1_config_channel_atten(this->channel1_, ADC_ATTEN_DB_6);
+-      raw6 = adc1_get_raw(this->channel1_);
+-      if (raw6 < ADC_MAX) {
+-        adc1_config_channel_atten(this->channel1_, ADC_ATTEN_DB_2_5);
+-        raw2 = adc1_get_raw(this->channel1_);
+-        if (raw2 < ADC_MAX) {
+-          adc1_config_channel_atten(this->channel1_, ADC_ATTEN_DB_0);
+-          raw0 = adc1_get_raw(this->channel1_);
+-        }
+-      }
+-    }
++    raw = adc1_get_raw(this->channel1_);
+   } else if (this->channel2_ != ADC2_CHANNEL_MAX) {
+-    adc2_config_channel_atten(this->channel2_, ADC_ATTEN_DB_12_COMPAT);
+-    adc2_get_raw(this->channel2_, ADC_WIDTH_MAX_SOC_BITS, &raw12);
+-    if (raw12 < ADC_MAX) {
+-      adc2_config_channel_atten(this->channel2_, ADC_ATTEN_DB_6);
+-      adc2_get_raw(this->channel2_, ADC_WIDTH_MAX_SOC_BITS, &raw6);
+-      if (raw6 < ADC_MAX) {
+-        adc2_config_channel_atten(this->channel2_, ADC_ATTEN_DB_2_5);
+-        adc2_get_raw(this->channel2_, ADC_WIDTH_MAX_SOC_BITS, &raw2);
+-        if (raw2 < ADC_MAX) {
+-          adc2_config_channel_atten(this->channel2_, ADC_ATTEN_DB_0);
+-          adc2_get_raw(this->channel2_, ADC_WIDTH_MAX_SOC_BITS, &raw0);
+-        }
+-      }
+-    }
++    adc2_get_raw(this->channel2_, ADC_WIDTH_BIT_12, &raw);
+   }
+ 
+-  if (raw0 == -1 || raw2 == -1 || raw6 == -1 || raw12 == -1) {
++  if (raw == -1) {
+     return NAN;
+   }
+ 
+-  uint32_t mv12 = esp_adc_cal_raw_to_voltage(raw12, &this->cal_characteristics_[(int32_t) ADC_ATTEN_DB_12_COMPAT]);
+-  uint32_t mv6 = esp_adc_cal_raw_to_voltage(raw6, &this->cal_characteristics_[(int32_t) ADC_ATTEN_DB_6]);
+-  uint32_t mv2 = esp_adc_cal_raw_to_voltage(raw2, &this->cal_characteristics_[(int32_t) ADC_ATTEN_DB_2_5]);
+-  uint32_t mv0 = esp_adc_cal_raw_to_voltage(raw0, &this->cal_characteristics_[(int32_t) ADC_ATTEN_DB_0]);
+-
+-  uint32_t c12 = std::min(raw12, ADC_HALF);
+-  uint32_t c6 = ADC_HALF - std::abs(raw6 - ADC_HALF);
+-  uint32_t c2 = ADC_HALF - std::abs(raw2 - ADC_HALF);
+-  uint32_t c0 = std::min(ADC_MAX - raw0, ADC_HALF);
+-  uint32_t csum = c12 + c6 + c2 + c0;
+-
+-  uint32_t mv_scaled = (mv12 * c12) + (mv6 * c6) + (mv2 * c2) + (mv0 * c0);
+-  return mv_scaled / (float) (csum * 1000U);
++  uint32_t voltage = esp_adc_cal_raw_to_voltage(raw, &cal_characteristics_[this->attenuation_]);
++  return this->output_raw_ ? raw : voltage / 1000.0f;
++#endif
+ }
+ 
+ }  // namespace adc
