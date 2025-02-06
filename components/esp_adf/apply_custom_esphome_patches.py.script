@@ -7,7 +7,7 @@ patchflag_path = join(FRAMEWORK_DIR, ".custom_adf_libs-patching-done")
 
 PROJECT_DIR = env.get('PROJECT_DIR')
 
-PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "esphome_2024.12.4.patch")
+PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "custom_esphome_dev.patch")
 
 TO_PATCH_DIR = join(PROJECT_DIR, "src", "esphome", "components" )
 

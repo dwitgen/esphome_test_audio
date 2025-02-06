@@ -121,6 +121,6 @@ async def to_code(config):
             "https://github.com/espressif/esp-adf/raw/v2.7/idf_patches/idf_v5.1_freertos.patch",
         )
         esp32.add_extra_build_file(
-            "esp_adf_patches/esphome_2024.12.4.patch",
-            "https://github.com/dwitgen/esphome_test_audio/raw/korvo-1_esp32s3_idf5.1.5/components/esp_adf/esphome_2024.12.4.patch",
+            "esp_adf_patches/custom_esphome_dev.patch",
+            "https://github.com/dwitgen/esphome_test_audio/raw/korvo-1_esp32s3_idf5.1.5/components/esp_adf/custom_esphome_dev.patch",
         )
