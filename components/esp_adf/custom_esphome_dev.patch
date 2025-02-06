@@ -125,10 +125,10 @@ index 2dccd55fc..873c4630e 100644
  }  // namespace adc
  }  // namespace esphome
 diff --git a/esphome/components/adc/adc_sensor_esp32.cpp b/esphome/components/adc/adc_sensor_esp32.cpp
-index 24e375009..482a9649e 100644
+index 24e375009..b6ba97d7b 100644
 --- a/esphome/components/adc/adc_sensor_esp32.cpp
 +++ b/esphome/components/adc/adc_sensor_esp32.cpp
-@@ -8,153 +8,78 @@ namespace adc {
+@@ -8,153 +8,82 @@ namespace adc {
  
  static const char *const TAG = "adc.esp32";
  
@@ -153,6 +153,7 @@ index 24e375009..482a9649e 100644
    ESP_LOGCONFIG(TAG, "Setting up ADC '%s'...", this->get_name().c_str());
  
 +#if ESP_IDF_VERSION_MAJOR >= 5
++  // ADC Initialization for ESP-IDF v5
 +  adc_oneshot_unit_init_cfg_t init_cfg = {
 +    .unit_id = ADC_UNIT_1
 +  };
@@ -162,7 +163,7 @@ index 24e375009..482a9649e 100644
 +    .atten = this->attenuation_,
 +    .bitwidth = ADC_BITWIDTH_DEFAULT
 +  };
-+  ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle_, this->channel1_, &channel_cfg));
++  ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle_, this->channel_, &channel_cfg));  // Corrected here
 +
 +  adc_cali_curve_fitting_config_t cal_cfg = {
 +    .unit_id = ADC_UNIT_1,
@@ -172,6 +173,7 @@ index 24e375009..482a9649e 100644
 +  ESP_ERROR_CHECK(adc_cali_create_scheme_curve_fitting(&cal_cfg, &cal_handle_));
 +
 +#else
++  // ADC Initialization for ESP-IDF v4
    if (this->channel1_ != ADC1_CHANNEL_MAX) {
 -    adc1_config_width(ADC_WIDTH_MAX_SOC_BITS);
 -    if (!this->autorange_) {
@@ -259,8 +261,9 @@ index 24e375009..482a9649e 100644
 -    return mv / 1000.0f;
 -  }
 +#if ESP_IDF_VERSION_MAJOR >= 5
++  // ADC Reading for ESP-IDF v5
 +  int raw = 0;
-+  ESP_ERROR_CHECK(adc_oneshot_read(adc_handle_, this->channel1_, &raw));
++  ESP_ERROR_CHECK(adc_oneshot_read(adc_handle_, this->channel_, &raw));  // Corrected here
 +
 +  int voltage = 0;
 +  ESP_ERROR_CHECK(adc_cali_raw_to_voltage(cal_handle_, raw, &voltage));
@@ -269,6 +272,7 @@ index 24e375009..482a9649e 100644
 +  return this->output_raw_ ? raw : voltage / 1000.0f;
  
 +#else
++  // ADC Reading for ESP-IDF v4
 +  int raw = 0;
    if (this->channel1_ != ADC1_CHANNEL_MAX) {
 -    adc1_config_channel_atten(this->channel1_, ADC_ATTEN_DB_12_COMPAT);
