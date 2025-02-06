@@ -1,0 +1,25 @@
+from os.path import join, isfile
+
+Import("env")
+
+FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-espidf")
+patchflag_path = join(FRAMEWORK_DIR, ".custom_adf_libs-patching-done")
+
+PROJECT_DIR = env.get('PROJECT_DIR')
+
+PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "esphome_2024.12.4.patch")
+
+TO_PATCH_DIR = join(PROJECT_DIR, "src", "/esphome", "components" )
+
+# patch file only if we didn't do it before
+#if not isfile(patchflag_path):
+print(PATCH_FILE)
+assert isfile(PATCH_FILE)
+
+env.Execute("patch -p1 -d %s -i %s" % (TO_PATCH_DIR, PATCH_FILE))
+
+def _touch(path):
+    with open(path, "w") as fp:
+        fp.write("")
+
+env.Execute(lambda *args, **kwargs: _touch(patchflag_path))
