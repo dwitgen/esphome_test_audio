@@ -92,6 +92,10 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
    QueueHandle_t event_queue_;
 
  private:
+   void initialize_adc();
+   void handle_buttons();
+   void process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press);
+
    int volume_ = 50;  // Default volume level
    bool is_http_stream_;
    audio_pipeline_handle_t pipeline_;
