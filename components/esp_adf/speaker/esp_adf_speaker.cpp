@@ -49,7 +49,15 @@ void ESPADFSpeaker::setup_adc() {
     //    ESP_LOGE(TAG, "✅ Hanging here AFTER unit config");
     //    vTaskDelay(pdMS_TO_TICKS(1000));
     //}
-    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &this->adc1_handle));
+    //ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &this->adc1_handle));
+    esp_err_t ret = adc_oneshot_new_unit(&init_config, &this->adc1_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "❌ adc_oneshot_new_unit() failed with error: %s (%d)", esp_err_to_name(ret), ret);
+        while (true) {  // Prevent reboot for investigation
+            ESP_LOGE(TAG, "⚠️ Stuck here due to ADC init failure");
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    }
 
     ESP_LOGE(TAG, "ADC Unit Initialized");
     while (true) {
