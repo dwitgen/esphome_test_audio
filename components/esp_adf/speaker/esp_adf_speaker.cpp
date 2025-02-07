@@ -32,7 +32,7 @@ namespace esp_adf {
 static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
-adc_oneshot_unit_handle_t adc_handle;
+adc_oneshot_unit_handle_t adc1_handle;
 
 void ESPADFSpeaker::initialize_adc() {
     // ADC Unit Initialization
