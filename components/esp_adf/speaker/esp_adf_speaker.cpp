@@ -2,18 +2,15 @@
 
 #ifdef USE_ESP_IDF
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+##ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <driver/i2s_std.h>
 #include <driver/gpio.h>
 #include <esp_adc/adc_oneshot.h>
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
-
-#include "esphome/core/application.h"
-#include "esphome/core/hal.h"
-#include "esphome/core/log.h"
-
 #include <audio_hal.h>
 #include <filter_resample.h>
 #include <i2s_stream.h>
@@ -22,6 +19,14 @@
 #include <http_stream.h>
 #include <audio_pipeline.h>
 #include <mp3_decoder.h>
+
+#ifdef __cplusplus
+}
+#endif
+
+#include "esphome/core/application.h"
+#include "esphome/core/hal.h"
+#include "esphome/core/log.h"
 
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
@@ -69,7 +74,7 @@ void ESPADFSpeaker::setup_adc() {
     // Step 2: ADC Channel Configuration
     adc_oneshot_chan_cfg_t chan_config = {
         .atten = ADC_ATTEN_DB_12,              // 12dB attenuation
-        .bitwidth = ADC_BITWIDTH_DEFAULT       // Use default bit width
+        .bitwidth = ADC_BITWIDTH_12       // Use default bit width
     };
     //while (true) {
     //    ESP_LOGE(TAG, "✅ Hanging here AFTER channel config");
