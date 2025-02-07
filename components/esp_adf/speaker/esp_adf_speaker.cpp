@@ -43,8 +43,8 @@ void ESPADFSpeaker::initialize_adc() {
     adc_oneshot_new_unit(&init_cfg, &adc_handle);
 
     adc_oneshot_chan_cfg_t chan_cfg = {
-        .bitwidth = ADC_BITWIDTH_12,
-        .atten = ADC_ATTEN_DB_11  // Assuming 3.3V reference
+    .bitwidth = ADC_BITWIDTH_12,  // First field
+    .atten = ADC_ATTEN_DB_12      // Second field (updated to avoid deprecation warning)
     };
 
     adc_oneshot_config_channel(adc_handle, INPUT_BUTOP_ID, &chan_cfg);
@@ -699,7 +699,7 @@ void ESPADFSpeaker::watch_() {
 void ESPADFSpeaker::loop() {
   this->watch_();
   handle_buttons();  // Handle button inputs
-  
+
   switch (this->state_) {
     case speaker::STATE_STARTING:
       this->start_();
