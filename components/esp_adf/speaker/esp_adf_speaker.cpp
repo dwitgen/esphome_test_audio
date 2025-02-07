@@ -2,6 +2,8 @@
 
 #ifdef USE_ESP_IDF
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <driver/i2s_std.h>
 #include <driver/gpio.h>
 #include <esp_adc/adc_oneshot.h>
