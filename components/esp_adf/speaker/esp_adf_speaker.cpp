@@ -33,10 +33,6 @@ static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
 
-adc_oneshot_unit_handle_t adc1_handle;
-adc_cali_handle_t adc1_cali_handle;
-bool adc_calibrated = false;
-
 void ESPADFSpeaker::initialize_adc() {
     ESP_LOGI(TAG, "Initializing ADC...");
 
@@ -45,7 +41,8 @@ void ESPADFSpeaker::initialize_adc() {
         .unit_id = ADC_UNIT_1,
         .ulp_mode = ADC_ULP_MODE_DISABLE,  // Ensure ULP mode is disabled
     };
-    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &adc1_handle));
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &this->adc1_handle));
+
     ESP_LOGI(TAG, "ADC Unit Initialized");
 
     // Step 2: ADC Channel Configuration

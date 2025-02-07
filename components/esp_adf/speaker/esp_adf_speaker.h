@@ -17,11 +17,15 @@
 #include <audio_pipeline.h>
 
 #include <audio_hal.h>
-//#include "esp_peripherals.h"
-//#include "periph_adc_button.h"
-//#include "input_key_service.h"
+#include "esp_peripherals.h"
+#include "periph_adc_button.h"
+#include "input_key_service.h"
 #include <board.h>
 #include <http_stream.h>
+
+#include "esp_adc/adc_oneshot.h"
+#include "esp_adc/adc_cali.h"
+#include "esp_adc/adc_cali_scheme.h"
 
 #include <esp_event.h>  
 
