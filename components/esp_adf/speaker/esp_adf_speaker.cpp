@@ -49,8 +49,8 @@ void ESPADFSpeaker::initialize_adc() {
 
     // ADC Channel Configuration
     adc_oneshot_chan_cfg_t channel_config = {
-        .bitwidth = ADC_BITWIDTH_DEFAULT,
         .atten = ADC_ATTEN_DB_12,
+        .bitwidth = ADC_BITWIDTH_DEFAULT,
     };
 
     ret = adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &channel_config);  // GPIO8 corresponds to ADC1_CHANNEL_7
