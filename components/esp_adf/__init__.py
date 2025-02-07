@@ -77,13 +77,13 @@ async def to_code(config):
         components=["*"],
         submodules=["components/esp-adf-libs"],
     )
-    esp32.add_idf_component(
-        name="adc",
-        repo="https://github.com/dwitgen/esphome",
-        path="esphome/components",
-        ref="adc_upgrade_testing",
-        components=["adc"],
-    )
+    #esp32.add_idf_component(
+    #    name="adc",
+    #    repo="https://github.com/dwitgen/esphome",
+    #    path="esphome/components",
+    #    ref="adc_upgrade_testing",
+    #    components=["adc"],
+    #)
 
         
     cg.add_platformio_option(

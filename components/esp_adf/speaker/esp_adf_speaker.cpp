@@ -4,9 +4,9 @@
 
 #include <driver/i2s_std.h>
 #include <driver/gpio.h>
-#include <esp_adc/adc_oneshot.h>
-#include <esp_adc/adc_cali.h>
-#include <esp_adc/adc_cali_scheme.h>
+//#include <esp_adc/adc_oneshot.h>
+//#include <esp_adc/adc_cali.h>
+//#include <esp_adc/adc_cali_scheme.h>
 
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
