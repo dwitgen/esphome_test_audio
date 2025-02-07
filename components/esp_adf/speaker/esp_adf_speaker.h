@@ -60,6 +60,11 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void play_url(const std::string &url); 
   void set_and_play_url(const std::string &url);
   void set_dynamic_url(const std::string &url);
+
+  void initialize_adc();
+  void handle_buttons();
+  void process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press);
+  void read_adc();
   
   struct TaskParams {
     ESPADFSpeaker *speaker;  // Pointer to the ESPADFSpeaker instance
@@ -91,11 +96,14 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
    } buffer_queue_;
    QueueHandle_t event_queue_;
 
- private:
-   void initialize_adc();
-   void handle_buttons();
-   void process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press);
+  adc_oneshot_unit_handle_t adc1_handle;  // Handle for ADC1
+  adc_cali_handle_t adc1_cali_handle;     // Calibration handle
+  bool adc_calibrated = false;            // Flag for calibration status
 
+  // ADC Calibration Method
+  bool initialize_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle);
+
+ private:
    int volume_ = 50;  // Default volume level
    bool is_http_stream_;
    audio_pipeline_handle_t pipeline_;
