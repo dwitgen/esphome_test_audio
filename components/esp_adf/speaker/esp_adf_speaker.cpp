@@ -34,33 +34,33 @@ static const char *const TAG = "esp_adf.speaker";
 
 adc_oneshot_unit_handle_t adc1_handle;
 
-//void ESPADFSpeaker::initialize_adc() {
-//    // ADC Unit Initialization
-//    adc_oneshot_unit_init_cfg_t init_config = {
-//        .unit_id = ADC_UNIT_1,
-//        .ulp_mode = ADC_ULP_MODE_DISABLE,
-//    };
+void ESPADFSpeaker::initialize_adc() {
+    // ADC Unit Initialization
+    adc_oneshot_unit_init_cfg_t init_config = {
+       .unit_id = ADC_UNIT_1,
+        .ulp_mode = ADC_ULP_MODE_DISABLE,
+    };
 
-//    esp_err_t ret = adc_oneshot_new_unit(&init_config, &adc1_handle);
-//    if (ret != ESP_OK) {
-//        ESP_LOGE(TAG, "Failed to initialize ADC unit: %s", esp_err_to_name(ret));
-//        return;
-//    }
+    esp_err_t ret = adc_oneshot_new_unit(&init_config, &adc1_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize ADC unit: %s", esp_err_to_name(ret));
+        return;
+    }
 
     // ADC Channel Configuration
-//    adc_oneshot_chan_cfg_t channel_config = {
-//        .atten = ADC_ATTEN_DB_12,
-//        .bitwidth = ADC_BITWIDTH_DEFAULT,
-//    };
+    adc_oneshot_chan_cfg_t channel_config = {
+        .atten = ADC_ATTEN_DB_12,
+        .bitwidth = ADC_BITWIDTH_DEFAULT,
+    };
 
-//    ret = adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &channel_config);  // GPIO8 corresponds to ADC1_CHANNEL_7
-//    if (ret != ESP_OK) {
-//        ESP_LOGE(TAG, "Failed to configure ADC channel: %s", esp_err_to_name(ret));
-//        return;
-//    }
+    ret = adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &channel_config);  // GPIO8 corresponds to ADC1_CHANNEL_7
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to configure ADC channel: %s", esp_err_to_name(ret));
+        return;
+    }
 
-//    ESP_LOGI(TAG, "ADC setup complete!");
-//}
+    ESP_LOGI(TAG, "ADC setup complete!");
+}
 
 //void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press) {
 //    static std::map<std::string, bool> button_states;  // Track button states
