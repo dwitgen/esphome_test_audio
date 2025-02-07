@@ -5,8 +5,8 @@
 #include <driver/i2s_std.h>
 #include <driver/gpio.h>
 #include <esp_adc/adc_oneshot.h>
-//#include <esp_adc/adc_cali.h>
-//#include <esp_adc/adc_cali_scheme.h>
+#include <esp_adc/adc_cali.h>
+#include <esp_adc/adc_cali_scheme.h>
 
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
@@ -34,33 +34,73 @@ static const char *const TAG = "esp_adf.speaker";
 
 adc_oneshot_unit_handle_t adc1_handle;
 
+#include <esp_adc/adc_oneshot.h>
+#include <esp_adc/adc_cali.h>
+#include <esp_adc/adc_cali_scheme.h>
+
+adc_oneshot_unit_handle_t adc1_handle;
+adc_cali_handle_t adc1_cali_handle;
+bool adc_calibrated = false;
+
 void ESPADFSpeaker::initialize_adc() {
-    // ADC Unit Initialization
+    ESP_LOGI(TAG, "Initializing ADC...");
+
+    // Step 1: ADC Unit Initialization
     adc_oneshot_unit_init_cfg_t init_config = {
-       .unit_id = ADC_UNIT_1,
-        .ulp_mode = ADC_ULP_MODE_DISABLE,
+        .unit_id = ADC_UNIT_1,
+        .ulp_mode = ADC_ULP_MODE_DISABLE,  // Ensure ULP mode is disabled
     };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &adc1_handle));
+    ESP_LOGI(TAG, "ADC Unit Initialized");
 
-    esp_err_t ret = adc_oneshot_new_unit(&init_config, &adc1_handle);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize ADC unit: %s", esp_err_to_name(ret));
-        return;
-    }
+    // Step 2: ADC Channel Configuration
+    adc_oneshot_chan_cfg_t chan_config = {
+        .atten = ADC_ATTEN_DB_12,              // 12dB attenuation
+        .bitwidth = ADC_BITWIDTH_DEFAULT       // Use default bit width
+    };
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &chan_config));  // GPIO8 maps to ADC_CHANNEL_7
 
-    // ADC Channel Configuration
-    adc_oneshot_chan_cfg_t channel_config = {
-        .atten = ADC_ATTEN_DB_12,
+    // Step 3: ADC Calibration (Optional but safe)
+    adc_calibrated = initialize_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &adc1_cali_handle);
+
+    ESP_LOGI(TAG, "ADC Initialization Complete");
+}
+
+bool ESPADFSpeaker::initialize_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle) {
+    adc_cali_handle_t handle = nullptr;
+    esp_err_t ret = ESP_FAIL;
+    bool calibrated = false;
+
+    adc_cali_curve_fitting_config_t cali_config = {
+        .unit_id = unit,
+        .chan = channel,
+        .atten = atten,
         .bitwidth = ADC_BITWIDTH_DEFAULT,
     };
-
-    ret = adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &channel_config);  // GPIO8 corresponds to ADC1_CHANNEL_7
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to configure ADC channel: %s", esp_err_to_name(ret));
-        return;
+    ret = adc_cali_create_scheme_curve_fitting(&cali_config, &handle);
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "ADC Calibration Successful (Curve Fitting)");
+        calibrated = true;
+    } else {
+        ESP_LOGW(TAG, "ADC Calibration Not Supported or Skipped");
     }
 
-    ESP_LOGI(TAG, "ADC setup complete!");
+    *out_handle = handle;
+    return calibrated;
 }
+
+void ESPADFSpeaker::read_adc() {
+    int raw_value = 0;
+    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANNEL_7, &raw_value));
+    ESP_LOGI(TAG, "ADC Raw Value: %d", raw_value);
+
+    if (adc_calibrated) {
+        int voltage = 0;
+        ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, raw_value, &voltage));
+        ESP_LOGI(TAG, "Calibrated Voltage: %d mV", voltage);
+    }
+}
+
 
 //void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press) {
 //    static std::map<std::string, bool> button_states;  // Track button states
