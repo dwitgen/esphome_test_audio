@@ -324,7 +324,7 @@ void ESPADFSpeaker::setup() {
   #ifdef USE_ESP_ADF_BOARD
   // Use the PA enable pin from board.h configuration trying to stop speaker popping with control of the PA during speaker operations
   gpio_num_t pa_enable_gpio = static_cast<gpio_num_t>(get_pa_enable_gpio());
-  int but_channel = INPUT_BUTOP_ID;
+  //int but_channel = INPUT_BUTOP_ID;
   #endif
 
   gpio_config_t io_conf;
