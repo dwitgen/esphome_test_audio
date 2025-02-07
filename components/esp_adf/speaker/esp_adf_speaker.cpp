@@ -64,45 +64,45 @@ void ESPADFSpeaker::setup_adc() {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
     // Step 3: ADC Calibration (Optional but safe)
-    adc_calibrated = initialize_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &adc1_cali_handle);
+    //adc_calibrated = initialize_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &adc1_cali_handle);
 
     ESP_LOGI(TAG, "ADC Initialization Complete");
 }
 
-bool ESPADFSpeaker::initialize_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle) {
-    adc_cali_handle_t handle = nullptr;
-    esp_err_t ret = ESP_FAIL;
-    bool calibrated = false;
+//bool ESPADFSpeaker::initialize_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle) {
+//    adc_cali_handle_t handle = nullptr;
+//    esp_err_t ret = ESP_FAIL;
+//    bool calibrated = false;
 
-    adc_cali_curve_fitting_config_t cali_config = {
-        .unit_id = unit,
-        .chan = channel,
-        .atten = atten,
-        .bitwidth = ADC_BITWIDTH_DEFAULT,
-    };
-    ret = adc_cali_create_scheme_curve_fitting(&cali_config, &handle);
-    if (ret == ESP_OK) {
-        ESP_LOGI(TAG, "ADC Calibration Successful (Curve Fitting)");
-        calibrated = true;
-    } else {
-        ESP_LOGW(TAG, "ADC Calibration Not Supported or Skipped");
-    }
+//    adc_cali_curve_fitting_config_t cali_config = {
+//        .unit_id = unit,
+//        .chan = channel,
+//        .atten = atten,
+//        .bitwidth = ADC_BITWIDTH_DEFAULT,
+//    };
+//    ret = adc_cali_create_scheme_curve_fitting(&cali_config, &handle);
+//    if (ret == ESP_OK) {
+//        ESP_LOGI(TAG, "ADC Calibration Successful (Curve Fitting)");
+//        calibrated = true;
+//    } else {
+//        ESP_LOGW(TAG, "ADC Calibration Not Supported or Skipped");
+//    }
 
-    *out_handle = handle;
-    return calibrated;
-}
+//    *out_handle = handle;
+//    return calibrated;
+//}
 
-void ESPADFSpeaker::read_adc() {
-    int raw_value = 0;
-    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANNEL_7, &raw_value));
-    ESP_LOGI(TAG, "ADC Raw Value: %d", raw_value);
+//void ESPADFSpeaker::read_adc() {
+//    int raw_value = 0;
+//    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANNEL_7, &raw_value));
+//    ESP_LOGI(TAG, "ADC Raw Value: %d", raw_value);
 
-    if (adc_calibrated) {
-        int voltage = 0;
-        ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, raw_value, &voltage));
-        ESP_LOGI(TAG, "Calibrated Voltage: %d mV", voltage);
-    }
-}
+//    if (adc_calibrated) {
+//        int voltage = 0;
+//        ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, raw_value, &voltage));
+//        ESP_LOGI(TAG, "Calibrated Voltage: %d mV", voltage);
+//    }
+//}
 
 
 //void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press) {
