@@ -32,63 +32,63 @@ namespace esp_adf {
 static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
-adc_oneshot_unit_handle_t adc1_handle;
+//adc_oneshot_unit_handle_t adc1_handle;
 
-void ESPADFSpeaker::initialize_adc() {
-    // ADC Unit Initialization
-    adc_oneshot_unit_init_cfg_t init_config = {
-        .unit_id = ADC_UNIT_1,
-        .ulp_mode = ADC_ULP_MODE_DISABLE,
-    };
+//void ESPADFSpeaker::initialize_adc() {
+//    // ADC Unit Initialization
+//    adc_oneshot_unit_init_cfg_t init_config = {
+//        .unit_id = ADC_UNIT_1,
+//        .ulp_mode = ADC_ULP_MODE_DISABLE,
+//    };
 
-    esp_err_t ret = adc_oneshot_new_unit(&init_config, &adc1_handle);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize ADC unit: %s", esp_err_to_name(ret));
-        return;
-    }
+//    esp_err_t ret = adc_oneshot_new_unit(&init_config, &adc1_handle);
+//    if (ret != ESP_OK) {
+//        ESP_LOGE(TAG, "Failed to initialize ADC unit: %s", esp_err_to_name(ret));
+//        return;
+//    }
 
     // ADC Channel Configuration
-    adc_oneshot_chan_cfg_t channel_config = {
-        .atten = ADC_ATTEN_DB_12,
-        .bitwidth = ADC_BITWIDTH_DEFAULT,
-    };
+//    adc_oneshot_chan_cfg_t channel_config = {
+//        .atten = ADC_ATTEN_DB_12,
+//        .bitwidth = ADC_BITWIDTH_DEFAULT,
+//    };
 
-    ret = adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &channel_config);  // GPIO8 corresponds to ADC1_CHANNEL_7
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to configure ADC channel: %s", esp_err_to_name(ret));
-        return;
-    }
+//    ret = adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &channel_config);  // GPIO8 corresponds to ADC1_CHANNEL_7
+//    if (ret != ESP_OK) {
+//        ESP_LOGE(TAG, "Failed to configure ADC channel: %s", esp_err_to_name(ret));
+//        return;
+//    }
 
-    ESP_LOGI(TAG, "ADC setup complete!");
-}
+//    ESP_LOGI(TAG, "ADC setup complete!");
+//}
 
-void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press) {
-    static std::map<std::string, bool> button_states;  // Track button states
-    bool is_pressed = (adc_value >= low_thresh && adc_value <= high_thresh);
-    bool was_pressed = button_states[button_name];
+//void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press) {
+//    static std::map<std::string, bool> button_states;  // Track button states
+//    bool is_pressed = (adc_value >= low_thresh && adc_value <= high_thresh);
+//    bool was_pressed = button_states[button_name];
 
-    if (is_pressed != was_pressed) {
-        button_states[button_name] = is_pressed;
-        ESP_LOGI(TAG, "Button %s %s", button_name, is_pressed ? "PRESSED" : "RELEASED");
+//    if (is_pressed != was_pressed) {
+//        button_states[button_name] = is_pressed;
+//        ESP_LOGI(TAG, "Button %s %s", button_name, is_pressed ? "PRESSED" : "RELEASED");
 
-        if (is_pressed && on_press) {
-            on_press();  // Trigger action on button press
-        }
-    }
-}
+//        if (is_pressed && on_press) {
+//            on_press();  // Trigger action on button press
+//        }
+//    }
+//}
 
-void ESPADFSpeaker::handle_buttons() {
-    int adc_raw;
-    adc_oneshot_read(adc1_handle, INPUT_BUTOP_ID, &adc_raw);
-    ESP_LOGV(TAG, "ADC Raw Value: %d", adc_raw);
+//void ESPADFSpeaker::handle_buttons() {
+//    int adc_raw;
+//    adc_oneshot_read(adc1_handle, INPUT_BUTOP_ID, &adc_raw);
+//    ESP_LOGV(TAG, "ADC Raw Value: %d", adc_raw);
 
-    process_button(adc_raw, VOL_UP_THRESHOLD_LOW, VOL_UP_THRESHOLD_HIGH, "VOL_UP", [this]() { this->volume_up(); });
-    process_button(adc_raw, VOL_DOWN_THRESHOLD_LOW, VOL_DOWN_THRESHOLD_HIGH, "VOL_DOWN", [this]() { this->volume_down(); });
-    process_button(adc_raw, SET_THRESHOLD_LOW, SET_THRESHOLD_HIGH, "SET", []() { ESP_LOGI(TAG, "SET Button Pressed"); });
-    process_button(adc_raw, PLAY_THRESHOLD_LOW, PLAY_THRESHOLD_HIGH, "PLAY", []() { ESP_LOGI(TAG, "PLAY Button Pressed"); });
-    process_button(adc_raw, MODE_THRESHOLD_LOW, MODE_THRESHOLD_HIGH, "MODE", []() { ESP_LOGI(TAG, "MODE Button Pressed"); });
-    process_button(adc_raw, REC_THRESHOLD_LOW, REC_THRESHOLD_HIGH, "REC", []() { ESP_LOGI(TAG, "REC Button Pressed"); });
-}
+//    process_button(adc_raw, VOL_UP_THRESHOLD_LOW, VOL_UP_THRESHOLD_HIGH, "VOL_UP", [this]() { this->volume_up(); });
+//    process_button(adc_raw, VOL_DOWN_THRESHOLD_LOW, VOL_DOWN_THRESHOLD_HIGH, "VOL_DOWN", [this]() { this->volume_down(); });
+//    process_button(adc_raw, SET_THRESHOLD_LOW, SET_THRESHOLD_HIGH, "SET", []() { ESP_LOGI(TAG, "SET Button Pressed"); });
+//    process_button(adc_raw, PLAY_THRESHOLD_LOW, PLAY_THRESHOLD_HIGH, "PLAY", []() { ESP_LOGI(TAG, "PLAY Button Pressed"); });
+//    process_button(adc_raw, MODE_THRESHOLD_LOW, MODE_THRESHOLD_HIGH, "MODE", []() { ESP_LOGI(TAG, "MODE Button Pressed"); });
+//    process_button(adc_raw, REC_THRESHOLD_LOW, REC_THRESHOLD_HIGH, "REC", []() { ESP_LOGI(TAG, "REC Button Pressed"); });
+//}
 
 // Helper to configure I2S stream with dynamic sample rate
 esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate) {
