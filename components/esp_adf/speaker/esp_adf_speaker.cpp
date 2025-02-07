@@ -45,19 +45,26 @@ void ESPADFSpeaker::setup_adc() {
         .unit_id = ADC_UNIT_1,
         .ulp_mode = ADC_ULP_MODE_DISABLE,  // Ensure ULP mode is disabled
     };
-    while (true) {
-        ESP_LOGE(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
+    //while (true) {
+    //    ESP_LOGE(TAG, "✅ Hanging here AFTER unit config");
+    //    vTaskDelay(pdMS_TO_TICKS(1000));
+    //}
     ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &this->adc1_handle));
 
     ESP_LOGE(TAG, "ADC Unit Initialized");
-
+    while (true) {
+        ESP_LOGE(TAG, "✅ Hanging here AFTER new unit");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
     // Step 2: ADC Channel Configuration
     adc_oneshot_chan_cfg_t chan_config = {
         .atten = ADC_ATTEN_DB_12,              // 12dB attenuation
         .bitwidth = ADC_BITWIDTH_DEFAULT       // Use default bit width
     };
+    while (true) {
+        ESP_LOGE(TAG, "✅ Hanging here AFTER channel config");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
     ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &chan_config));  // GPIO8 maps to ADC_CHANNEL_7
     while (true) {
         ESP_LOGE(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
