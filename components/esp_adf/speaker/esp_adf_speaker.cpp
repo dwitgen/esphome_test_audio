@@ -51,7 +51,10 @@ void ESPADFSpeaker::initialize_adc() {
         .bitwidth = ADC_BITWIDTH_DEFAULT       // Use default bit width
     };
     ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &chan_config));  // GPIO8 maps to ADC_CHANNEL_7
-
+    while (true) {
+        ESP_LOGI(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
     // Step 3: ADC Calibration (Optional but safe)
     adc_calibrated = initialize_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &adc1_cali_handle);
 
