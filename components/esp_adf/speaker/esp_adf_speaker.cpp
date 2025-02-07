@@ -45,10 +45,10 @@ void ESPADFSpeaker::setup_adc() {
         .unit_id = ADC_UNIT_1,
         .ulp_mode = ADC_ULP_MODE_DISABLE,  // Ensure ULP mode is disabled
     };
-    //while (true) {
-    //    ESP_LOGI(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
-    //    vTaskDelay(pdMS_TO_TICKS(1000));
-    //}
+    while (true) {
+        ESP_LOGE(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
     ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &this->adc1_handle));
 
     ESP_LOGE(TAG, "ADC Unit Initialized");
