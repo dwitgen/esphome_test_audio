@@ -64,6 +64,7 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
             on_press();  // Trigger action on button press
         }
     }
+}
 
 void ESPADFSpeaker::handle_buttons() {
     int adc_raw;
