@@ -33,7 +33,7 @@ static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
 
-void ESPADFSpeaker::initialize_adc() {
+void ESPADFSpeaker::setup_adc() {
     ESP_LOGI(TAG, "Initializing ADC...");
     while (true) {
         ESP_LOGI(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");

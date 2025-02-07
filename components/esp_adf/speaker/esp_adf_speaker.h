@@ -65,7 +65,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void set_and_play_url(const std::string &url);
   void set_dynamic_url(const std::string &url);
 
-  void initialize_adc();
+  void setup_adc();
   void handle_buttons();
   void process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press);
   void read_adc();
