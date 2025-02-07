@@ -444,7 +444,7 @@ void ESPADFSpeaker::setup() {
   int initial_volume = this->get_current_volume();
   this->set_volume(initial_volume);
 
-  initialize_adc();  // Initialize ADC for button inputs
+  //initialize_adc();  // Initialize ADC for button inputs
   
   // Configure ADC for volume control
  // adc1_config_width(ADC_WIDTH_BIT);
@@ -699,7 +699,7 @@ void ESPADFSpeaker::watch_() {
 
 void ESPADFSpeaker::loop() {
   this->watch_();
-  handle_buttons();  // Handle button inputs
+  //handle_buttons();  // Handle button inputs
 
   switch (this->state_) {
     case speaker::STATE_STARTING:
