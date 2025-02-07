@@ -34,7 +34,7 @@ static const char *const TAG = "esp_adf.speaker";
 
 
 void ESPADFSpeaker::setup_adc() {
-    ESP_LOGI(TAG, "Initializing ADC...");
+    ESP_LOGE(TAG, "Initializing ADC...");
     //while (true) {
     //    ESP_LOGI(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
     //    vTaskDelay(pdMS_TO_TICKS(1000));
@@ -51,16 +51,16 @@ void ESPADFSpeaker::setup_adc() {
     //}
     ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &this->adc1_handle));
 
-    ESP_LOGI(TAG, "ADC Unit Initialized");
+    ESP_LOGE(TAG, "ADC Unit Initialized");
 
     // Step 2: ADC Channel Configuration
     adc_oneshot_chan_cfg_t chan_config = {
         .atten = ADC_ATTEN_DB_12,              // 12dB attenuation
         .bitwidth = ADC_BITWIDTH_DEFAULT       // Use default bit width
     };
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &chan_config));  // GPIO8 maps to ADC_CHANNEL_7
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(&this->adc1_handle, ADC_CHANNEL_7, &chan_config));  // GPIO8 maps to ADC_CHANNEL_7
     while (true) {
-        ESP_LOGI(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
+        ESP_LOGE(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
     // Step 3: ADC Calibration (Optional but safe)
