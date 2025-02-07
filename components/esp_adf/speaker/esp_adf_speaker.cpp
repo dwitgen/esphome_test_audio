@@ -34,7 +34,7 @@ static const char *const TAG = "esp_adf.speaker";
 
 adc_oneshot_unit_handle_t adc_handle;
 
-void ESPADFSpeaker::setup_adc() {
+void ESPADFSpeaker::initialize_adc() {
     // ADC Unit Initialization
     adc_oneshot_unit_init_cfg_t init_config = {
         .unit_id = ADC_UNIT_1,
