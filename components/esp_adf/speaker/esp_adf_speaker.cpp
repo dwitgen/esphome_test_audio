@@ -60,10 +60,10 @@ void ESPADFSpeaker::setup_adc() {
     //}
 
     ESP_LOGE(TAG, "ADC Unit Initialized");
-    while (true) {
-        ESP_LOGE(TAG, "✅ Hanging here AFTER new unit");
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
+    //while (true) {
+    //    ESP_LOGE(TAG, "✅ Hanging here AFTER new unit");
+    //    vTaskDelay(pdMS_TO_TICKS(1000));
+   // }
     // Step 2: ADC Channel Configuration
     adc_oneshot_chan_cfg_t chan_config = {
         .atten = ADC_ATTEN_DB_12,              // 12dB attenuation
