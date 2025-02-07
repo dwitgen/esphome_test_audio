@@ -4,7 +4,7 @@
 
 #include <driver/i2s_std.h>
 #include <driver/gpio.h>
-#include <driver/adc.h>
+//#include <driver/adc.h>
 
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
@@ -174,8 +174,8 @@ esp_err_t ESPADFSpeaker::configure_resample_filter(audio_element_handle_t *filte
 
 
 // Define ADC configuration added for button controls, maybe not correct to have in speaker config
-#define ADC_WIDTH_BIT    ADC_WIDTH_BIT_12
-#define ADC_ATTEN        ADC_ATTEN_DB_12
+//#define ADC_WIDTH_BIT    ADC_WIDTH_BIT_12
+//#define ADC_ATTEN        ADC_ATTEN_DB_12
 
 //Volume controls for buttons again speaker may mot be the correct location for this
 void ESPADFSpeaker::set_volume(int volume) {
