@@ -35,10 +35,10 @@ static const char *const TAG = "esp_adf.speaker";
 
 void ESPADFSpeaker::setup_adc() {
     ESP_LOGI(TAG, "Initializing ADC...");
-    //while (true) {
-    //    ESP_LOGI(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
-    //    vTaskDelay(pdMS_TO_TICKS(1000));
-    //}
+    while (true) {
+        ESP_LOGI(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
 
     // Step 1: ADC Unit Initialization
     adc_oneshot_unit_init_cfg_t init_config = {
