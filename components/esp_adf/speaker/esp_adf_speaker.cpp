@@ -115,8 +115,8 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
         if (strcmp(button_name, "PLAY") == 0 && btn_play)
             btn_play->publish_state(is_pressed);
 
-        if (strcmp(button_name, "MODE") == 0 && btn_mode)
-            btn_mode->publish_state(is_pressed);
+        if (strcmp(button_name, "MODE") == 0 && btn_new_mode)
+            btn_new_mode->publish_state(is_pressed);
 
         if (strcmp(button_name, "REC") == 0 && btn_record)
             btn_record->publish_state(is_pressed);
@@ -539,7 +539,7 @@ void ESPADFSpeaker::setup() {
   this->btn_vol_down = &id(btn_vol_down);
   this->btn_set = &id(btn_set);
   this->btn_play = &id(btn_play);
-  this->btn_mode = &id(btn_mode);
+  this->btn_new_mode = &id(btn_new_mode);
   this->btn_record = &id(btn_record);
 
 }
