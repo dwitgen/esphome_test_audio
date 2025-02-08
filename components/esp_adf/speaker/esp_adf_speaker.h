@@ -72,7 +72,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void handle_buttons();
   void process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press);
   void read_adc();
-  static bool setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle);
+  bool setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle);
   
   struct TaskParams {
     ESPADFSpeaker *speaker;  // Pointer to the ESPADFSpeaker instance

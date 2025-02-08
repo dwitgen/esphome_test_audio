@@ -91,7 +91,7 @@ static const char *const TAG = "esp_adf.speaker";
 //   ESP_LOGI(TAG, "ADC Initialization Complete");
 //}
 
-static bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle) {
+bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle) {
     adc_cali_handle_t handle = nullptr;
     esp_err_t ret = ESP_FAIL;
     bool calibrated = false;
