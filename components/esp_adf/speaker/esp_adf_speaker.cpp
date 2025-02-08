@@ -40,14 +40,6 @@ namespace esp_adf {
 static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
-// Declare as references to avoid static initialization order fiasco
-static binary_sensor::BinarySensor &btn_vol_up = id(btn_vol_up);
-static binary_sensor::BinarySensor &btn_vol_down = id(btn_vol_down);
-static binary_sensor::BinarySensor &btn_set = id(btn_set);
-static binary_sensor::BinarySensor &btn_play = id(btn_play);
-static binary_sensor::BinarySensor &btn_mode = id(btn_mode);
-static binary_sensor::BinarySensor &btn_record = id(btn_record);
-
 
 bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle) {
     adc_cali_handle_t handle = nullptr;
