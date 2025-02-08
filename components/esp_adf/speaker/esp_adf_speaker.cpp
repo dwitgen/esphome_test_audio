@@ -41,57 +41,6 @@ static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
 
-//void ESPADFSpeaker::setup_adc() {
-//   ESP_LOGE(TAG, "Initializing ADC...");
-//    //while (true) {
-//    //    ESP_LOGI(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
-//    //    vTaskDelay(pdMS_TO_TICKS(1000));
-//    //}
-//
-//    // Step 1: ADC Unit Initialization
-//    adc_oneshot_unit_init_cfg_t init_config = {
-//        .unit_id = ADC_UNIT_1,
-//        .ulp_mode = ADC_ULP_MODE_DISABLE,  // Ensure ULP mode is disabled
-//    };
-//    //while (true) {
-//    //    ESP_LOGE(TAG, "✅ Hanging here AFTER unit config");
-//    //    vTaskDelay(pdMS_TO_TICKS(1000));
-//    //}
-//    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &this->adc1_handle));
-//    //esp_err_t ret = adc_oneshot_new_unit(&init_config, &this->adc1_handle);
-//    //if (ret != ESP_OK) {
-//    //    ESP_LOGE(TAG, "❌ adc_oneshot_new_unit() failed with error: %s (%d)", esp_err_to_name(ret), ret);
-//    //    while (true) {  // Prevent reboot for investigation
-//    //        ESP_LOGE(TAG, "⚠️ Stuck here due to ADC init failure");
-//    //        vTaskDelay(pdMS_TO_TICKS(1000));
-//    //    }
-//    //}
-
-//    ESP_LOGE(TAG, "ADC Unit Initialized");
-//    //while (true) {
-//    //    ESP_LOGE(TAG, "✅ Hanging here AFTER new unit");
-//    //    vTaskDelay(pdMS_TO_TICKS(1000));
-//   // }
-//    // Step 2: ADC Channel Configuration
-//    adc_oneshot_chan_cfg_t chan_config = {
-//        .atten = ADC_ATTEN_DB_12,              // 12dB attenuation
-//        .bitwidth = ADC_BITWIDTH_12       // Use default bit width
-//    };
-//    //while (true) {
-//   //    ESP_LOGE(TAG, "✅ Hanging here AFTER channel config");
-//    //    vTaskDelay(pdMS_TO_TICKS(1000));
-//    //}
-//    ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &chan_config));  // GPIO8 maps to ADC_CHANNEL_7
-//    //while (true) {
-//    //    ESP_LOGE(TAG, "✅ Hanging here AFTER initialize_adc_calibration()");
-//    //    vTaskDelay(pdMS_TO_TICKS(1000));
-//    //}
-//    // Step 3: ADC Calibration (Optional but safe)
-//    adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &adc1_cali_handle);
-//
-//   ESP_LOGI(TAG, "ADC Initialization Complete");
-//}
-
 bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle) {
     adc_cali_handle_t handle = nullptr;
     esp_err_t ret = ESP_FAIL;
@@ -556,6 +505,12 @@ void ESPADFSpeaker::setup() {
       .unit_id = ADC_UNIT_1,
   };
   ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &this->adc1_handle));
+  adc_oneshot_chan_cfg_t ch_config = {
+      .bitwidth = ADC_BITWIDTH_DEFAULT,
+      .atten = ADC_ATTEN_DB_12,
+  };
+  ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &ch_config));
+  adc1_cali_handle_t adc1_cali_handle = NULL;
   bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
  // adc1_config_width(ADC_WIDTH_BIT);
  // adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
