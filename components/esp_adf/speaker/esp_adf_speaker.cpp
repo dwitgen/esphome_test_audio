@@ -121,18 +121,31 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
 }
 
 void ESPADFSpeaker::handle_buttons() {
-    int adc_raw;
-    vTaskDelay(pdMS_TO_TICKS(100));
-    adc_oneshot_read(adc1_handle, INPUT_BUTOP_ID, &adc_raw);
-    ESP_LOGV(TAG, "ADC Raw Value: %d", adc_raw);
+    static uint32_t last_check_time = 0;
+    const uint32_t debounce_interval = 50;  // 100 ms debounce interval
 
-    process_button(adc_raw, VOL_UP_THRESHOLD_LOW, VOL_UP_THRESHOLD_HIGH, "VOL_UP", [this]() { this->volume_up(); });
-    process_button(adc_raw, VOL_DOWN_THRESHOLD_LOW, VOL_DOWN_THRESHOLD_HIGH, "VOL_DOWN", [this]() { this->volume_down(); });
-    process_button(adc_raw, SET_THRESHOLD_LOW, SET_THRESHOLD_HIGH, "SET", []() { ESP_LOGE(TAG, "SET Button Pressed"); });
-    process_button(adc_raw, PLAY_THRESHOLD_LOW, PLAY_THRESHOLD_HIGH, "PLAY", []() { ESP_LOGE(TAG, "PLAY Button Pressed"); });
-    process_button(adc_raw, MODE_THRESHOLD_LOW, MODE_THRESHOLD_HIGH, "MODE", []() { ESP_LOGE(TAG, "MODE Button Pressed"); });
-    process_button(adc_raw, REC_THRESHOLD_LOW, REC_THRESHOLD_HIGH, "REC", []() { ESP_LOGE(TAG, "REC Button Pressed"); });
+    // Check if debounce interval has passed
+    if (millis() - last_check_time >= debounce_interval) {
+        last_check_time = millis();  // Update the timestamp
+
+        int adc_raw = 0;
+        esp_err_t ret = adc_oneshot_read(adc1_handle, INPUT_BUTOP_ID, &adc_raw);
+        
+        if (ret == ESP_OK) {
+            ESP_LOGV(TAG, "ADC Raw Value: %d", adc_raw);
+
+            process_button(adc_raw, VOL_UP_THRESHOLD_LOW, VOL_UP_THRESHOLD_HIGH, "VOL_UP", [this]() { this->volume_up(); });
+            process_button(adc_raw, VOL_DOWN_THRESHOLD_LOW, VOL_DOWN_THRESHOLD_HIGH, "VOL_DOWN", [this]() { this->volume_down(); });
+            process_button(adc_raw, SET_THRESHOLD_LOW, SET_THRESHOLD_HIGH, "SET", []() { ESP_LOGI(TAG, "SET Button Pressed"); });
+            process_button(adc_raw, PLAY_THRESHOLD_LOW, PLAY_THRESHOLD_HIGH, "PLAY", []() { ESP_LOGI(TAG, "PLAY Button Pressed"); });
+            process_button(adc_raw, MODE_THRESHOLD_LOW, MODE_THRESHOLD_HIGH, "MODE", []() { ESP_LOGI(TAG, "MODE Button Pressed"); });
+            process_button(adc_raw, REC_THRESHOLD_LOW, REC_THRESHOLD_HIGH, "REC", []() { ESP_LOGI(TAG, "REC Button Pressed"); });
+        } else {
+            ESP_LOGE(TAG, "ADC Read Failed: %s", esp_err_to_name(ret));
+        }
+    }
 }
+
 
 // Helper to configure I2S stream with dynamic sample rate
 esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate) {
