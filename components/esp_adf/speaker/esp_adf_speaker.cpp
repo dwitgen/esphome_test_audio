@@ -506,7 +506,7 @@ void ESPADFSpeaker::setup() {
   };
   ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &this->adc1_handle));
   adc_oneshot_chan_cfg_t ch_config = {
-      .bitwidth = ADC_BITWIDTH_DEFAULT,
+      .bitwidth = ADC_BITWIDTH_12,
       .atten = ADC_ATTEN_DB_12,
   };
   ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &ch_config));
