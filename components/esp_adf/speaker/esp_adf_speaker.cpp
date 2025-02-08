@@ -123,7 +123,7 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
 void ESPADFSpeaker::handle_buttons() {
     int adc_raw;
     adc_oneshot_read(adc1_handle, INPUT_BUTOP_ID, &adc_raw);
-    ESP_LOGV(TAG, "ADC Raw Value: %d", adc_raw);
+    ESP_LOGE(TAG, "ADC Raw Value: %d", adc_raw);
 
     process_button(adc_raw, VOL_UP_THRESHOLD_LOW, VOL_UP_THRESHOLD_HIGH, "VOL_UP", [this]() { this->volume_up(); });
     process_button(adc_raw, VOL_DOWN_THRESHOLD_LOW, VOL_DOWN_THRESHOLD_HIGH, "VOL_DOWN", [this]() { this->volume_down(); });
@@ -764,7 +764,7 @@ void ESPADFSpeaker::watch_() {
 
 void ESPADFSpeaker::loop() {
   this->watch_();
-  //handle_buttons();  // Handle button inputs
+  handle_buttons();  // Handle button inputs
 
   switch (this->state_) {
     case speaker::STATE_STARTING:
