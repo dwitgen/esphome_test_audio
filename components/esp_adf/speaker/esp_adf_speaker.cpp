@@ -491,7 +491,6 @@ void ESPADFSpeaker::setup() {
  // Find the key for the generic volume sensor
   uint32_t volume_sensor_key = 0;
   for (auto *sensor : App.get_sensors()) {
-    ESP_LOGE(TAG, "Sensor Name: %s, Object ID Hash: %u", sensor->get_name().c_str(), sensor->get_object_id_hash());
     if (sensor->get_name() == "generic_volume_sensor") {
       volume_sensor_key = sensor->get_object_id_hash();
       break;
@@ -541,13 +540,66 @@ void ESPADFSpeaker::setup() {
   bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
   
    // Link YAML binary sensors
-  this->btn_vol_up = &id(btn_vol_up);
-  this->btn_vol_down = &id(btn_vol_down);
-  this->btn_set = &id(btn_set);
-  this->btn_play = &id(btn_play);
-  this->btn_mode = &id(btn_mode);
-  this->btn_record = &id(btn_record);
-
+   // Find the key for the button sensors
+  uint32_t volup_sensor_key = 0;
+  uint32_t voldown_sensor_key = 0;
+  uint32_t set_sensor_key = 0;
+  uint32_t play_sensor_key = 0;
+  uint32_t mode_sensor_key = 0;
+  uint32_t record_sensor_key = 0;
+  for (auto *binary_sensor : App.get_binary_sensors()) {
+    if (binary_sensor->get_name() == "vol_up") {
+      volup_sensor_key = binary_sensor->get_object_id_hash();
+    } else if (binary_sensor->get_name() == "vol_down") {
+      voldown_sensor_key = binary_sensor->get_object_id_hash();
+    } else if (binary_sensor->get_name() == "set") {
+      set_sensor_key = binary_sensor->get_object_id_hash();
+    } else if (binary_sensor->get_name() == "play") {
+      play_sensor_key = binary_sensor->get_object_id_hash();
+    } else if (binary_sensor->get_name() == "mode") {
+      mode_sensor_key = binary_sensor->get_object_id_hash();
+    } else if (binary_sensor->get_name() == "record") {
+      record_sensor_key = binary_sensor->get_object_id_hash();
+    } 
+  }
+  
+  if(volup_sensor_key != 0) {
+    this->btn_vol_up = App.get_binary_sensor_by_key(volup_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for volume up initialized successfully: %s", this->btn_vol_up->get_name().c_str());
+  } else {
+    ESP_LOGE(TAG, "Failed to find key for binary sensor volume up");
+  }
+  if(voldown_sensor_key != 0) {
+    this->btn_vol_down = App.get_binary_sensor_by_key(voldown_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for volume down initialized successfully: %s", this->btn_vol_down->get_name().c_str());
+  } else {
+    ESP_LOGE(TAG, "Failed to find key for binary sensor volume down");
+  }
+  if(set_sensor_key != 0) {
+    this->btn_set = App.get_binary_sensor_by_key(set_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for set initialized successfully: %s", this->btn_set->get_name().c_str());
+  } else {
+    ESP_LOGE(TAG, "Failed to find key for binary sensor set");
+  }
+  if(play_sensor_key != 0) {
+    this->btn_play = App.get_binary_sensor_by_key(play_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for play initialized successfully: %s", this->btn_play->get_name().c_str());
+  } else {
+    ESP_LOGE(TAG, "Failed to find key for binary sensor play");
+  }
+  if(mode_sensor_key != 0) {
+    this->btn_mode = App.get_binary_sensor_by_key(mode_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for mode initialized successfully: %s", this->btn_mode->get_name().c_str());
+  } else {
+    ESP_LOGE(TAG, "Failed to find key for binary sensor mode");
+  }
+  if(record_sensor_key != 0) {
+    this->btn_record = App.get_binary_sensor_by_key(record_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for record initialized successfully: %s", this->btn_record->get_name().c_str());
+  } else {
+    ESP_LOGE(TAG, "Failed to find key for binary sensor record");
+  }
+  
 }
 
 void ESPADFSpeaker::set_and_play_url(const std::string &url) {
