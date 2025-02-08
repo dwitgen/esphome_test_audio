@@ -4,30 +4,33 @@
 
 #include "../esp_adf.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
+
+#include <audio_element.h>
+#include <audio_pipeline.h>
+#include <audio_hal.h>
+#include "esp_peripherals.h"
+#include <board.h>
+#include <http_stream.h>
+#include "esp_adc/adc_oneshot.h"
+#include "esp_adc/adc_cali.h"
+#include "esp_adc/adc_cali_scheme.h"
+#include <esp_event.h>
+
+#ifdef __cplusplus
+}
+#endif
 
 #include "esphome/components/speaker/speaker.h"
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/text_sensor/text_sensor.h"
-
-#include <audio_element.h>
-#include <audio_pipeline.h>
-
-#include <audio_hal.h>
-#include "esp_peripherals.h"
-//#include "periph_adc_button.h"
-//#include "input_key_service.h"
-#include <board.h>
-#include <http_stream.h>
-
-#include "esp_adc/adc_oneshot.h"
-#include "esp_adc/adc_cali.h"
-#include "esp_adc/adc_cali_scheme.h"
-
-#include <esp_event.h>  
 
 namespace esphome {
 namespace esp_adf {
@@ -69,7 +72,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void handle_buttons();
   void process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press);
   void read_adc();
-  bool setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle);
+  static bool setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle);
   
   struct TaskParams {
     ESPADFSpeaker *speaker;  // Pointer to the ESPADFSpeaker instance
