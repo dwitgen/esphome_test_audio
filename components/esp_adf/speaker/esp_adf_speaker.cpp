@@ -110,27 +110,30 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
         button_states[button_name] = is_pressed;
         ESP_LOGI(TAG, "Button %s %s", button_name, is_pressed ? "PRESSED" : "RELEASED");
 
+        // Publish the state to Home Assistant via ESPHome
+        if (strcmp(button_name, "VOL_UP") == 0 && this->btn_vol_up)
+            this->btn_vol_up->publish_state(is_pressed);
+
+        if (strcmp(button_name, "VOL_DOWN") == 0 && this->btn_vol_down)
+            this->btn_vol_down->publish_state(is_pressed);
+
+        if (strcmp(button_name, "SET") == 0 && this->btn_set)
+            this->btn_set->publish_state(is_pressed);
+
+        if (strcmp(button_name, "PLAY") == 0 && this->btn_play)
+            this->btn_play->publish_state(is_pressed);
+
+        if (strcmp(button_name, "MODE") == 0 && this->btn_mode)
+            this->btn_mode->publish_state(is_pressed);
+
+        if (strcmp(button_name, "REC") == 0 && this->btn_record)
+            this->btn_record->publish_state(is_pressed);
+
         if (is_pressed && on_press) {
             on_press();  // Trigger action on button press
         }
 
-        if (strcmp(button_name, "VOL_UP") == 0)
-            btn_vol_up.publish_state(is_pressed);
-
-        if (strcmp(button_name, "VOL_DOWN") == 0)
-            btn_vol_down.publish_state(is_pressed);
-
-        if (strcmp(button_name, "SET") == 0)
-            btn_set.publish_state(is_pressed);
-
-        if (strcmp(button_name, "PLAY") == 0)
-            btn_play.publish_state(is_pressed);
-
-        if (strcmp(button_name, "MODE") == 0)
-            btn_mode.publish_state(is_pressed);
-
-        if (strcmp(button_name, "REC") == 0)
-            btn_record.publish_state(is_pressed);
+        
     }
 }
 
@@ -540,12 +543,12 @@ void ESPADFSpeaker::setup() {
   bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
   
    // Link YAML binary sensors
-    btn_vol_up = id(btn_vol_up);
-    btn_vol_down = id(btn_vol_down);
-    btn_set = id(btn_set);
-    btn_play = id(btn_play);
-    btn_mode = id(btn_mode);
-    btn_record = id(btn_record);
+  this->btn_vol_up = &id(btn_vol_up);
+  this->btn_vol_down = &id(btn_vol_down);
+  this->btn_set = &id(btn_set);
+  this->btn_play = &id(btn_play);
+  this->btn_mode = &id(btn_mode);
+  this->btn_record = &id(btn_record);
 
 }
 
