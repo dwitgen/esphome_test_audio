@@ -40,13 +40,13 @@ namespace esp_adf {
 static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
-// Declare binary sensors locally in the file
-static binary_sensor::BinarySensor *btn_vol_up = nullptr;
-static binary_sensor::BinarySensor *btn_vol_down = nullptr;
-static binary_sensor::BinarySensor *btn_set = nullptr;
-static binary_sensor::BinarySensor *btn_play = nullptr;
-static binary_sensor::BinarySensor *btn_mode = nullptr;
-static binary_sensor::BinarySensor *btn_record = nullptr;
+// Declare as references to avoid static initialization order fiasco
+static binary_sensor::BinarySensor &btn_vol_up = id(btn_vol_up);
+static binary_sensor::BinarySensor &btn_vol_down = id(btn_vol_down);
+static binary_sensor::BinarySensor &btn_set = id(btn_set);
+static binary_sensor::BinarySensor &btn_play = id(btn_play);
+static binary_sensor::BinarySensor &btn_mode = id(btn_mode);
+static binary_sensor::BinarySensor &btn_record = id(btn_record);
 
 
 bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle) {
@@ -100,18 +100,6 @@ bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t channel
     return calibrated;
 }
 
-//void ESPADFSpeaker::read_adc() {
-//    int raw_value = 0;
-//    ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC_CHANNEL_7, &raw_value));
-//    ESP_LOGI(TAG, "ADC Raw Value: %d", raw_value);
-
-//    if (adc_calibrated) {
-//        int voltage = 0;
-//        ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_handle, raw_value, &voltage));
-//        ESP_LOGI(TAG, "Calibrated Voltage: %d mV", voltage);
-//    }
-//}
-
 
 void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press) {
     static std::map<std::string, bool> button_states;  // Track button states
@@ -125,6 +113,24 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
         if (is_pressed && on_press) {
             on_press();  // Trigger action on button press
         }
+
+        if (strcmp(button_name, "VOL_UP") == 0)
+            btn_vol_up.publish_state(is_pressed);
+
+        if (strcmp(button_name, "VOL_DOWN") == 0)
+            btn_vol_down.publish_state(is_pressed);
+
+        if (strcmp(button_name, "SET") == 0)
+            btn_set.publish_state(is_pressed);
+
+        if (strcmp(button_name, "PLAY") == 0)
+            btn_play.publish_state(is_pressed);
+
+        if (strcmp(button_name, "MODE") == 0)
+            btn_mode.publish_state(is_pressed);
+
+        if (strcmp(button_name, "REC") == 0)
+            btn_record.publish_state(is_pressed);
     }
 }
 
