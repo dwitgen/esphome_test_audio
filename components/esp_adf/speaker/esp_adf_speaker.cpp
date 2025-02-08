@@ -40,6 +40,14 @@ namespace esp_adf {
 static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
 
+// Declare binary sensors locally in the file
+static binary_sensor::BinarySensor *btn_vol_up = nullptr;
+static binary_sensor::BinarySensor *btn_vol_down = nullptr;
+static binary_sensor::BinarySensor *btn_set = nullptr;
+static binary_sensor::BinarySensor *btn_play = nullptr;
+static binary_sensor::BinarySensor *btn_mode = nullptr;
+static binary_sensor::BinarySensor *btn_record = nullptr;
+
 
 bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle) {
     adc_cali_handle_t handle = nullptr;
@@ -512,9 +520,7 @@ void ESPADFSpeaker::setup() {
   int initial_volume = this->get_current_volume();
   this->set_volume(initial_volume);
 
-  //setup_adc();  // Initialize ADC for button inputs
-  
-  // Configure ADC for volume control
+  // Setup ADC for button controls
   adc_oneshot_unit_init_cfg_t init_config1 = {
       .unit_id = ADC_UNIT_1,
   };
@@ -526,8 +532,14 @@ void ESPADFSpeaker::setup() {
   ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &ch_config));
   adc_cali_handle_t adc1_cali_handle = NULL;
   bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
- // adc1_config_width(ADC_WIDTH_BIT);
- // adc1_config_channel_atten((adc1_channel_t)but_channel, ADC_ATTEN);
+  
+   // Link YAML binary sensors
+    btn_vol_up = id(btn_vol_up);
+    btn_vol_down = id(btn_vol_down);
+    btn_set = id(btn_set);
+    btn_play = id(btn_play);
+    btn_mode = id(btn_mode);
+    btn_record = id(btn_record);
 
 }
 
