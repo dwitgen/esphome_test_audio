@@ -75,7 +75,7 @@ async def to_code(config):
         path="components",
         ref="v2.7",
         components=["*"],
-        submodules=["components/esp-adf-libs"],
+        submodules=["components/esp-adf-libs", "components/esp-sr"],
     )
     #esp32.add_idf_component(
     #    name="adc",
