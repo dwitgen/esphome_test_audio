@@ -98,14 +98,14 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
     bool is_pressed = (adc_value >= low_thresh && adc_value <= high_thresh);
     bool was_pressed = button_states[button_name];
 
-    for (auto *sensor : App.get_sensors()) {
-    ESP_LOGE(TAG, "Sensor Name: %s, Object ID Hash: %u", sensor->get_name().c_str(), sensor->get_object_id_hash());
     
-    }
-
     if (is_pressed != was_pressed) {
         button_states[button_name] = is_pressed;
         ESP_LOGI(TAG, "Button %s %s", button_name, is_pressed ? "PRESSED" : "RELEASED");
+        for (auto *binary_sensor : App.get_binary_sensors()) {
+            ESP_LOGE(TAG, "Sensor Name: %s, Object ID Hash: %u", sensor->get_name().c_str(), sensor->get_object_id_hash());
+        
+        }
 
         // Publish the state to Home Assistant via ESPHome
         if (strcmp(button_name, "VOL_UP") == 0 && btn_vol_up)
