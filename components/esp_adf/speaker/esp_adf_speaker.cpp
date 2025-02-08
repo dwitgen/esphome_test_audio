@@ -535,12 +535,12 @@ void ESPADFSpeaker::setup() {
   bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
   
    // Link YAML binary sensors
-  this->btn_vol_up = &id(btn_vol_up);
-  this->btn_vol_down = &id(btn_vol_down);
-  this->btn_set = &id(btn_set);
-  this->btn_play = &id(btn_play);
-  this->btn_mode = &id(btn_mode);
-  this->btn_record = &id(btn_record);
+  this->btn_vol_up = id(btn_vol_up);
+  this->btn_vol_down = id(btn_vol_down);
+  this->btn_set = id(btn_set);
+  this->btn_play = id(btn_play);
+  this->btn_mode = id(btn_mode);
+  this->btn_record = id(btn_record);
 
 }
 
