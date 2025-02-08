@@ -122,15 +122,16 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
 
 void ESPADFSpeaker::handle_buttons() {
     int adc_raw;
+    vTaskDelay(pdMS_TO_TICKS(100));
     adc_oneshot_read(adc1_handle, INPUT_BUTOP_ID, &adc_raw);
-    ESP_LOGE(TAG, "ADC Raw Value: %d", adc_raw);
+    ESP_LOGV(TAG, "ADC Raw Value: %d", adc_raw);
 
     process_button(adc_raw, VOL_UP_THRESHOLD_LOW, VOL_UP_THRESHOLD_HIGH, "VOL_UP", [this]() { this->volume_up(); });
     process_button(adc_raw, VOL_DOWN_THRESHOLD_LOW, VOL_DOWN_THRESHOLD_HIGH, "VOL_DOWN", [this]() { this->volume_down(); });
-    process_button(adc_raw, SET_THRESHOLD_LOW, SET_THRESHOLD_HIGH, "SET", []() { ESP_LOGI(TAG, "SET Button Pressed"); });
-    process_button(adc_raw, PLAY_THRESHOLD_LOW, PLAY_THRESHOLD_HIGH, "PLAY", []() { ESP_LOGI(TAG, "PLAY Button Pressed"); });
-    process_button(adc_raw, MODE_THRESHOLD_LOW, MODE_THRESHOLD_HIGH, "MODE", []() { ESP_LOGI(TAG, "MODE Button Pressed"); });
-    process_button(adc_raw, REC_THRESHOLD_LOW, REC_THRESHOLD_HIGH, "REC", []() { ESP_LOGI(TAG, "REC Button Pressed"); });
+    process_button(adc_raw, SET_THRESHOLD_LOW, SET_THRESHOLD_HIGH, "SET", []() { ESP_LOGE(TAG, "SET Button Pressed"); });
+    process_button(adc_raw, PLAY_THRESHOLD_LOW, PLAY_THRESHOLD_HIGH, "PLAY", []() { ESP_LOGE(TAG, "PLAY Button Pressed"); });
+    process_button(adc_raw, MODE_THRESHOLD_LOW, MODE_THRESHOLD_HIGH, "MODE", []() { ESP_LOGE(TAG, "MODE Button Pressed"); });
+    process_button(adc_raw, REC_THRESHOLD_LOW, REC_THRESHOLD_HIGH, "REC", []() { ESP_LOGE(TAG, "REC Button Pressed"); });
 }
 
 // Helper to configure I2S stream with dynamic sample rate
