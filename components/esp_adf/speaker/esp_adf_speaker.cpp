@@ -108,23 +108,23 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
         }
 
         // Publish the state to Home Assistant via ESPHome
-        if (strcmp(button_name, "VOL_UP") == 0 && btn_vol_up)
-            btn_vol_up->publish_state("On");
+        if (strcmp(button_name, "VOL_UP") == 0 && internal_btn_vol_up)
+            internal_btn_vol_up->publish_state("On");
 
-        if (strcmp(button_name, "VOL_DOWN") == 0 && btn_vol_down)
-            btn_vol_down->publish_state("On");
+        if (strcmp(button_name, "VOL_DOWN") == 0 && internal_btn_vol_down)
+            internal_btn_vol_down->publish_state("On");
 
-        if (strcmp(button_name, "SET") == 0 && btn_set)
-            btn_set->publish_state(is_pressed);
+        if (strcmp(button_name, "SET") == 0 && internal_btn_set)
+            internal_btn_set->publish_state(is_pressed);
 
-        if (strcmp(button_name, "PLAY") == 0 && btn_play)
-            btn_play->publish_state(is_pressed);
+        if (strcmp(button_name, "PLAY") == 0 && internal_btn_play)
+            internal_btn_play->publish_state(is_pressed);
 
-        if (strcmp(button_name, "MODE") == 0 && btn_mode)
-            btn_mode->publish_state(is_pressed);
+        if (strcmp(button_name, "MODE") == 0 && internal_btn_mode)
+            internal_btn_mode->publish_state(is_pressed);
 
-        if (strcmp(button_name, "REC") == 0 && btn_record)
-            btn_record->publish_state(is_pressed);
+        if (strcmp(button_name, "REC") == 0 && internal_btn_record)
+            internal_btn_record->publish_state(is_pressed);
 
         if (is_pressed && on_press) {
             on_press();  // Trigger action on button press
@@ -548,54 +548,54 @@ void ESPADFSpeaker::setup() {
   uint32_t mode_sensor_key = 0;
   uint32_t record_sensor_key = 0;
   for (auto *binary_sensor : App.get_binary_sensors()) {
-    if (binary_sensor->get_name() == "vol_up") {
+    if (binary_sensor->get_name() == "internal_btn_vol_up") {
       volup_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "vol_down") {
+    } else if (binary_sensor->get_name() == "internal_btn_vol_down") {
       voldown_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "set") {
+    } else if (binary_sensor->get_name() == "internal_btn_set") {
       set_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "play") {
+    } else if (binary_sensor->get_name() == "internal_btn_play") {
       play_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "mode") {
+    } else if (binary_sensor->get_name() == "internal_btn_mode") {
       mode_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "record") {
+    } else if (binary_sensor->get_name() == "intenral_btn_record") {
       record_sensor_key = binary_sensor->get_object_id_hash();
     } 
   }
   
   if(volup_sensor_key != 0) {
-    this->btn_vol_up = App.get_binary_sensor_by_key(volup_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for volume up initialized successfully: %s", this->btn_vol_up->get_name().c_str());
+    this->internal_btn_vol_up = App.get_binary_sensor_by_key(volup_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for volume up initialized successfully: %s", this->internal_btn_vol_up->get_name().c_str());
   } else {
     ESP_LOGE(TAG, "Failed to find key for binary sensor volume up");
   }
   if(voldown_sensor_key != 0) {
-    this->btn_vol_down = App.get_binary_sensor_by_key(voldown_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for volume down initialized successfully: %s", this->btn_vol_down->get_name().c_str());
+    this->internal_btn_vol_down = App.get_binary_sensor_by_key(voldown_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for volume down initialized successfully: %s", this->internal_btn_vol_down->get_name().c_str());
   } else {
     ESP_LOGE(TAG, "Failed to find key for binary sensor volume down");
   }
   if(set_sensor_key != 0) {
-    this->btn_set = App.get_binary_sensor_by_key(set_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for set initialized successfully: %s", this->btn_set->get_name().c_str());
+    this->internal_btn_set = App.get_binary_sensor_by_key(set_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for set initialized successfully: %s", this->internal_btn_set->get_name().c_str());
   } else {
     ESP_LOGE(TAG, "Failed to find key for binary sensor set");
   }
   if(play_sensor_key != 0) {
-    this->btn_play = App.get_binary_sensor_by_key(play_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for play initialized successfully: %s", this->btn_play->get_name().c_str());
+    this->internal_btn_play = App.get_binary_sensor_by_key(play_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for play initialized successfully: %s", this->internal_btn_play->get_name().c_str());
   } else {
     ESP_LOGE(TAG, "Failed to find key for binary sensor play");
   }
   if(mode_sensor_key != 0) {
-    this->btn_mode = App.get_binary_sensor_by_key(mode_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for mode initialized successfully: %s", this->btn_mode->get_name().c_str());
+    this->internal_btn_mode = App.get_binary_sensor_by_key(mode_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for mode initialized successfully: %s", this->internal_btn_mode->get_name().c_str());
   } else {
     ESP_LOGE(TAG, "Failed to find key for binary sensor mode");
   }
   if(record_sensor_key != 0) {
-    this->btn_record = App.get_binary_sensor_by_key(record_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for record initialized successfully: %s", this->btn_record->get_name().c_str());
+    this->internal_btn_record = App.get_binary_sensor_by_key(record_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for record initialized successfully: %s", this->internal_btn_record->get_name().c_str());
   } else {
     ESP_LOGE(TAG, "Failed to find key for binary sensor record");
   }
