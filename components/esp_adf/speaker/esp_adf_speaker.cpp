@@ -104,10 +104,10 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
 
         // Publish the state to Home Assistant via ESPHome
         if (strcmp(button_name, "VOL_UP") == 0 && btn_vol_up)
-            btn_vol_up->publish_state(is_pressed);
+            btn_vol_up->publish_state(On);
 
         if (strcmp(button_name, "VOL_DOWN") == 0 && btn_vol_down)
-            btn_vol_down->publish_state(is_pressed);
+            btn_vol_down->publish_state(On);
 
         if (strcmp(button_name, "SET") == 0 && btn_set)
             btn_set->publish_state(is_pressed);
