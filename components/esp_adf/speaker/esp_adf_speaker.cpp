@@ -509,7 +509,7 @@ void ESPADFSpeaker::setup() {
       .atten = ADC_ATTEN_DB_12,
       .bitwidth = ADC_BITWIDTH_12,
   };
-  ESP_ERROR_CHECK(adc_oneshot_config_channel(&this->adc1_handle, ADC_CHANNEL_7, &ch_config));
+  ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &ch_config));
   adc_cali_handle_t adc1_cali_handle = NULL;
   bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
  // adc1_config_width(ADC_WIDTH_BIT);
