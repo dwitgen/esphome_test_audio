@@ -134,7 +134,7 @@ static bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t 
     *out_handle = handle;
     if (ret == ESP_OK) {
         ESP_LOGI(TAG, "ADC Calibration Scheme Created Successfully");
-    } elseif (ret == ESP_ERR_NOT_SUPPORTED || !calibrated) {
+    } else if (ret == ESP_ERR_NOT_SUPPORTED || !calibrated) {
         ESP_LOGW(TAG, "eFuse not burnt, skip software calibration");
     } else {
         ESP_LOGE(TAG, "ADC Calibration Scheme Creation Failed: %s (%d)", esp_err_to_name(ret), ret);
