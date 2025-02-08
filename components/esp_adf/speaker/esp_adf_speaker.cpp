@@ -2,7 +2,7 @@
 
 #ifdef USE_ESP_IDF
 
-##ifdef __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
