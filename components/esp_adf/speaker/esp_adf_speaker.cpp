@@ -486,7 +486,7 @@ void ESPADFSpeaker::setup() {
  // Find the key for the generic volume sensor
   uint32_t volume_sensor_key = 0;
   for (auto *sensor : App.get_sensors()) {
-    ESP_LOGI(TAG, "Sensor Name: %s, Object ID Hash: %u", sensor->get_name().c_str(), sensor->get_object_id_hash());
+    ESP_LOGE(TAG, "Sensor Name: %s, Object ID Hash: %u", sensor->get_name().c_str(), sensor->get_object_id_hash());
     if (sensor->get_name() == "generic_volume_sensor") {
       volume_sensor_key = sensor->get_object_id_hash();
       break;
