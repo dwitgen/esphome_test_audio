@@ -31,6 +31,7 @@ extern "C" {
 #include "esphome/core/helpers.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/text_sensor/text_sensor.h"
+#include "esphome/components/binary_sensor/binary_sensor.h"
 
 namespace esphome {
 namespace esp_adf {
@@ -58,12 +59,12 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   //void update_playback_state(int state);
   void update_playback_state(const char *state);
 
-  binary_sensor::BinarySensor *btn_vol_up = nullptr;
-  binary_sensor::BinarySensor *btn_vol_down = nullptr;
-  binary_sensor::BinarySensor *btn_set = nullptr;
-  binary_sensor::BinarySensor *btn_play = nullptr;
-  binary_sensor::BinarySensor *btn_mode = nullptr;
-  binary_sensor::BinarySensor *btn_record = nullptr;
+  binary_sensor::BinarySensor *btn_vol_up;
+  binary_sensor::BinarySensor *btn_vol_down;
+  binary_sensor::BinarySensor *btn_set;
+  binary_sensor::BinarySensor *btn_play;
+  binary_sensor::BinarySensor *btn_mode;
+  binary_sensor::BinarySensor *btn_record;
 
   static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx);
   void handle_set_button();
