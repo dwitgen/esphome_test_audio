@@ -16,7 +16,7 @@ TO_PATCH_DIR = join(PROJECT_DIR, "components" )
 print(PATCH_FILE)
 assert isfile(PATCH_FILE)
 
-env.Execute("patch -p1 --fuzz=5 -l -u -d %s -i %s" % (PROJECT_DIR, PATCH_FILE))
+env.Execute("patch -p1 -l -u -d %s -i %s" % (PROJECT_DIR, PATCH_FILE))
 
 def _touch(path):
     with open(path, "w") as fp:
