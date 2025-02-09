@@ -116,8 +116,8 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
         if (strcmp(button_name, "PLAY") == 0 && internal_btn_play)
             internal_btn_play->publish_state(is_pressed);
 
-        if (strcmp(button_name, "MODE") == 0 && btn_mode)
-            btn_mode->publish_state(is_pressed);
+        if (strcmp(button_name, "MODE") == 0 && internal_btn_mode)
+            internal_btn_mode->publish_state(is_pressed);
 
         if (strcmp(button_name, "REC") == 0 && internal_btn_record)
             internal_btn_record->publish_state(is_pressed);
@@ -552,7 +552,7 @@ void ESPADFSpeaker::setup() {
       set_sensor_key = binary_sensor->get_object_id_hash();
     } else if (binary_sensor->get_name() == "internal_btn_play") {
       play_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "btn_mode") {
+    } else if (binary_sensor->get_name() == "internal_btn_mode") {
       mode_sensor_key = binary_sensor->get_object_id_hash();
     } else if (binary_sensor->get_name() == "intenral_btn_record") {
       record_sensor_key = binary_sensor->get_object_id_hash();
@@ -584,8 +584,8 @@ void ESPADFSpeaker::setup() {
     ESP_LOGE(TAG, "Failed to find key for binary sensor play");
   }
   if(mode_sensor_key != 0) {
-    this->btn_mode = App.get_binary_sensor_by_key(mode_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for mode initialized successfully: %s", this->btn_mode->get_name().c_str());
+    this->internal_btn_mode = App.get_binary_sensor_by_key(mode_sensor_key, true);
+    ESP_LOGI(TAG, "Binary sensor for mode initialized successfully: %s", this->internal_btn_mode->get_name().c_str());
   } else {
     ESP_LOGE(TAG, "Failed to find key for binary sensor mode");
   }
