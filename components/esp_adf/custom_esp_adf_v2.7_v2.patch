@@ -371,7 +371,7 @@ index af97414a..48c83188 100644
      .total_steps = 6,         \
      .press_judge_time = 3000, \
 diff --git a/components/esp_peripherals/lib/adc_button/adc_button.c b/components/esp_peripherals/lib/adc_button/adc_button.c
-index 41f8618c..3a9ee053 100644
+index 41f8618c..ec6d6326 100644
 --- a/components/esp_peripherals/lib/adc_button/adc_button.c
 +++ b/components/esp_peripherals/lib/adc_button/adc_button.c
 @@ -26,22 +26,17 @@
@@ -560,7 +560,7 @@ index 41f8618c..3a9ee053 100644
  }
  
  static int get_button_id(adc_btn_list *node, int adc)
-@@ -280,25 +373,25 @@ static void button_task(void *parameters)
+@@ -280,25 +373,17 @@ static void button_task(void *parameters)
      adc_btn_list *head = tag->head;
      adc_btn_list *find = head;
      xEventGroupClearBits(g_event_bit, DESTROY_BIT);
@@ -569,24 +569,17 @@ index 41f8618c..3a9ee053 100644
 -#else
 -    adc1_config_width(ADC_WIDTH_BIT_12);
 -#endif
- 
-+    // Legacy ADC configuration removed.
-+    // It is assumed that ADC oneshot initialization (adc_oneshot_new_unit) and channel configuration
-+    // (adc_oneshot_config_channel) have already been performed elsewhere.
-+
-+    // Reset buttons for each ADC channel node.
+-
      while (find) {
          adc_arr_t *info = & (find->adc_info);
          reset_btn(find->btn_dscp, info->total_steps);
 -        adc1_config_channel_atten(info->adc_ch, ADC_ATTEN_11db);
-+        // Remove legacy configuration: adc1_config_channel_atten(info->adc_ch, ADC_ATTEN_11db);
          find = find->next;
      }
      find = head;
  
  #if defined ENABLE_ADC_VOLUME
 -    adc1_config_channel_atten(DIAL_adc_ch, ADC_ATTEN_11db);
-+    // Remove legacy configuration: adc1_config_channel_atten(DIAL_adc_ch, ADC_ATTEN_11db);
      short adc_vol_prev = ADC_BTN_INVALID_ID;
      short adc_vol_cur = ADC_BTN_INVALID_ID;
 -    short internal_time_ms = DIAL_VOL_INTERVAL_TIME_MS / ADC_SAMPLE_INTERVAL_TIME_MS; /// 10 * 10 = 100ms
@@ -594,7 +587,7 @@ index 41f8618c..3a9ee053 100644
      static bool empty_flag;
      static bool full_flag;
      bool is_first_time = true;
-@@ -307,6 +400,7 @@ static void button_task(void *parameters)
+@@ -307,6 +392,7 @@ static void button_task(void *parameters)
      static adc_btn_state_t cur_state = ADC_BTN_STATE_ADC;
      adc_btn_state_t btn_st = ADC_BTN_STATE_IDLE;
      int cur_act_id = ADC_BTN_INVALID_ACT_ID;
@@ -602,7 +595,7 @@ index 41f8618c..3a9ee053 100644
      while (_task_flag) {
  #if defined ENABLE_ADC_VOLUME
          if (internal_time_ms == 0) {
-@@ -318,12 +412,12 @@ static void button_task(void *parameters)
+@@ -318,12 +404,12 @@ static void button_task(void *parameters)
                      is_first_time = false;
                  }
                  if (adc_vol_cur < 200) {
@@ -617,7 +610,7 @@ index 41f8618c..3a9ee053 100644
                          ESP_LOGI(TAG, "ABS_HIGH:%d, %d->100", n, adc_vol_cur / 25);
                          full_flag = true;
                      }
-@@ -360,22 +454,22 @@ static void button_task(void *parameters)
+@@ -360,22 +446,22 @@ static void button_task(void *parameters)
                          break;
                      }
                  case ADC_BTN_STATE_PRESSED: {
