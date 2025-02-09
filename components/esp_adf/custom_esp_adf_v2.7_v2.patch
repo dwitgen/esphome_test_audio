@@ -1,0 +1,899 @@
+diff --git a/components/audio_board/include/board_pins_config.h b/components/audio_board/include/board_pins_config.h
+index 62893921..f536ee46 100644
+--- a/components/audio_board/include/board_pins_config.h
++++ b/components/audio_board/include/board_pins_config.h
+@@ -29,6 +29,7 @@
+ #include "driver/spi_common.h"
+ #include "driver/spi_master.h"
+ #include "driver/spi_slave.h"
++#include "driver/i2s_std.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -61,13 +62,13 @@ esp_err_t get_i2c_pins(i2c_port_t port, i2c_config_t *i2c_config);
+  * @brief                  Get i2s pins configuration
+  *
+  * @param      port        i2s port number to get configuration
+- * @param      i2s_config  i2s configuration parameters
++ * @param      gpio_cfg    i2s configuration parameters
+  *
+  * @return
+  *     - ESP_OK
+  *     - ESP_FAIL
+  */
+-esp_err_t get_i2s_pins(int port, board_i2s_pin_t *i2s_config);
++esp_err_t get_i2s_pins(int port, i2s_std_gpio_config_t *gpio_cfg);
+ 
+ /**
+  * @brief                  Get spi pins configuration
+diff --git a/components/audio_hal/driver/tas5805m/tas5805m.c b/components/audio_hal/driver/tas5805m/tas5805m.c
+index fef4fe3c..7c448d8d 100644
+--- a/components/audio_hal/driver/tas5805m/tas5805m.c
++++ b/components/audio_hal/driver/tas5805m/tas5805m.c
+@@ -94,7 +94,7 @@ static esp_err_t tas5805m_transmit_registers(const tas5805m_cfg_reg_t *conf_buf,
+                 // Used in legacy applications.  Ignored here.
+                 break;
+             case CFG_META_DELAY:
+-                vTaskDelay(conf_buf[i].value / portTICK_RATE_MS);
++                vTaskDelay(conf_buf[i].value / portTICK_PERIOD_MS);
+                 break;
+             case CFG_META_BURST:
+                 ret = i2c_bus_write_bytes(i2c_handler, TAS5805M_ADDR, (unsigned char *)(&conf_buf[i + 1].offset), 1, (unsigned char *)(&conf_buf[i + 1].value), conf_buf[i].value);
+@@ -129,9 +129,9 @@ esp_err_t tas5805m_init(audio_hal_codec_config_t *codec_cfg)
+     io_conf.intr_type = GPIO_INTR_DISABLE;
+     gpio_config(&io_conf);
+     gpio_set_level(TAS5805M_RST_GPIO, 0);
+-    vTaskDelay(20 / portTICK_RATE_MS);
++    vTaskDelay(20 / portTICK_PERIOD_MS);
+     gpio_set_level(TAS5805M_RST_GPIO, 1);
+-    vTaskDelay(200 / portTICK_RATE_MS);
++    vTaskDelay(200 / portTICK_PERIOD_MS);
+ 
+     ret = get_i2c_pins(I2C_NUM_0, &i2c_cfg);
+     i2c_handler = i2c_bus_create(I2C_NUM_0, &i2c_cfg);
+diff --git a/components/audio_hal/include/audio_hal.h b/components/audio_hal/include/audio_hal.h
+index 1a9cf12a..065218c1 100755
+--- a/components/audio_hal/include/audio_hal.h
++++ b/components/audio_hal/include/audio_hal.h
+@@ -147,7 +147,7 @@ typedef struct audio_hal {
+     esp_err_t (*audio_codec_set_volume)(int volume);                                                         /*!< set codec volume */
+     esp_err_t (*audio_codec_get_volume)(int *volume);                                                        /*!< get codec volume */
+     esp_err_t (*audio_codec_enable_pa) (bool enable);                                                        /*!< enable pa */
+-    xSemaphoreHandle audio_hal_lock;                                                                         /*!< semaphore of codec */
++    SemaphoreHandle_t audio_hal_lock;                                                                         /*!< semaphore of codec */
+     void *handle;                                                                                            /*!< handle of audio codec */
+ } audio_hal_func_t;
+ 
+diff --git a/components/audio_pipeline/audio_element.c b/components/audio_pipeline/audio_element.c
+index 39b24468..bb26cdcc 100644
+--- a/components/audio_pipeline/audio_element.c
++++ b/components/audio_pipeline/audio_element.c
+@@ -37,7 +37,7 @@
+ #include "audio_thread.h"
+ 
+ static const char *TAG = "AUDIO_ELEMENT";
+-#define DEFAULT_MAX_WAIT_TIME       (2000/portTICK_RATE_MS)
++#define DEFAULT_MAX_WAIT_TIME       (2000/portTICK_PERIOD_MS)
+ 
+ /**
+  *  I/O Element Abstract
+@@ -106,7 +106,7 @@ struct audio_element {
+     int                         task_stack;
+     int                         task_prio;
+     int                         task_core;
+-    xSemaphoreHandle            lock;
++    SemaphoreHandle_t            lock;
+     audio_element_info_t        info;
+     audio_element_info_t        *report_info;
+ 
+diff --git a/components/audio_pipeline/audio_pipeline.c b/components/audio_pipeline/audio_pipeline.c
+index 8be8365c..3cd1001b 100644
+--- a/components/audio_pipeline/audio_pipeline.c
++++ b/components/audio_pipeline/audio_pipeline.c
+@@ -66,7 +66,7 @@ struct audio_pipeline {
+     audio_element_list_t        el_list;
+     ringbuf_list_t              rb_list;
+     audio_element_state_t       state;
+-    xSemaphoreHandle            lock;
++    SemaphoreHandle_t            lock;
+     bool                        linked;
+     audio_event_iface_handle_t  listener;
+ };
+@@ -315,10 +315,10 @@ esp_err_t audio_pipeline_resume(audio_pipeline_handle_t pipeline)
+             continue;
+         }
+         if (wait_first_el) {
+-            ret |= audio_element_resume(el_item->el, 0, 2000 / portTICK_RATE_MS);
++            ret |= audio_element_resume(el_item->el, 0, 2000 / portTICK_PERIOD_MS);
+             wait_first_el = false;
+         } else {
+-            ret |= audio_element_resume(el_item->el, 0, 2000 / portTICK_RATE_MS);
++            ret |= audio_element_resume(el_item->el, 0, 2000 / portTICK_PERIOD_MS);
+         }
+     }
+     audio_pipeline_change_state(pipeline, AEL_STATE_RUNNING);
+diff --git a/components/audio_stream/pwm_stream.c b/components/audio_stream/pwm_stream.c
+index c3326f94..5deaaab4 100644
+--- a/components/audio_stream/pwm_stream.c
++++ b/components/audio_stream/pwm_stream.c
+@@ -561,7 +561,7 @@ static void pwm_wait_flush(void)
+     audio_pwm_handle_t handle = g_audio_pwm_handle;
+     uint32_t data_size = pwm_data_list_get_count(handle->data);
+     if (handle->status == AUDIO_PWM_STATUS_BUSY && data_size > 0) {
+-        pwm_data_list_wait_flushed(handle->data, pwm_get_data_duration(data_size) / portTICK_RATE_MS);
++        pwm_data_list_wait_flushed(handle->data, pwm_get_data_duration(data_size) / portTICK_PERIOD_MS);
+     }
+ }
+ 
+@@ -669,7 +669,7 @@ static esp_err_t _pwm_open(audio_element_handle_t self)
+     if (pwm->is_open) {
+         return ESP_OK;
+     }
+-    res = audio_element_set_input_timeout(self, 2000 / portTICK_RATE_MS);
++    res = audio_element_set_input_timeout(self, 2000 / portTICK_PERIOD_MS);
+     pwm->is_open = true;
+     return res;
+ }
+diff --git a/components/battery_service/battery_service.c b/components/battery_service/battery_service.c
+index 222433ae..4a5b88cf 100644
+--- a/components/battery_service/battery_service.c
++++ b/components/battery_service/battery_service.c
+@@ -35,7 +35,7 @@
+ #include "battery_service.h"
+ 
+ typedef struct battery_service {
+-    xQueueHandle serv_q;
++    QueueHandle_t serv_q;
+     EventGroupHandle_t sync_events;
+ 
+     vol_monitor_handle_t vol_monitor;
+diff --git a/components/coredump_upload_service/coredump_upload_service.c b/components/coredump_upload_service/coredump_upload_service.c
+index 16604bad..ac410cdf 100644
+--- a/components/coredump_upload_service/coredump_upload_service.c
++++ b/components/coredump_upload_service/coredump_upload_service.c
+@@ -49,7 +49,7 @@
+ #endif
+ 
+ typedef struct {
+-    xQueueHandle cmd_q;
++    QueueHandle_t cmd_q;
+     EventGroupHandle_t sync_evt;
+     bool (*do_post)(char *url, uint8_t *data, size_t len);
+ } coredump_upload_t;
+diff --git a/components/dueros_service/dueros_service.c b/components/dueros_service/dueros_service.c
+index 878d7648..54cf3aaa 100644
+--- a/components/dueros_service/dueros_service.c
++++ b/components/dueros_service/dueros_service.c
+@@ -80,7 +80,7 @@ typedef enum {
+ 
+ typedef struct {
+     bool                    login;
+-    xQueueHandle            duer_que;
++    QueueHandle_t           duer_que;
+     service_state_t         duer_state;
+     EventGroupHandle_t      duer_evt;
+ } dueros_service_t;
+diff --git a/components/esp_event_cast/esp_event_cast.c b/components/esp_event_cast/esp_event_cast.c
+index 8cad8f4f..dad60fab 100644
+--- a/components/esp_event_cast/esp_event_cast.c
++++ b/components/esp_event_cast/esp_event_cast.c
+@@ -37,13 +37,13 @@ static const char *TAG = "EVT_CAST";
+ 
+ typedef struct esp_evt_cast_item {
+     STAILQ_ENTRY(esp_evt_cast_item)     next;
+-    xQueueHandle                        que;
++    QueueHandle_t                        que;
+ } esp_evt_cast_item_t;
+ 
+ typedef STAILQ_HEAD(esp_event_cast_list, esp_evt_cast_item) esp_event_cast_list_t;
+ 
+ typedef struct esp_event_cast {
+-    xSemaphoreHandle        _mux;
++    SemaphoreHandle_t        _mux;
+     esp_event_cast_list_t   evt_list;
+ } esp_event_cast_t;
+ 
+@@ -75,7 +75,7 @@ esp_err_t esp_event_cast_destroy(esp_event_cast_handle_t handle)
+     return ESP_FAIL;
+ }
+ 
+-esp_err_t esp_event_cast_register(esp_event_cast_handle_t handle, xQueueHandle que)
++esp_err_t esp_event_cast_register(esp_event_cast_handle_t handle, QueueHandle_t que)
+ {
+     if ((handle == NULL) || (que == NULL)) {
+         ESP_LOGE(TAG, "func:%s, invalid parameters, handle=%p, que=%p", __func__, handle, que);
+@@ -92,7 +92,7 @@ esp_err_t esp_event_cast_register(esp_event_cast_handle_t handle, xQueueHandle q
+     return ESP_OK;
+ }
+ 
+-esp_err_t esp_event_cast_unregister(esp_event_cast_handle_t handle, xQueueHandle que)
++esp_err_t esp_event_cast_unregister(esp_event_cast_handle_t handle, QueueHandle_t que)
+ {
+     if ((handle == NULL) || (que == NULL)) {
+         ESP_LOGE(TAG, "func:%s, invalid parameters, handle=%p, que=%p", __func__, handle, que);
+diff --git a/components/esp_event_cast/include/esp_event_cast.h b/components/esp_event_cast/include/esp_event_cast.h
+index aff08edf..6322872a 100644
+--- a/components/esp_event_cast/include/esp_event_cast.h
++++ b/components/esp_event_cast/include/esp_event_cast.h
+@@ -57,7 +57,7 @@ esp_err_t esp_event_cast_destroy(esp_event_cast_handle_t handle);
+  *     - ESP_OK: success
+  *     - ESP_FAIL: others
+  */
+-esp_err_t esp_event_cast_register(esp_event_cast_handle_t handle, xQueueHandle que);
++esp_err_t esp_event_cast_register(esp_event_cast_handle_t handle, QueueHandle_t que);
+ 
+ /**
+  * @brief Remove queue item from esp_event_cast_handle_t object, but does't delete the queue
+@@ -69,7 +69,7 @@ esp_err_t esp_event_cast_register(esp_event_cast_handle_t handle, xQueueHandle q
+  *     - ESP_OK: success
+  *     - ESP_FAIL: others
+  */
+-esp_err_t esp_event_cast_unregister(esp_event_cast_handle_t handle, xQueueHandle que);
++esp_err_t esp_event_cast_unregister(esp_event_cast_handle_t handle, QueueHandle_t que);
+ 
+ /**
+  * @brief Broadcasting the data to receiver
+diff --git a/components/esp_peripherals/driver/i2c_bus/i2c_bus.c b/components/esp_peripherals/driver/i2c_bus/i2c_bus.c
+index 32f3c21c..ecf6b1a7 100644
+--- a/components/esp_peripherals/driver/i2c_bus/i2c_bus.c
++++ b/components/esp_peripherals/driver/i2c_bus/i2c_bus.c
+@@ -43,7 +43,7 @@ typedef struct {
+     i2c_config_t     i2c_conf;   /*!<I2C bus parameters*/
+     i2c_port_t       i2c_port;   /*!<I2C port number */
+     int              ref_count;  /*!<Reference Count for multiple client */
+-    xSemaphoreHandle bus_lock;   /*!<Lock for bus */
++    SemaphoreHandle_t bus_lock;   /*!<Lock for bus */
+ } i2c_bus_t;
+ 
+ static const char *TAG = "I2C_BUS";
+@@ -109,7 +109,7 @@ esp_err_t i2c_bus_write_bytes(i2c_bus_handle_t bus, int addr, uint8_t *reg, int
+     ret |= i2c_master_write(cmd, reg, regLen, I2C_ACK_CHECK_EN);
+     ret |= i2c_master_write(cmd, data, datalen, I2C_ACK_CHECK_EN);
+     ret |= i2c_master_stop(cmd);
+-    ret |= i2c_master_cmd_begin(p_bus->i2c_port, cmd, 1000 / portTICK_RATE_MS);
++    ret |= i2c_master_cmd_begin(p_bus->i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
+     i2c_cmd_link_delete(cmd);
+     mutex_unlock(p_bus->bus_lock);
+     I2C_BUS_CHECK(ret == 0, "I2C Bus WriteReg Error", ESP_FAIL);
+@@ -129,7 +129,7 @@ esp_err_t i2c_bus_write_data(i2c_bus_handle_t bus, int addr, uint8_t *data, int
+     ret |= i2c_master_write_byte(cmd, addr, 1);
+     ret |= i2c_master_write(cmd, data, datalen, I2C_ACK_CHECK_EN);
+     ret |= i2c_master_stop(cmd);
+-    ret |= i2c_master_cmd_begin(p_bus->i2c_port, cmd, 1000 / portTICK_RATE_MS);
++    ret |= i2c_master_cmd_begin(p_bus->i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
+     i2c_cmd_link_delete(cmd);
+     mutex_unlock(p_bus->bus_lock);
+     I2C_BUS_CHECK(ret == 0, "I2C Bus WriteReg Error", ESP_FAIL);
+@@ -150,7 +150,7 @@ esp_err_t i2c_bus_read_bytes(i2c_bus_handle_t bus, int addr, uint8_t *reg, int r
+     ret |= i2c_master_write_byte(cmd, addr, I2C_ACK_CHECK_EN);
+     ret |= i2c_master_write(cmd, reg, reglen, I2C_ACK_CHECK_EN);
+     ret |= i2c_master_stop(cmd);
+-    ret |= i2c_master_cmd_begin(p_bus->i2c_port, cmd, 1000 / portTICK_RATE_MS);
++    ret |= i2c_master_cmd_begin(p_bus->i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
+     i2c_cmd_link_delete(cmd);
+ 
+     cmd = i2c_cmd_link_create();
+@@ -163,7 +163,7 @@ esp_err_t i2c_bus_read_bytes(i2c_bus_handle_t bus, int addr, uint8_t *reg, int r
+     ret |= i2c_master_read_byte(cmd, &outdata[datalen - 1], 1);
+ 
+     ret |= i2c_master_stop(cmd);
+-    ret |= i2c_master_cmd_begin(p_bus->i2c_port, cmd, 1000 / portTICK_RATE_MS);
++    ret |= i2c_master_cmd_begin(p_bus->i2c_port, cmd, 1000 / portTICK_PERIOD_MS);
+     i2c_cmd_link_delete(cmd);
+ 
+     mutex_unlock(p_bus->bus_lock);
+diff --git a/components/esp_peripherals/esp_peripherals.c b/components/esp_peripherals/esp_peripherals.c
+index 0f85c53e..fd5c2ef9 100644
+--- a/components/esp_peripherals/esp_peripherals.c
++++ b/components/esp_peripherals/esp_peripherals.c
+@@ -35,7 +35,7 @@
+ 
+ static const char *TAG = "ESP_PERIPH";
+ 
+-#define DEFAULT_ESP_PERIPH_WAIT_TICK       (10/portTICK_RATE_MS)
++#define DEFAULT_ESP_PERIPH_WAIT_TICK       (10/portTICK_PERIOD_MS)
+ 
+ struct esp_periph {
+     char                       *tag;
+@@ -54,7 +54,7 @@ struct esp_periph {
+ 
+ typedef struct esp_periph_sets {
+     EventGroupHandle_t                              state_event_bits;
+-    xSemaphoreHandle                                lock;
++    SemaphoreHandle_t                               lock;
+     int                                             task_stack;
+     int                                             task_prio;
+     int                                             task_core;
+@@ -89,7 +89,7 @@ static esp_err_t process_peripheral_event(audio_event_iface_msg_t *msg, void *co
+ 
+ esp_err_t esp_periph_set_change_waiting_time(esp_periph_set_handle_t periph_set_handle, int time_ms)
+ {
+-    audio_event_iface_set_cmd_waiting_timeout(esp_periph_set_get_event_iface(periph_set_handle), time_ms / portTICK_RATE_MS);
++    audio_event_iface_set_cmd_waiting_timeout(esp_periph_set_get_event_iface(periph_set_handle), time_ms / portTICK_PERIOD_MS);
+     return ESP_OK;
+ }
+ 
+diff --git a/components/esp_peripherals/include/esp_peripherals.h b/components/esp_peripherals/include/esp_peripherals.h
+index ad4f9fe9..c6be4089 100644
+--- a/components/esp_peripherals/include/esp_peripherals.h
++++ b/components/esp_peripherals/include/esp_peripherals.h
+@@ -29,6 +29,7 @@
+ #include "audio_event_iface.h"
+ #include "audio_common.h"
+ #include "freertos/event_groups.h"
++#include "freertos/timers.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -76,7 +77,7 @@ typedef struct esp_periph *esp_periph_handle_t;
+ typedef esp_err_t (*esp_periph_func)(esp_periph_handle_t periph);
+ typedef esp_err_t (*esp_periph_run_func)(esp_periph_handle_t periph, audio_event_iface_msg_t *msg);
+ typedef esp_err_t (*esp_periph_event_handle_t)(audio_event_iface_msg_t *event, void *context);
+-typedef void (*timer_callback)(xTimerHandle tmr);
++typedef void (*timer_callback)(TimerHandle_t tmr);
+ 
+ /**
+  * @brief Common peripherals configurations
+diff --git a/components/esp_peripherals/include/periph_adc_button.h b/components/esp_peripherals/include/periph_adc_button.h
+index af97414a..48c83188 100644
+--- a/components/esp_peripherals/include/periph_adc_button.h
++++ b/components/esp_peripherals/include/periph_adc_button.h
+@@ -25,7 +25,7 @@
+ #ifndef _PERIPH_ADC_BUTTON_H_
+ #define _PERIPH_ADC_BUTTON_H_
+ 
+-#include "driver/adc.h"
++#include "esp_adc/oneshot.h"
+ #include "adc_button.h"
+ #include "esp_peripherals.h"
+ 
+@@ -63,21 +63,9 @@ typedef enum {
+     PERIPH_ADC_BUTTON_LONG_RELEASE,
+ } periph_adc_button_event_id_t;
+ 
+-/**
+-* ESP32 ADC1 channels and GPIO table
+-*   ADC1_CHANNEL_0 -  GPIO36
+-*   ADC1_CHANNEL_1 -  GPIO37
+-*   ADC1_CHANNEL_2 -  GPIO38
+-*   ADC1_CHANNEL_3 -  GPIO39
+-*   ADC1_CHANNEL_4 -  GPIO32
+-*   ADC1_CHANNEL_5 -  GPIO33
+-*   ADC1_CHANNEL_6 -  GPIO34
+-*   ADC1_CHANNEL_7 -  GPIO35
+-*
+-**/
+ 
+ #define ADC_DEFAULT_ARR() {   \
+-    .adc_ch = ADC1_CHANNEL_3, \
++    .adc_ch = ADC_CHANNEL_3, \
+     .adc_level_step = NULL,   \
+     .total_steps = 6,         \
+     .press_judge_time = 3000, \
+diff --git a/components/esp_peripherals/lib/adc_button/adc_button.c b/components/esp_peripherals/lib/adc_button/adc_button.c
+index 41f8618c..3a9ee053 100644
+--- a/components/esp_peripherals/lib/adc_button/adc_button.c
++++ b/components/esp_peripherals/lib/adc_button/adc_button.c
+@@ -26,22 +26,17 @@
+ #include <stdlib.h>
+ #include "freertos/FreeRTOS.h"
+ #include "freertos/event_groups.h"
+-#include "driver/adc.h"
++#include <esp_adc/adc_oneshot.h> 
++#include <esp_adc/adc_cali.h> 
++#include <esp_adc/adc_cali_scheme.h> 
+ #include "math.h"
+ #include "audio_mem.h"
+-#include "esp_adc_cal.h"
+ #include "string.h"
+ #include "adc_button.h"
+ #include "esp_log.h"
+ #include "audio_thread.h"
+ #include "audio_idf_version.h"
+ 
+-#if (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0))
+-#define ADC_ATTEN_11db ADC_ATTEN_DB_11
+-#define ADC_WIDTH_12Bit ADC_BITWIDTH_12
+-#define ADC_WIDTH_13Bit ADC_BITWIDTH_13
+-#endif
+-
+ #define V_REF                           1100
+ 
+ #define ADC_SAMPLES_NUM                 10
+@@ -60,6 +55,9 @@
+ static char *TAG = "ADC_BTN";
+ static EventGroupHandle_t g_event_bit;
+ 
++static adc_oneshot_unit_handle_t adc1_handle = NULL;
++static adc_cali_handle_t       adc1_cali_handle = NULL;
++
+ typedef struct {
+     adc_button_callback btn_callback;
+     adc_btn_list *head;
+@@ -141,37 +139,132 @@ esp_err_t adc_btn_destroy_list(adc_btn_list *head)
+     return ESP_OK;
+ }
+ 
+-static int get_adc_voltage(int channel)
++/*---------------------------------------------------------------
++        ADC Calibration Initialization
++---------------------------------------------------------------*/
++static bool adc_calibration_init(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle)
+ {
+-    uint32_t data[ADC_SAMPLES_NUM] = { 0 };
+-    uint32_t sum = 0;
+-    int tmp = 0;
+-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32S3
+-    esp_adc_cal_characteristics_t characteristics;
+-#if CONFIG_IDF_TARGET_ESP32
+-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_11db, ADC_WIDTH_12Bit, V_REF, &characteristics);
+-#elif CONFIG_IDF_TARGET_ESP32S2
+-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_11db, ADC_WIDTH_BIT_13, 0, &characteristics);
+-#else
+-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_11db, ADC_WIDTH_12Bit, 0, &characteristics);
++    adc_cali_handle_t handle = NULL;
++    esp_err_t ret = ESP_FAIL;
++    bool calibrated = false;
++
++#if ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED
++    if (!calibrated) {
++        ESP_LOGI(TAG, "calibration scheme version is %s", "Curve Fitting");
++        adc_cali_curve_fitting_config_t cali_config = {
++            .unit_id = unit,
++            .chan = channel,
++            .atten = atten,
++            .bitwidth = ADC_BITWIDTH_DEFAULT,
++        };
++        ret = adc_cali_create_scheme_curve_fitting(&cali_config, &handle);
++        if (ret == ESP_OK) {
++            calibrated = true;
++        }
++    }
+ #endif
+ 
+-    for (int i = 0; i < ADC_SAMPLES_NUM; ++i) {
+-        esp_adc_cal_get_voltage(channel, &characteristics, &data[i]);
++#if ADC_CALI_SCHEME_LINE_FITTING_SUPPORTED
++    if (!calibrated) {
++        ESP_LOGI(TAG, "calibration scheme version is %s", "Line Fitting");
++        adc_cali_line_fitting_config_t cali_config = {
++            .unit_id = unit,
++            .atten = atten,
++            .bitwidth = ADC_BITWIDTH_DEFAULT,
++        };
++        ret = adc_cali_create_scheme_line_fitting(&cali_config, &handle);
++        if (ret == ESP_OK) {
++            calibrated = true;
++        }
+     }
+ #endif
++
++    *out_handle = handle;
++    if (ret == ESP_OK) {
++        ESP_LOGI(TAG, "Calibration Success");
++    } else if (ret == ESP_ERR_NOT_SUPPORTED || !calibrated) {
++        ESP_LOGW(TAG, "eFuse not burnt, skip software calibration");
++    } else {
++        ESP_LOGE(TAG, "Invalid arg or no memory");
++    }
++
++    return calibrated;
++}
++
++/*---------------------------------------------------------------
++        ADC Initialization for Button Module
++---------------------------------------------------------------*/
++static esp_err_t adc_button_adc_init(adc_channel_t channel)
++{
++    adc_oneshot_unit_init_cfg_t init_config = {
++        .unit_id = ADC_UNIT_1,
++    };
++    esp_err_t ret = adc_oneshot_new_unit(&init_config, &adc1_handle);
++    if (ret != ESP_OK) {
++         ESP_LOGE(TAG, "adc_oneshot_new_unit failed; ret = %d", ret);
++         return ret;
++    }
++    
++    adc_oneshot_chan_cfg_t ch_config = {
++        .atten = ADC_ATTEN_DB_12,
++        .bitwidth = ADC_BITWIDTH_DEFAULT,
++    };
++    ret = adc_oneshot_config_channel(adc1_handle, channel, &ch_config);
++    if (ret != ESP_OK) {
++         ESP_LOGE(TAG, "adc_oneshot_config_channel failed; ret = %d", ret);
++         return ret;
++    }
++    
++    bool calibrated = adc_calibration_init(ADC_UNIT_1, channel, ADC_ATTEN_DB_12, &adc1_cali_handle);
++    if (!calibrated) {
++         ESP_LOGW(TAG, "Calibration not supported, using raw ADC values");
++    }
++    return ESP_OK;
++}
++
++static int get_adc_voltage(int channel)
++{
++    uint32_t data[ADC_SAMPLES_NUM] = { 0 };
++    uint32_t sum = 0;
++    // Loop to acquire multiple samples using the new adc oneshot API
++    for (int i = 0; i < ADC_SAMPLES_NUM; i++) {
++        int raw;
++        // Read raw ADC value from the oneshot API (adc1_handle must be initialized earlier)
++        esp_err_t ret = adc_oneshot_read(adc1_handle, channel, &raw);
++        if (ret != ESP_OK) {
++            ESP_LOGE(TAG, "adc_oneshot_read failed; ret = %d", ret);
++            return -1;
++        }
++        int voltage = 0;
++        // Use calibration handle (adc1_cali_handle) if available to convert raw value to voltage
++        if (adc1_cali_handle) {
++            ret = adc_cali_raw_to_voltage(adc1_cali_handle, raw, &voltage);
++            if (ret != ESP_OK) {
++                ESP_LOGE(TAG, "adc_cali_raw_to_voltage failed; ret = %d", ret);
++                voltage = raw; // fallback to raw value if calibration conversion fails
++            }
++        } else {
++            voltage = raw; // fallback to raw value if no calibration handle is available
++        }
++        data[i] = voltage;
++    }
++    
++    // Sort the acquired samples
+     for (int j = 0; j < ADC_SAMPLES_NUM - 1; j++) {
+         for (int i = 0; i < ADC_SAMPLES_NUM - j - 1; i++) {
+             if (data[i] > data[i + 1]) {
+-                tmp = data[i];
++                int tmp = data[i];
+                 data[i] = data[i + 1];
+                 data[i + 1] = tmp;
+             }
+         }
+     }
+-    for (int num = 1; num < ADC_SAMPLES_NUM - 1; num++)
++    
++    // Average the middle samples to exclude potential outliers
++    for (int num = 1; num < ADC_SAMPLES_NUM - 1; num++) {
+         sum += data[num];
+-    return (sum / (ADC_SAMPLES_NUM - 2));
++    }
++    return sum / (ADC_SAMPLES_NUM - 2);
+ }
+ 
+ static int get_button_id(adc_btn_list *node, int adc)
+@@ -280,25 +373,25 @@ static void button_task(void *parameters)
+     adc_btn_list *head = tag->head;
+     adc_btn_list *find = head;
+     xEventGroupClearBits(g_event_bit, DESTROY_BIT);
+-#if CONFIG_IDF_TARGET_ESP32S2
+-    adc1_config_width(ADC_WIDTH_BIT_13);
+-#else
+-    adc1_config_width(ADC_WIDTH_BIT_12);
+-#endif
+ 
++    // Legacy ADC configuration removed.
++    // It is assumed that ADC oneshot initialization (adc_oneshot_new_unit) and channel configuration
++    // (adc_oneshot_config_channel) have already been performed elsewhere.
++
++    // Reset buttons for each ADC channel node.
+     while (find) {
+         adc_arr_t *info = & (find->adc_info);
+         reset_btn(find->btn_dscp, info->total_steps);
+-        adc1_config_channel_atten(info->adc_ch, ADC_ATTEN_11db);
++        // Remove legacy configuration: adc1_config_channel_atten(info->adc_ch, ADC_ATTEN_11db);
+         find = find->next;
+     }
+     find = head;
+ 
+ #if defined ENABLE_ADC_VOLUME
+-    adc1_config_channel_atten(DIAL_adc_ch, ADC_ATTEN_11db);
++    // Remove legacy configuration: adc1_config_channel_atten(DIAL_adc_ch, ADC_ATTEN_11db);
+     short adc_vol_prev = ADC_BTN_INVALID_ID;
+     short adc_vol_cur = ADC_BTN_INVALID_ID;
+-    short internal_time_ms = DIAL_VOL_INTERVAL_TIME_MS / ADC_SAMPLE_INTERVAL_TIME_MS; /// 10 * 10 = 100ms
++    short internal_time_ms = DIAL_VOL_INTERVAL_TIME_MS / ADC_SAMPLE_INTERVAL_TIME_MS;  // e.g., 100ms
+     static bool empty_flag;
+     static bool full_flag;
+     bool is_first_time = true;
+@@ -307,6 +400,7 @@ static void button_task(void *parameters)
+     static adc_btn_state_t cur_state = ADC_BTN_STATE_ADC;
+     adc_btn_state_t btn_st = ADC_BTN_STATE_IDLE;
+     int cur_act_id = ADC_BTN_INVALID_ACT_ID;
++
+     while (_task_flag) {
+ #if defined ENABLE_ADC_VOLUME
+         if (internal_time_ms == 0) {
+@@ -318,12 +412,12 @@ static void button_task(void *parameters)
+                     is_first_time = false;
+                 }
+                 if (adc_vol_cur < 200) {
+-                    if (empty_flag == false) {
++                    if (!empty_flag) {
+                         ESP_LOGI(TAG, "ABS_LOW:%d, %d->0", n, adc_vol_cur / 25);
+                         empty_flag = true;
+                     }
+                 } else if (adc_vol_cur > 2500) {
+-                    if (full_flag == false) {
++                    if (!full_flag) {
+                         ESP_LOGI(TAG, "ABS_HIGH:%d, %d->100", n, adc_vol_cur / 25);
+                         full_flag = true;
+                     }
+@@ -360,22 +454,22 @@ static void button_task(void *parameters)
+                         break;
+                     }
+                 case ADC_BTN_STATE_PRESSED: {
+-                        tag->btn_callback((void *)tag->user_data, info->adc_ch, cur_act_id, ADC_BTN_STATE_PRESSED);
++                        tag->btn_callback(tag->user_data, info->adc_ch, cur_act_id, ADC_BTN_STATE_PRESSED);
+                         cur_state = ADC_BTN_STATE_ADC;
+                         break;
+                     }
+                 case ADC_BTN_STATE_LONG_PRESSED: {
+-                        tag->btn_callback((void *)tag->user_data, info->adc_ch, cur_act_id, ADC_BTN_STATE_LONG_PRESSED);
++                        tag->btn_callback(tag->user_data, info->adc_ch, cur_act_id, ADC_BTN_STATE_LONG_PRESSED);
+                         cur_state = ADC_BTN_STATE_ADC;
+                         break;
+                     }
+                 case ADC_BTN_STATE_LONG_RELEASE: {
+-                        tag->btn_callback((void *)tag->user_data, info->adc_ch, cur_act_id, ADC_BTN_STATE_LONG_RELEASE);
++                        tag->btn_callback(tag->user_data, info->adc_ch, cur_act_id, ADC_BTN_STATE_LONG_RELEASE);
+                         cur_state = ADC_BTN_STATE_ADC;
+                         break;
+                     }
+                 case ADC_BTN_STATE_RELEASE: {
+-                        tag->btn_callback((void *)tag->user_data, info->adc_ch, cur_act_id, ADC_BTN_STATE_RELEASE);
++                        tag->btn_callback(tag->user_data, info->adc_ch, cur_act_id, ADC_BTN_STATE_RELEASE);
+                         cur_state = ADC_BTN_STATE_ADC;
+                         break;
+                     }
+diff --git a/components/esp_peripherals/periph_button.c b/components/esp_peripherals/periph_button.c
+index 0719d18c..f929e624 100644
+--- a/components/esp_peripherals/periph_button.c
++++ b/components/esp_peripherals/periph_button.c
+@@ -82,7 +82,7 @@ static void IRAM_ATTR button_intr_handler(void* param)
+     esp_periph_send_cmd_from_isr(periph, 0, NULL, 0);
+ }
+ 
+-static void button_timer_handler(xTimerHandle tmr)
++static void button_timer_handler(TimerHandle_t tmr)
+ {
+     esp_periph_handle_t periph = (esp_periph_handle_t) pvTimerGetTimerID(tmr);
+     esp_periph_send_cmd_from_isr(periph, 0, NULL, 0);
+@@ -102,7 +102,7 @@ static esp_err_t _button_init(esp_periph_handle_t self)
+     };
+     periph_btn->btn = button_init(&btn_config);
+ 
+-    esp_periph_start_timer(self, 50/portTICK_RATE_MS, button_timer_handler);
++    esp_periph_start_timer(self, 50/portTICK_PERIOD_MS, button_timer_handler);
+     return ret;
+ }
+ 
+diff --git a/components/esp_peripherals/periph_console.c b/components/esp_peripherals/periph_console.c
+index 53b18fb4..ec22accf 100644
+--- a/components/esp_peripherals/periph_console.c
++++ b/components/esp_peripherals/periph_console.c
+@@ -211,7 +211,7 @@ static void _console_task(void *pv)
+     }
+     printf("\r\n%s ", prompt_string);
+     while (console->run) {
+-        if (console_get_line(console, console->buffer_size, 10 / portTICK_RATE_MS)) {
++        if (console_get_line(console, console->buffer_size, 10 / portTICK_PERIOD_MS)) {
+             if (console->total_bytes) {
+                 ESP_LOGD(TAG, "Read line: %s", console->buffer);
+             }
+diff --git a/components/esp_peripherals/periph_led.c b/components/esp_peripherals/periph_led.c
+index 1cde6b1e..8453485b 100644
+--- a/components/esp_peripherals/periph_led.c
++++ b/components/esp_peripherals/periph_led.c
+@@ -136,7 +136,7 @@ static periph_led_channel_t *_find_led_channel(periph_led_t *periph_led, int gpi
+     return ch;
+ }
+ 
+-static void led_timer_handler(xTimerHandle tmr)
++static void led_timer_handler(TimerHandle_t tmr)
+ {
+     esp_periph_handle_t periph = (esp_periph_handle_t) pvTimerGetTimerID(tmr);
+ 
+@@ -222,7 +222,7 @@ esp_err_t periph_led_blink(esp_periph_handle_t periph, int gpio_num, int time_on
+     }
+     ch->stop = false;
+     ch->level = level;
+-    esp_periph_start_timer(periph, portTICK_RATE_MS, led_timer_handler);
++    esp_periph_start_timer(periph, portTICK_PERIOD_MS, led_timer_handler);
+     return ESP_OK;
+ }
+ 
+diff --git a/components/esp_peripherals/periph_sdcard.c b/components/esp_peripherals/periph_sdcard.c
+index fb3f8e06..29a204e0 100644
+--- a/components/esp_peripherals/periph_sdcard.c
++++ b/components/esp_peripherals/periph_sdcard.c
+@@ -81,7 +81,7 @@ static esp_err_t _sdcard_run(esp_periph_handle_t self, audio_event_iface_msg_t *
+     return ESP_OK;
+ }
+ 
+-static void sdcard_timer_handler(xTimerHandle tmr)
++static void sdcard_timer_handler(TimerHandle_t tmr)
+ {
+     esp_periph_handle_t periph = (esp_periph_handle_t) pvTimerGetTimerID(tmr);
+     esp_periph_send_cmd(periph, SDCARD_STATUS_CARD_DETECT_CHANGE, NULL, 0);
+@@ -96,7 +96,7 @@ static esp_err_t _sdcard_init(esp_periph_handle_t self)
+     } else {
+         ESP_LOGE(TAG, "no sdcard detect");
+     }
+-    esp_periph_start_timer(self, 1000 / portTICK_RATE_MS, sdcard_timer_handler);
++    esp_periph_start_timer(self, 1000 / portTICK_PERIOD_MS, sdcard_timer_handler);
+     return ESP_OK;
+ }
+ 
+diff --git a/components/esp_peripherals/periph_touch.c b/components/esp_peripherals/periph_touch.c
+index d6904d4f..58d899b2 100644
+--- a/components/esp_peripherals/periph_touch.c
++++ b/components/esp_peripherals/periph_touch.c
+@@ -65,7 +65,7 @@ static esp_err_t _touch_run(esp_periph_handle_t self, audio_event_iface_msg_t *m
+     return ESP_OK;
+ }
+ 
+-static void touch_timer_handler(xTimerHandle tmr)
++static void touch_timer_handler(TimerHandle_t tmr)
+ {
+     esp_periph_handle_t periph = (esp_periph_handle_t) pvTimerGetTimerID(tmr);
+ 
+diff --git a/components/esp_peripherals/periph_wifi.c b/components/esp_peripherals/periph_wifi.c
+index c11cfd98..38bdda7b 100644
+--- a/components/esp_peripherals/periph_wifi.c
++++ b/components/esp_peripherals/periph_wifi.c
+@@ -279,7 +279,7 @@ esp_err_t periph_wifi_config_wait_done(esp_periph_handle_t periph, TickType_t ti
+     return ESP_FAIL;
+ }
+ 
+-static void wifi_reconnect_timer(xTimerHandle tmr)
++static void wifi_reconnect_timer(TimerHandle_t tmr)
+ {
+     esp_periph_handle_t periph = (esp_periph_handle_t)pvTimerGetTimerID(tmr);
+     periph_wifi_handle_t periph_wifi = (periph_wifi_handle_t)esp_periph_get_data(periph);
+@@ -326,7 +326,7 @@ static void _wifi_event_callback(void *arg, esp_event_base_t event_base,
+         if (periph_wifi->disable_auto_reconnect) {
+             return;
+         }
+-        esp_periph_start_timer(self, periph_wifi->reconnect_timeout_ms / portTICK_RATE_MS, wifi_reconnect_timer);
++        esp_periph_start_timer(self, periph_wifi->reconnect_timeout_ms / portTICK_PERIOD_MS, wifi_reconnect_timer);
+ 
+     } else {
+         ESP_LOGW(TAG, "WiFi Event cb, Unhandle event_base:%s, event_id:%d", event_base, (int)event_id);
+@@ -368,7 +368,7 @@ static esp_err_t _wifi_event_callback(void *ctx, system_event_t *event)
+             if (periph_wifi->disable_auto_reconnect) {
+                 break;
+             }
+-            esp_periph_start_timer(self, periph_wifi->reconnect_timeout_ms / portTICK_RATE_MS, wifi_reconnect_timer);
++            esp_periph_start_timer(self, periph_wifi->reconnect_timeout_ms / portTICK_PERIOD_MS, wifi_reconnect_timer);
+             break;
+         default:
+             break;
+diff --git a/components/esp_peripherals/periph_ws2812.c b/components/esp_peripherals/periph_ws2812.c
+index 2008c503..5415c0a8 100755
+--- a/components/esp_peripherals/periph_ws2812.c
++++ b/components/esp_peripherals/periph_ws2812.c
+@@ -84,7 +84,7 @@ typedef struct periph_ws2812 {
+     periph_rgb_value          *color;
+     uint32_t                  led_num;
+     TimerHandle_t             timer;
+-    xSemaphoreHandle          sem;
++    SemaphoreHandle_t          sem;
+     intr_handle_t             rmt_intr_handle;
+     periph_ws2812_state_t     *state;
+     periph_ws2812_process_t   process;
+@@ -409,7 +409,7 @@ esp_err_t periph_ws2812_control(esp_periph_handle_t periph, periph_ws2812_ctrl_c
+         periph_ws2812->state[i].mode = control_cfg[i].mode;
+     }
+ 
+-    esp_periph_start_timer(periph, INTERVAL_TIME_MS / portTICK_RATE_MS, ws2812_timer_handler);
++    esp_periph_start_timer(periph, INTERVAL_TIME_MS / portTICK_PERIOD_MS, ws2812_timer_handler);
+ 
+     return ESP_OK;
+ }
+diff --git a/components/ota_service/CMakeLists.txt b/components/ota_service/CMakeLists.txt
+index 7d6184e0..c3b24ff1 100644
+--- a/components/ota_service/CMakeLists.txt
++++ b/components/ota_service/CMakeLists.txt
+@@ -6,7 +6,7 @@ set(COMPONENT_REQUIRES app_update esp_https_ota)
+ set(COMPONENT_PRIV_REQUIRES esp_peripherals audio_pipeline audio_sal audio_stream)
+ 
+ if (idf_version VERSION_GREATER_EQUAL "5.0")
+-list(APPEND COMPONENT_REQUIRES esp_app_format)
++list(APPEND COMPONENT_REQUIRES esp_app_format esp-tls)
+ endif()
+ 
+ set(COMPONENT_SRCS ./esp_fs_ota.c
+diff --git a/components/ota_service/ota_service.c b/components/ota_service/ota_service.c
+index 9a199ceb..960601dc 100644
+--- a/components/ota_service/ota_service.c
++++ b/components/ota_service/ota_service.c
+@@ -44,7 +44,7 @@ typedef enum {
+ 
+ typedef struct {
+     int state;
+-    xQueueHandle srv_q;
++    QueueHandle_t srv_q;
+     ota_upgrade_ops_t *upgrade_list;
+     int list_len;
+     int result;
+diff --git a/components/playlist/playlist.c b/components/playlist/playlist.c
+index c1d4b8db..f7fd789d 100644
+--- a/components/playlist/playlist.c
++++ b/components/playlist/playlist.c
+@@ -46,7 +46,7 @@ typedef struct playlist_info {
+ struct playlist_handle {
+     uint8_t list_num;                                           /*!< The number of all the playlists in the handle */
+     playlist_info_t *cur_playlist;                              /*!< Pointer of current playlist */
+-    xSemaphoreHandle playlist_operate_lock;                     /*!< A semaphore of operations */
++    SemaphoreHandle_t playlist_operate_lock;                     /*!< A semaphore of operations */
+     STAILQ_HEAD(list_info, playlist_info) playlist_info_list;   /*!< List head of playlists */
+ };
+ 
+diff --git a/components/wifi_service/airkiss_config/airkiss_config.c b/components/wifi_service/airkiss_config/airkiss_config.c
+index d6b2ed0c..e7b2c8ba 100644
+--- a/components/wifi_service/airkiss_config/airkiss_config.c
++++ b/components/wifi_service/airkiss_config/airkiss_config.c
+@@ -166,7 +166,7 @@ static void airkiss_notify_task(void *pvParameters)
+         send_socket = socket(AF_INET, SOCK_DGRAM, 0);
+         if (send_socket == -1) {
+             ESP_LOGE(TAG, "failed to create sock!");
+-            vTaskDelay(1000 / portTICK_RATE_MS);
++            vTaskDelay(1000 / portTICK_PERIOD_MS);
+         }
+     } while (send_socket == -1);
+ 
+@@ -180,7 +180,7 @@ static void airkiss_notify_task(void *pvParameters)
+         fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); //IPPROTO_UDP
+         if (fd == -1) {
+             ESP_LOGE(TAG, "failed to create sock!");
+-            vTaskDelay(1000 / portTICK_RATE_MS);
++            vTaskDelay(1000 / portTICK_PERIOD_MS);
+         }
+     } while (fd == -1);
+ 
+@@ -306,7 +306,7 @@ static void airkiss_send_ack_task(void *pvParameters)
+     buf[0] = (uint8_t)ak_random_num;
+     esp_wifi_get_mac(WIFI_IF_STA, &buf[1]);
+ 
+-    vTaskDelay(200 / portTICK_RATE_MS);
++    vTaskDelay(200 / portTICK_PERIOD_MS);
+ 
+     while (1) {
+         /* Get local IP address of station */
+@@ -322,13 +322,13 @@ static void airkiss_send_ack_task(void *pvParameters)
+             send_socket = socket(AF_INET, SOCK_DGRAM, 0);
+             if (send_socket < 0) {
+                 ESP_LOGE(TAG, "Create airkiss udp socket failed");
+-                vTaskDelay(1000 / portTICK_RATE_MS);
++                vTaskDelay(1000 / portTICK_PERIOD_MS);
+                 continue;
+             }
+ 
+             while (1) {
+                 /* Send airkiss ACK every 100ms. */
+-                vTaskDelay(100 / portTICK_RATE_MS);
++                vTaskDelay(100 / portTICK_PERIOD_MS);
+ 
+                 sendlen = sendto(send_socket, buf, 7, 0,
+                                  (struct sockaddr *) &server_addr, sin_size);
+@@ -348,7 +348,7 @@ static void airkiss_send_ack_task(void *pvParameters)
+                 }
+             }
+         } else {
+-            vTaskDelay((portTickType) (100 / portTICK_RATE_MS));
++            vTaskDelay((TickType_t) (100 / portTICK_PERIOD_MS));
+         }
+     }
+ 
+diff --git a/components/wifi_service/src/wifi_service.c b/components/wifi_service/src/wifi_service.c
+index ce6c41ea..f0353715 100644
+--- a/components/wifi_service/src/wifi_service.c
++++ b/components/wifi_service/src/wifi_service.c
+@@ -68,7 +68,7 @@ typedef struct wifi_setting_item {
+ typedef STAILQ_HEAD(wifi_setting_list, wifi_setting_item) wifi_setting_list_t;
+ 
+ typedef struct {
+-    xQueueHandle                     wifi_serv_que;
++    QueueHandle_t                    wifi_serv_que;
+     wifi_service_event_t             wifi_serv_state;
+     wifi_config_t                    info;
+     wifi_setting_list_t              setting_list;
