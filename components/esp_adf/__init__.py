@@ -100,11 +100,11 @@ async def to_code(config):
             "apply_adf_patches.py",
             os.path.join(os.path.dirname(__file__), "apply_adf_patches.py.script"),
         )
-        esp32.add_extra_script(
-            "pre",
-            "apply_custom_esp_adf_patches.py",
-            os.path.join(os.path.dirname(__file__), "apply_custom_esp_adf_patches.py.script"),
-        )
+        #esp32.add_extra_script(
+        #    "pre",
+        #    "apply_custom_esp_adf_patches.py",
+        #    os.path.join(os.path.dirname(__file__), "apply_custom_esp_adf_patches.py.script"),
+        #)
         esp32.add_extra_script(
             "pre",
             "apply_custom_esp_adf_libs_patches.py",
@@ -115,10 +115,10 @@ async def to_code(config):
         #    "apply_custom_esphome_patches.py",
         #    os.path.join(os.path.dirname(__file__), "apply_custom_esphome_patches.py.script"),
         #)
-        esp32.add_extra_build_file(
-            "esp_adf_patches/custom_esp_adf_v2.7.patch",
-            "https://github.com/dwitgen/esphome_test_audio/raw/korvo-1_esp32s3_idf5.1.5_testing/components/esp_adf/custom_esp_adf_v2.7.patch",
-        )
+        #esp32.add_extra_build_file(
+        #    "esp_adf_patches/custom_esp_adf_v2.7.patch",
+        #    "https://github.com/dwitgen/esphome_test_audio/raw/korvo-1_esp32s3_idf5.1.5_testing/components/esp_adf/custom_esp_adf_v2.7.patch",
+        #)
         esp32.add_extra_build_file(
             "esp_adf_patches/custom_esp_adf_libs.diff",
             "https://github.com/dwitgen/esphome_test_audio/raw/korvo-1_esp32s3_idf5.1.5/components/esp_adf/custom_esp_adf_libs.diff",

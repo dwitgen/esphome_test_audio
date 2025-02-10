@@ -22,7 +22,6 @@ extern "C" {
 #include <mp3_decoder.h>
 #include "esp_peripherals.h"
 #include "periph_adc_button.h"
-#include <board.h>
 
 #ifdef __cplusplus
 }
@@ -33,9 +32,9 @@ extern "C" {
 #include "esphome/core/log.h"
 
 // Added include for board config to be used with button and other controls
-//#ifdef USE_ESP_ADF_BOARD
-//#include <board.h>
-//#endif
+#ifdef USE_ESP_ADF_BOARD
+#include <board.h>
+#endif
 
 namespace esphome {
 namespace esp_adf {
