@@ -20,6 +20,8 @@ extern "C" {
 #include <http_stream.h>
 #include <audio_pipeline.h>
 #include <mp3_decoder.h>
+#include "esp_peripherals.h"
+#include "periph_adc_button.h"
 
 #ifdef __cplusplus
 }
@@ -156,6 +158,49 @@ void ESPADFSpeaker::handle_buttons() {
     }
 }
 
+// Callback function to handle button press events
+static void button_press_handler(void *handler_args, esp_event_base_t base, int32_t id, void *event_data)
+{
+    periph_adc_button_event_id_t event = (periph_adc_button_event_id_t) id;
+    periph_adc_button_event_t *button_event = (periph_adc_button_event_t *) event_data;
+
+    switch (event) {
+        case PERIPH_ADC_BUTTON_PRESSED:
+            ESP_LOGI(TAG, "Button pressed, ID: %d", button_event->act_id);
+            break;
+        case PERIPH_ADC_BUTTON_RELEASE:
+            ESP_LOGI(TAG, "Button released, ID: %d", button_event->act_id);
+            break;
+        default:
+            ESP_LOGI(TAG, "Unknown button event");
+            break;
+    }
+
+    // Additional handling based on button ID
+    switch (button_event->act_id) {
+        case BUTTON_VOLUP_ID:
+            ESP_LOGI(TAG, "Volume Up button pressed");
+            break;
+        case BUTTON_VOLDOWN_ID:
+            ESP_LOGI(TAG, "Volume Down button pressed");
+            break;
+        case BUTTON_SET_ID:
+            ESP_LOGI(TAG, "Set button pressed");
+            break;
+        case BUTTON_PLAY_ID:
+            ESP_LOGI(TAG, "Play button pressed");
+            break;
+        case BUTTON_MODE_ID:
+            ESP_LOGI(TAG, "Mode button pressed");
+            break;
+        case BUTTON_REC_ID:
+            ESP_LOGI(TAG, "Record button pressed");
+            break;
+        default:
+            ESP_LOGI(TAG, "Unknown button ID");
+            break;
+    }
+}
 
 // Helper to configure I2S stream with dynamic sample rate
 esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream, int sample_rate) {
@@ -446,156 +491,164 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
 }
 
 void ESPADFSpeaker::setup() {
-  ESP_LOGCONFIG(TAG, "Setting up ESP ADF Speaker...");
+    ESP_LOGCONFIG(TAG, "Setting up ESP ADF Speaker...");
 
-  #ifdef USE_ESP_ADF_BOARD
-  // Use the PA enable pin from board.h configuration trying to stop speaker popping with control of the PA during speaker operations
-  gpio_num_t pa_enable_gpio = static_cast<gpio_num_t>(get_pa_enable_gpio());
-  //int but_channel = INPUT_BUTOP_ID;
-  #endif
+    #ifdef USE_ESP_ADF_BOARD
+    // Use the PA enable pin from board.h configuration trying to stop speaker popping with control of the PA during speaker operations
+    gpio_num_t pa_enable_gpio = static_cast<gpio_num_t>(get_pa_enable_gpio());
+    //int but_channel = INPUT_BUTOP_ID;
+    #endif
 
-  gpio_config_t io_conf;
-  io_conf.intr_type = GPIO_INTR_DISABLE;
-  io_conf.mode = GPIO_MODE_OUTPUT;
-  io_conf.pin_bit_mask = (1ULL << PA_ENABLE_GPIO);
-  io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
-  io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
-  gpio_config(&io_conf);
-  gpio_set_level(PA_ENABLE_GPIO, 0);  // Ensure PA is off initially
+    gpio_config_t io_conf;
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_OUTPUT;
+    io_conf.pin_bit_mask = (1ULL << PA_ENABLE_GPIO);
+    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+    gpio_config(&io_conf);
+    gpio_set_level(PA_ENABLE_GPIO, 0);  // Ensure PA is off initially
 
-  ExternalRAMAllocator<uint8_t> allocator(ExternalRAMAllocator<uint8_t>::ALLOW_FAILURE);
+    ExternalRAMAllocator<uint8_t> allocator(ExternalRAMAllocator<uint8_t>::ALLOW_FAILURE);
 
-  this->buffer_queue_.storage = allocator.allocate(sizeof(StaticQueue_t) + (BUFFER_COUNT * sizeof(DataEvent)));
-  if (this->buffer_queue_.storage == nullptr) {
-    ESP_LOGE(TAG, "Failed to allocate buffer queue!");
-    this->mark_failed();
-    return;
-  }
-
-  this->buffer_queue_.handle =
-      xQueueCreateStatic(BUFFER_COUNT, sizeof(DataEvent), this->buffer_queue_.storage + sizeof(StaticQueue_t),
-                         (StaticQueue_t *) (this->buffer_queue_.storage));
-
-  this->event_queue_ = xQueueCreate(20, sizeof(TaskEvent));
-  if (this->event_queue_ == nullptr) {
-    ESP_LOGW(TAG, "Could not allocate event queue.");
-    this->mark_failed();
-    return;
-  }
-
- //Adding intial setup for volume controls for the speaker
- // Find the key for the generic volume sensor
-  uint32_t volume_sensor_key = 0;
-  for (auto *sensor : App.get_sensors()) {
-    if (sensor->get_name() == "generic_volume_sensor") {
-      volume_sensor_key = sensor->get_object_id_hash();
-      break;
+    this->buffer_queue_.storage = allocator.allocate(sizeof(StaticQueue_t) + (BUFFER_COUNT * sizeof(DataEvent)));
+    if (this->buffer_queue_.storage == nullptr) {
+        ESP_LOGE(TAG, "Failed to allocate buffer queue!");
+        this->mark_failed();
+        return;
     }
-  }
 
-  // Use the key to get the sensor
-  if (volume_sensor_key != 0) {
-    this->volume_sensor = App.get_sensor_by_key(volume_sensor_key, true);
-    ESP_LOGI(TAG, "Internal generic volume sensor initialized successfully: %s", this->volume_sensor->get_name().c_str());
-  } else {
-    ESP_LOGE(TAG, "Failed to find key for internal generic volume sensor");
-  }
+    this->buffer_queue_.handle =
+        xQueueCreateStatic(BUFFER_COUNT, sizeof(DataEvent), this->buffer_queue_.storage + sizeof(StaticQueue_t),
+                           (StaticQueue_t *) (this->buffer_queue_.storage));
 
-  if (this->volume_sensor == nullptr) {
-    ESP_LOGE(TAG, "Failed to get internal generic volume sensor component");
-  } else {
-    ESP_LOGI(TAG, "Internal generic volume sensor initialized correctly");
-  }
+    this->event_queue_ = xQueueCreate(20, sizeof(TaskEvent));
+    if (this->event_queue_ == nullptr) {
+        ESP_LOGW(TAG, "Could not allocate event queue.");
+        this->mark_failed();
+        return;
+    }
 
-  // Initialize the audio board and store the handle
-  this->board_handle_ = audio_board_init();
-  if (this->board_handle_ == nullptr) {
-      ESP_LOGE(TAG, "Failed to initialize audio board");
-      this->mark_failed();
-      return;
-  }
-    
-  // Set initial volume
-  this->set_volume(volume_); // Set initial volume to 50%
+    // Adding initial setup for volume controls for the speaker
+    // Find the key for the generic volume sensor
+    uint32_t volume_sensor_key = 0;
+    for (auto *sensor : App.get_sensors()) {
+        if (sensor->get_name() == "generic_volume_sensor") {
+            volume_sensor_key = sensor->get_object_id_hash();
+            break;
+        }
+    }
 
-   // Read and set initial volume
-  int initial_volume = this->get_current_volume();
-  this->set_volume(initial_volume);
+    // Use the key to get the sensor
+    if (volume_sensor_key != 0) {
+        this->volume_sensor = App.get_sensor_by_key(volume_sensor_key, true);
+        ESP_LOGI(TAG, "Internal generic volume sensor initialized successfully: %s", this->volume_sensor->get_name().c_str());
+    } else {
+        ESP_LOGE(TAG, "Failed to find key for internal generic volume sensor");
+    }
 
-  // Setup ADC for button controls
-  adc_oneshot_unit_init_cfg_t init_config1 = {
-      .unit_id = ADC_UNIT_1,
-  };
-  ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &this->adc1_handle));
-  adc_oneshot_chan_cfg_t ch_config = {
-      .atten = ADC_ATTEN_DB_12,
-      .bitwidth = ADC_BITWIDTH_12,
-  };
-  ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &ch_config));
-  adc_cali_handle_t adc1_cali_handle = NULL;
-  bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
-  
-   // Link YAML binary sensors
-   // Find the key for the button sensors
-  uint32_t volup_sensor_key = 0;
-  uint32_t voldown_sensor_key = 0;
-  uint32_t set_sensor_key = 0;
-  uint32_t play_sensor_key = 0;
-  uint32_t mode_sensor_key = 0;
-  uint32_t record_sensor_key = 0;
-  for (auto *binary_sensor : App.get_binary_sensors()) {
-    if (binary_sensor->get_name() == "internal_btn_vol_up") {
-      volup_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "internal_btn_vol_down") {
-      voldown_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "internal_btn_set") {
-      set_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "internal_btn_play") {
-      play_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "internal_btn_mode") {
-      mode_sensor_key = binary_sensor->get_object_id_hash();
-    } else if (binary_sensor->get_name() == "intenral_btn_record") {
-      record_sensor_key = binary_sensor->get_object_id_hash();
-    } 
-  }
-  
-  if(volup_sensor_key != 0) {
-    this->internal_btn_vol_up = App.get_binary_sensor_by_key(volup_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for volume up initialized successfully: %s", this->internal_btn_vol_up->get_name().c_str());
-  } else {
-    ESP_LOGE(TAG, "Failed to find key for binary sensor volume up");
-  }
-  if(voldown_sensor_key != 0) {
-    this->internal_btn_vol_down = App.get_binary_sensor_by_key(voldown_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for volume down initialized successfully: %s", this->internal_btn_vol_down->get_name().c_str());
-  } else {
-    ESP_LOGE(TAG, "Failed to find key for binary sensor volume down");
-  }
-  if(set_sensor_key != 0) {
-    this->internal_btn_set = App.get_binary_sensor_by_key(set_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for set initialized successfully: %s", this->internal_btn_set->get_name().c_str());
-  } else {
-    ESP_LOGE(TAG, "Failed to find key for binary sensor set");
-  }
-  if(play_sensor_key != 0) {
-    this->internal_btn_play = App.get_binary_sensor_by_key(play_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for play initialized successfully: %s", this->internal_btn_play->get_name().c_str());
-  } else {
-    ESP_LOGE(TAG, "Failed to find key for binary sensor play");
-  }
-  if(mode_sensor_key != 0) {
-    this->internal_btn_mode = App.get_binary_sensor_by_key(mode_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for mode initialized successfully: %s", this->internal_btn_mode->get_name().c_str());
-  } else {
-    ESP_LOGE(TAG, "Failed to find key for binary sensor mode");
-  }
-  if(record_sensor_key != 0) {
-    this->internal_btn_record = App.get_binary_sensor_by_key(record_sensor_key, true);
-    ESP_LOGI(TAG, "Binary sensor for record initialized successfully: %s", this->internal_btn_record->get_name().c_str());
-  } else {
-    ESP_LOGE(TAG, "Failed to find key for binary sensor record");
-  }
-  
+    if (this->volume_sensor == nullptr) {
+        ESP_LOGE(TAG, "Failed to get internal generic volume sensor component");
+    } else {
+        ESP_LOGI(TAG, "Internal generic volume sensor initialized correctly");
+    }
+
+    // Initialize the audio board and store the handle
+    this->board_handle_ = audio_board_init();
+    if (this->board_handle_ == nullptr) {
+        ESP_LOGE(TAG, "Failed to initialize audio board");
+        this->mark_failed();
+        return;
+    }
+
+    // Initialize peripherals set
+    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+
+    // Check if the peripheral set was initialized successfully
+    if (set == NULL) {
+        ESP_LOGE(TAG, "Failed to initialize peripheral set");
+        this->mark_failed();
+        return;
+    }
+
+    // Initialize the audio board keys
+    esp_err_t ret = audio_board_key_init(set);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize audio board keys");
+        this->mark_failed();
+        return;
+    }
+
+    // Register the button press handler
+    esp_periph_set_register_callback(set, button_press_handler, NULL);
+
+    // Set initial volume
+    this->set_volume(volume_); // Set initial volume to 50%
+
+    // Read and set initial volume
+    int initial_volume = this->get_current_volume();
+    this->set_volume(initial_volume);
+
+    // Link YAML binary sensors
+    // Find the key for the button sensors
+    uint32_t volup_sensor_key = 0;
+    uint32_t voldown_sensor_key = 0;
+    uint32_t set_sensor_key = 0;
+    uint32_t play_sensor_key = 0;
+    uint32_t mode_sensor_key = 0;
+    uint32_t record_sensor_key = 0;
+    for (auto *binary_sensor : App.get_binary_sensors()) {
+        if (binary_sensor->get_name() == "internal_btn_vol_up") {
+            volup_sensor_key = binary_sensor->get_object_id_hash();
+        } else if (binary_sensor->get_name() == "internal_btn_vol_down") {
+            voldown_sensor_key = binary_sensor->get_object_id_hash();
+        } else if (binary_sensor->get_name() == "internal_btn_set") {
+            set_sensor_key = binary_sensor->get_object_id_hash();
+        } else if (binary_sensor->get_name() == "internal_btn_play") {
+            play_sensor_key = binary_sensor->get_object_id_hash();
+        } else if (binary_sensor->get_name() == "internal_btn_mode") {
+            mode_sensor_key = binary_sensor->get_object_id_hash();
+        } else if (binary_sensor->get_name() == "internal_btn_record") {
+            record_sensor_key = binary_sensor->get_object_id_hash();
+        }
+    }
+
+    if (volup_sensor_key != 0) {
+        this->internal_btn_vol_up = App.get_binary_sensor_by_key(volup_sensor_key, true);
+        ESP_LOGI(TAG, "Binary sensor for volume up initialized successfully: %s", this->internal_btn_vol_up->get_name().c_str());
+    } else {
+        ESP_LOGE(TAG, "Failed to find key for binary sensor volume up");
+    }
+    if (voldown_sensor_key != 0) {
+        this->internal_btn_vol_down = App.get_binary_sensor_by_key(voldown_sensor_key, true);
+        ESP_LOGI(TAG, "Binary sensor for volume down initialized successfully: %s", this->internal_btn_vol_down->get_name().c_str());
+    } else {
+        ESP_LOGE(TAG, "Failed to find key for binary sensor volume down");
+    }
+    if (set_sensor_key != 0) {
+        this->internal_btn_set = App.get_binary_sensor_by_key(set_sensor_key, true);
+        ESP_LOGI(TAG, "Binary sensor for set initialized successfully: %s", this->internal_btn_set->get_name().c_str());
+    } else {
+        ESP_LOGE(TAG, "Failed to find key for binary sensor set");
+    }
+    if (play_sensor_key != 0) {
+        this->internal_btn_play = App.get_binary_sensor_by_key(play_sensor_key, true);
+        ESP_LOGI(TAG, "Binary sensor for play initialized successfully: %s", this->internal_btn_play->get_name().c_str());
+    } else {
+        ESP_LOGE(TAG, "Failed to find key for binary sensor play");
+    }
+    if (mode_sensor_key != 0) {
+        this->internal_btn_mode = App.get_binary_sensor_by_key(mode_sensor_key, true);
+        ESP_LOGI(TAG, "Binary sensor for mode initialized successfully: %s", this->internal_btn_mode->get_name().c_str());
+    } else {
+        ESP_LOGE(TAG, "Failed to find key for binary sensor mode");
+    }
+    if (record_sensor_key != 0) {
+        this->internal_btn_record = App.get_binary_sensor_by_key(record_sensor_key, true);
+        ESP_LOGI(TAG, "Binary sensor for record initialized successfully: %s", this->internal_btn_record->get_name().c_str());
+    } else {
+        ESP_LOGE(TAG, "Failed to find key for binary sensor record");
+    }
 }
 
 void ESPADFSpeaker::set_and_play_url(const std::string &url) {
@@ -845,7 +898,7 @@ void ESPADFSpeaker::watch_() {
 
 void ESPADFSpeaker::loop() {
   this->watch_();
-  handle_buttons();  // Handle button inputs
+  //handle_buttons();  // Handle button inputs
 
   switch (this->state_) {
     case speaker::STATE_STARTING:
