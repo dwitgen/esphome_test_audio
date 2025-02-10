@@ -12,12 +12,12 @@
 namespace esphome {
 namespace esp_adf {
 
-esp_log_level_set("*", ESP_LOG_DEBUG);
 
 static const char *const TAG = "esp_adf";
 
 void ESPADF::setup() {
 #ifdef USE_ESP_ADF_BOARD
+esp_log_level_set("*", ESP_LOG_DEBUG);
   ESP_LOGI(TAG, "Start codec chip");
   audio_board_handle_t board_handle = audio_board_init();
   audio_hal_ctrl_codec(board_handle->audio_hal, AUDIO_HAL_CODEC_MODE_BOTH, AUDIO_HAL_CTRL_START);
