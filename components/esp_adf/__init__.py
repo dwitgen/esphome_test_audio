@@ -71,9 +71,9 @@ async def to_code(config):
     
     esp32.add_idf_component(
         name="esp-adf",
-        repo="https://github.com/espressif/esp-adf",
+        repo="https://github.com/dwitgen/esp-adf",
         path="components",
-        ref="v2.7",
+        ref="v2.7-dev_testing",
         components=["*"],
         submodules=["components/esp-adf-libs", "components/esp-sr"],
     )
@@ -116,8 +116,8 @@ async def to_code(config):
         #    os.path.join(os.path.dirname(__file__), "apply_custom_esphome_patches.py.script"),
         #)
         esp32.add_extra_build_file(
-            "esp_adf_patches/custom_esp_adf_v2.7_v2.patch",
-            "https://github.com/dwitgen/esphome_test_audio/raw/korvo-1_esp32s3_idf5.1.5_testing/components/esp_adf/custom_esp_adf_v2.7_v2.patch",
+            "esp_adf_patches/custom_esp_adf_v2.7.patch",
+            "https://github.com/dwitgen/esphome_test_audio/raw/korvo-1_esp32s3_idf5.1.5_testing/components/esp_adf/custom_esp_adf_v2.7.patch",
         )
         esp32.add_extra_build_file(
             "esp_adf_patches/custom_esp_adf_libs.diff",
