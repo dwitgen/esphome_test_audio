@@ -335,7 +335,7 @@ index ad4f9fe9..c6be4089 100644
  /**
   * @brief Common peripherals configurations
 diff --git a/components/esp_peripherals/include/periph_adc_button.h b/components/esp_peripherals/include/periph_adc_button.h
-index af97414a..48c83188 100644
+index af97414a..6ab5c3f7 100644
 --- a/components/esp_peripherals/include/periph_adc_button.h
 +++ b/components/esp_peripherals/include/periph_adc_button.h
 @@ -25,7 +25,7 @@
@@ -343,7 +343,7 @@ index af97414a..48c83188 100644
  #define _PERIPH_ADC_BUTTON_H_
  
 -#include "driver/adc.h"
-+#include "esp_adc/oneshot.h"
++//#include <esp_adc/adc_oneshot.h> 
  #include "adc_button.h"
  #include "esp_peripherals.h"
  
