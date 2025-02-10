@@ -560,7 +560,7 @@ index 41f8618c..ec6d6326 100644
  }
  
  static int get_button_id(adc_btn_list *node, int adc)
-@@ -373,25 +373,17 @@ static void button_task(void *parameters)
+@@ -280,25 +373,17 @@ static void button_task(void *parameters)
      adc_btn_list *head = tag->head;
      adc_btn_list *find = head;
      xEventGroupClearBits(g_event_bit, DESTROY_BIT);
