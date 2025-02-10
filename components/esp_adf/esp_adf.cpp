@@ -12,6 +12,8 @@
 namespace esphome {
 namespace esp_adf {
 
+esp_log_level_set("*", ESP_LOG_DEBUG);
+
 static const char *const TAG = "esp_adf";
 
 void ESPADF::setup() {
