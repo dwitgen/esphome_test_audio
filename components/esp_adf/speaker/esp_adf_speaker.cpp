@@ -159,7 +159,7 @@ void ESPADFSpeaker::handle_buttons() {
 }
 
 // Callback function to handle button press events
-static void button_press_handler(void *handler_args, esp_event_base_t base, int32_t id, void *event_data)
+void button_press_handler(void *handler_args, esp_event_base_t base, int32_t id, void *event_data)
 {
     periph_adc_button_event_id_t event = (periph_adc_button_event_id_t) id;
     periph_adc_button_event_t *button_event = (periph_adc_button_event_t *) event_data;
@@ -580,7 +580,7 @@ void ESPADFSpeaker::setup() {
     }
 
     // Register the button press handler
-    esp_periph_set_register_callback(set, button_press_handler, NULL);
+    esp_periph_set_register_callback(set, (esp_periph_event_handle_t) button_press_handler, NULL);
 
     // Set initial volume
     this->set_volume(volume_); // Set initial volume to 50%
