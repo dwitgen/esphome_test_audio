@@ -600,7 +600,7 @@ void ESPADFSpeaker::setup() {
         ESP_LOGE(TAG, "Failed to find key for binary sensor record");
     }
 
-    xTaskCreate(log_forwarding_task, "log_forwarding", 2048, NULL, 5, NULL);
+    //xTaskCreate(log_forwarding_task, "log_forwarding", 2048, NULL, 5, NULL);
 }
 
 static void log_forwarding_task(void *params) {
