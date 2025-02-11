@@ -517,18 +517,18 @@ void ESPADFSpeaker::setup() {
         return;
     }
 
-    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+    //esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    //esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
 
     // ✅ Let audio_board_key_init handle everything
-    esp_err_t ret = audio_board_key_init(set);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize audio board keys");
-        this->mark_failed();
-        return;
-    } else {
-        ESP_LOGE(TAG, "Audio board keys initialized successfully");
-    }
+    //esp_err_t ret = audio_board_key_init(set);
+    //if (ret != ESP_OK) {
+    //    ESP_LOGE(TAG, "Failed to initialize audio board keys");
+    //    this->mark_failed();
+    //    return;
+    //} else {
+    //    ESP_LOGE(TAG, "Audio board keys initialized successfully");
+    //}
 
     
     // Set initial volume
@@ -659,6 +659,19 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         ESP_LOGI(TAG, "Resetting pipeline ringbuffers and states");
         audio_pipeline_reset_ringbuffer(this->pipeline_);
         audio_pipeline_reset_items_state(this->pipeline_);
+
+        esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+        esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+
+        // ✅ Let audio_board_key_init handle everything
+        esp_err_t ret = audio_board_key_init(set);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to initialize audio board keys");
+            this->mark_failed();
+            return;
+        } else {
+            ESP_LOGE(TAG, "Audio board keys initialized successfully");
+        }
 
         ESP_LOGI(TAG, "Checking ADC button states...");
         adc_btn_list *btn_list = adc_btn_create_list(NULL, 0);  // Assuming we have button config elsewhere
