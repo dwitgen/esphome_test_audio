@@ -96,7 +96,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   // Method to initialize pipeline and cleanup
   audio_pipeline_handle_t initialize_audio_pipeline(bool is_http_stream);
   void cleanup_audio_pipeline();
-  static void log_forwarding_task(void *params)
+  static void log_forwarding_task(void *params);
 
  protected:
   void start_();
