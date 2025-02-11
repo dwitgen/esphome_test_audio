@@ -571,6 +571,9 @@ void ESPADFSpeaker::setup() {
 
     esp_periph_start(set, adc_btn);    // Step 3: Start the ADC button peripheral
 
+    // Register the button press handler
+    esp_periph_set_register_callback(set, (esp_periph_event_handle_t) button_press_handler, NULL);
+
     // Initialize peripherals set
     //esp_periph_config_t periph_cfg = PERIPH_ADC_BUTTON_DEFAULT_CONFIG();
     //esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
@@ -590,9 +593,7 @@ void ESPADFSpeaker::setup() {
         return;
     }
 
-    // Register the button press handler
-    esp_periph_set_register_callback(set, (esp_periph_event_handle_t) button_press_handler, NULL);
-
+    
     // Set initial volume
     this->set_volume(volume_); // Set initial volume to 50%
 
