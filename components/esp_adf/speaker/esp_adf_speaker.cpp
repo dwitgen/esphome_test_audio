@@ -665,7 +665,8 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         if (btn_list != NULL) {
             adc_btn_list *node = btn_list;
             while (node) {
-                int voltage = adc_read(node->adc_info.adc_ch);
+                int voltage = adc_read(static_cast<adc_channel_t>(node->adc_info.adc_ch));
+
                 ESP_LOGI(TAG, "Button Channel %d Voltage: %d", node->adc_info.adc_ch, voltage);
                 node = node->next;
             }
