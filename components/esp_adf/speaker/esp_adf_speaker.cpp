@@ -526,6 +526,8 @@ void ESPADFSpeaker::setup() {
         ESP_LOGE(TAG, "Failed to initialize audio board keys");
         this->mark_failed();
         return;
+    } else {
+        ESP_LOGE(TAG, "Audio board keys initialized successfully");
     }
 
     
