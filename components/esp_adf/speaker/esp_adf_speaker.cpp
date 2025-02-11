@@ -448,6 +448,7 @@ audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_st
 }
 
 void ESPADFSpeaker::setup() {
+    esp_log_set_vprintf(vprintf);
     ESP_LOGCONFIG(TAG, "Setting up ESP ADF Speaker...");
 
     #ifdef USE_ESP_ADF_BOARD
@@ -598,7 +599,17 @@ void ESPADFSpeaker::setup() {
     } else {
         ESP_LOGE(TAG, "Failed to find key for binary sensor record");
     }
+
+    xTaskCreate(log_forwarding_task, "log_forwarding", 2048, NULL, 5, NULL);
 }
+
+static void log_forwarding_task(void *params) {
+    while (1) {
+        ESP_LOGI("LOG_FORWARD", "🔄 Forwarding ADC logs to console...");
+        vTaskDelay(pdMS_TO_TICKS(2000));  // Log every 2 seconds
+    }
+}
+
 
 void ESPADFSpeaker::set_and_play_url(const std::string &url) {
     ESP_LOGI(TAG, "Received URL to play: %s", url.c_str());
