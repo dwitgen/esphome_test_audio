@@ -561,31 +561,9 @@ void ESPADFSpeaker::setup() {
     }
 
     esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);   // Step 1: Peripheral manager
+    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
 
-    periph_adc_button_cfg_t adc_btn_cfg = PERIPH_ADC_BUTTON_DEFAULT_CONFIG();
-    adc_btn_cfg.arr = &adc_btn_arr;    // Make sure adc_btn_arr is properly initialized
-    adc_btn_cfg.arr_size = sizeof(adc_btn_arr) / sizeof(adc_arr_t);
-
-    esp_periph_handle_t adc_btn = periph_adc_button_init(&adc_btn_cfg);   // Step 2: ADC button
-
-    esp_periph_start(set, adc_btn);    // Step 3: Start the ADC button peripheral
-
-    // Register the button press handler
-    esp_periph_set_register_callback(set, (esp_periph_event_handle_t) button_press_handler, NULL);
-
-    // Initialize peripherals set
-    //esp_periph_config_t periph_cfg = PERIPH_ADC_BUTTON_DEFAULT_CONFIG();
-    //esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
-
-    // Check if the peripheral set was initialized successfully
-    //if (set == NULL) {
-    //    ESP_LOGE(TAG, "Failed to initialize peripheral set");
-    //    this->mark_failed();
-    //    return;
-    //}
-
-    // Initialize the audio board keys
+    // ✅ Let audio_board_key_init handle everything
     esp_err_t ret = audio_board_key_init(set);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize audio board keys");
