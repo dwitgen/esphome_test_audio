@@ -530,7 +530,7 @@ void ESPADFSpeaker::setup() {
     //    ESP_LOGE(TAG, "Audio board keys initialized successfully");
     //}
 
-    
+    init_adc_buttons();
     // Set initial volume
     this->set_volume(volume_); // Set initial volume to 50%
 
@@ -646,6 +646,41 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 }
 
+void ESPADFSpeaker::init_adc_buttons() {
+    ESP_LOGI(TAG, "Initializing ADC Buttons...");
+
+    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+
+    // ✅ Let audio_board_key_init handle everything
+    esp_err_t ret = audio_board_key_init(set);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize audio board keys");
+        this->mark_failed();
+        return;
+    } else {
+        ESP_LOGE(TAG, "Audio board keys initialized successfully");
+    }
+
+    ESP_LOGI(TAG, "Checking ADC button states...");
+    adc_btn_list *btn_list = adc_btn_create_list(NULL, 0);  // Assuming we have button config elsewhere
+    if (btn_list != NULL) {
+        adc_btn_list *node = btn_list;
+        while (node) {
+            int voltage = adc_read(static_cast<adc_channel_t>(node->adc_info.adc_ch));
+
+            ESP_LOGI(TAG, "Button Channel %d Voltage: %d", node->adc_info.adc_ch, voltage);
+            node = node->next;
+        }
+        adc_btn_destroy_list(btn_list);
+    } else {
+        ESP_LOGW(TAG, "No ADC button list available.");
+    }
+
+    
+}
+
+
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
@@ -659,34 +694,6 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         ESP_LOGI(TAG, "Resetting pipeline ringbuffers and states");
         audio_pipeline_reset_ringbuffer(this->pipeline_);
         audio_pipeline_reset_items_state(this->pipeline_);
-
-        esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-        esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
-
-        // ✅ Let audio_board_key_init handle everything
-        esp_err_t ret = audio_board_key_init(set);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to initialize audio board keys");
-            this->mark_failed();
-            return;
-        } else {
-            ESP_LOGE(TAG, "Audio board keys initialized successfully");
-        }
-
-        ESP_LOGI(TAG, "Checking ADC button states...");
-        adc_btn_list *btn_list = adc_btn_create_list(NULL, 0);  // Assuming we have button config elsewhere
-        if (btn_list != NULL) {
-            adc_btn_list *node = btn_list;
-            while (node) {
-                int voltage = adc_read(static_cast<adc_channel_t>(node->adc_info.adc_ch));
-
-                ESP_LOGI(TAG, "Button Channel %d Voltage: %d", node->adc_info.adc_ch, voltage);
-                node = node->next;
-            }
-            adc_btn_destroy_list(btn_list);
-        } else {
-            ESP_LOGW(TAG, "No ADC button list available.");
-        }
 
         // Unregister and deinitialize elements
         if (this->i2s_stream_writer_http_ != nullptr) {
