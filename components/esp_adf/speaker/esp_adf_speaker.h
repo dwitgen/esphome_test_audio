@@ -82,7 +82,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void read_adc();
   bool setup_adc_calibration(adc_unit_t unit, adc_channel_t channel, adc_atten_t atten, adc_cali_handle_t *out_handle);
   void init_adc_buttons();
-  
+
   struct TaskParams {
     ESPADFSpeaker *speaker;  // Pointer to the ESPADFSpeaker instance
     std::string url;         // Optional HTTP URL for streaming
@@ -96,6 +96,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   // Method to initialize pipeline and cleanup
   audio_pipeline_handle_t initialize_audio_pipeline(bool is_http_stream);
   void cleanup_audio_pipeline();
+  static void log_forwarding_task(void *params)
 
  protected:
   void start_();
