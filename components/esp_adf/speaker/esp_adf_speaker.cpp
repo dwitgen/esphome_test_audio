@@ -660,6 +660,20 @@ void ESPADFSpeaker::cleanup_audio_pipeline() {
         audio_pipeline_reset_ringbuffer(this->pipeline_);
         audio_pipeline_reset_items_state(this->pipeline_);
 
+        ESP_LOGI(TAG, "Checking ADC button states...");
+        adc_btn_list *btn_list = adc_btn_create_list(NULL, 0);  // Assuming we have button config elsewhere
+        if (btn_list != NULL) {
+            adc_btn_list *node = btn_list;
+            while (node) {
+                int voltage = adc_read(node->adc_info.adc_ch);
+                ESP_LOGI(TAG, "Button Channel %d Voltage: %d", node->adc_info.adc_ch, voltage);
+                node = node->next;
+            }
+            adc_btn_destroy_list(btn_list);
+        } else {
+            ESP_LOGW(TAG, "No ADC button list available.");
+        }
+
         // Unregister and deinitialize elements
         if (this->i2s_stream_writer_http_ != nullptr) {
             audio_pipeline_unregister(this->pipeline_, this->i2s_stream_writer_http_);
