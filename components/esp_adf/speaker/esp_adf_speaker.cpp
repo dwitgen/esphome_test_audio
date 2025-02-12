@@ -657,7 +657,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 }
 
-static esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
+esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
     const char *key_types[] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
     ESP_LOGI("ADC_BTN", "Button Event - ID: %d, Type: %s", (int)evt->data, key_types[evt->type]);
     return ESP_OK;
