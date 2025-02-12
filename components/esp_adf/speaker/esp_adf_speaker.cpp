@@ -666,11 +666,11 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
     switch ((int)evt->data) {
         case INPUT_KEY_USER_ID_VOLUP:
             ESP_LOGE("ADC_BTN", "[Vol+] Button Pressed");
-            volume_up();
+            this->volume_up();
             break;
         case INPUT_KEY_USER_ID_VOLDOWN:
             ESP_LOGE("ADC_BTN", "[Vol-] Button Pressed");
-            volume_down();
+            this->volume_down();
             break;
         case INPUT_KEY_USER_ID_PLAY:
             ESP_LOGE("ADC_BTN", "[Play] Button Pressed");
