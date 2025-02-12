@@ -660,9 +660,27 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 
 esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
     const char *key_types[] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
-    ESP_LOGI("ADC_BTN", "Button Event - ID: %d, Type: %s", (int)evt->data, key_types[evt->type]);
+    ESP_LOGE("ADC_BTN", "Button Event - ID: %d, Type: %s", (int)evt->data, key_types[evt->type]);
+
+    // ✅ Perform actions based on button pressed
+    switch ((int)evt->data) {
+        case INPUT_KEY_USER_ID_VOLUP:
+            ESP_LOGE("ADC_BTN", "[Vol+] Button Pressed");
+            break;
+        case INPUT_KEY_USER_ID_VOLDOWN:
+            ESP_LOGE("ADC_BTN", "[Vol-] Button Pressed");
+            break;
+        case INPUT_KEY_USER_ID_PLAY:
+            ESP_LOGE("ADC_BTN", "[Play] Button Pressed");
+            break;
+        default:
+            ESP_LOGE("ADC_BTN", "Unknown Button ID: %d", (int)evt->data);
+            break;
+    }
+
     return ESP_OK;
 }
+
 
 
 void ESPADFSpeaker::init_adc_buttons() {
