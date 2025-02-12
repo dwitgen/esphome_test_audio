@@ -608,7 +608,7 @@ void ESPADFSpeaker::setup() {
 //        ESP_LOGI("LOG_FORWARD", "🔄 Forwarding ADC logs to console...");
 //        vTaskDelay(pdMS_TO_TICKS(2000));  // Log every 2 seconds
 //    }
-}
+//}
 
 
 void ESPADFSpeaker::set_and_play_url(const std::string &url) {
