@@ -786,7 +786,7 @@ void ESPADFSpeaker::start_() {
   if (!this->parent_->try_lock()) {
     return;  // Waiting for another i2s component to return lock
   }
-  xTaskCreate(ESPADFSpeaker::player_task, "speaker_task", 8192, (void *) this, 1, &this->player_task_handle_);
+  xTaskCreate(ESPADFSpeaker::player_task, "speaker_task", 8192, (void *) this, 0, &this->player_task_handle_);
   ESP_LOGE(TAG, "Audio Task running on core: %d", xPortGetCoreID());
 }
 
