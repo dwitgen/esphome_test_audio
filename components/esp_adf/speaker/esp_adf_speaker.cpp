@@ -649,7 +649,7 @@ void ESPADFSpeaker::play_url(const std::string &url) {
         this->pipeline_ = nullptr;
         return;
     }
-
+    ESP_LOGE(TAG, "Audio Task running on core: %d", xPortGetCoreID());
     // Update state and log
     ESP_LOGI(TAG, "Audio pipeline started successfully for URL: %s", url.c_str());
     //this->state_ = speaker::STATE_RUNNING;
@@ -786,6 +786,7 @@ void ESPADFSpeaker::start_() {
     return;  // Waiting for another i2s component to return lock
   }
   xTaskCreate(ESPADFSpeaker::player_task, "speaker_task", 8192, (void *) this, 0, &this->player_task_handle_);
+  ESP_LOGE(TAG, "Audio Task running on core: %d", xPortGetCoreID());
 }
 
 void ESPADFSpeaker::player_task(void *params) {
