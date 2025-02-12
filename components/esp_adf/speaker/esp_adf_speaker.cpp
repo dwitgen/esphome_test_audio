@@ -22,7 +22,7 @@ extern "C" {
 #include <mp3_decoder.h>
 #include "esp_peripherals.h"
 #include "periph_adc_button.h"
-
+#include "input_key_service.h"
 #ifdef __cplusplus
 }
 #endif
@@ -672,6 +672,17 @@ void ESPADFSpeaker::init_adc_buttons() {
     } else {
         ESP_LOGE(TAG, "Audio board keys initialized successfully");
     }
+
+    input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
+    input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
+    input_cfg.handle = set;
+    input_cfg.based_cfg.task_stack = 4 * 1024;
+
+    periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
+    input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
+
+    // Set the callback
+    periph_service_set_callback(input_ser, input_key_service_cb, NULL);
 
     ESP_LOGI(TAG, "Checking ADC button states...");
     adc_btn_list *btn_list = adc_btn_create_list(NULL, 0);  // Assuming we have button config elsewhere
