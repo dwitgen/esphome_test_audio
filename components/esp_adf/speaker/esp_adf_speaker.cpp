@@ -600,6 +600,7 @@ void ESPADFSpeaker::setup() {
         ESP_LOGE(TAG, "Failed to find key for binary sensor record");
     }
 
+    init_adc_buttons();
     //xTaskCreate(log_forwarding_task, "log_forwarding", 2048, NULL, 5, NULL);
 }
 
@@ -713,7 +714,7 @@ void ESPADFSpeaker::init_adc_buttons() {
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
-        init_adc_buttons();
+        //init_adc_buttons();
         // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
         audio_pipeline_wait_for_stop(this->pipeline_);
