@@ -538,9 +538,22 @@ void ESPADFSpeaker::setup() {
     esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
 
     input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
-    input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
-    input_cfg.handle = set;
-    input_cfg.based_cfg.task_stack = 4 * 1024;
+    input_key_service_cfg_t input_cfg = {
+        .based_cfg = {
+            .task_stack = ADC_BUTTON_STACK_SIZE, //4 * 1024, // INPUT_KEY_SERVICE_TASK_STACK_SIZE,
+            .task_prio = ADC_BUTTON_TASK_PRIORITY, //10, //INPUT_KEY_SERVICE_TASK_PRIORITY,
+            .task_core = ADC_BUTTON_TASK_CORE_ID, //INPUT_KEY_SERVICE_TASK_ON_CORE,
+            .task_func = nullptr,
+            .extern_stack = false,
+            .service_start = nullptr,
+            .service_stop = nullptr,
+            .service_destroy = nullptr,
+            .service_ioctl = nullptr,
+            .service_name = nullptr,
+            .user_data = nullptr
+        },
+        .handle = set
+    };
 
     periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
     if (input_ser == NULL) {
@@ -551,7 +564,7 @@ void ESPADFSpeaker::setup() {
     input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
 
     // Set the callback
-    esp_err_t cb_status = periph_service_set_callback(input_ser, input_key_service_cb, this);
+    esp_err_t cb_status = periph_service_set_callback(input_ser, ESPADFSpeaker::input_key_service_cb, this);
     if (cb_status != ESP_OK) {
         ESP_LOGE(TAG, "Failed to set input key callback");
     } else {
