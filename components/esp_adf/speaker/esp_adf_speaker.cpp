@@ -712,6 +712,7 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
     const char *key_types[] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
     ESP_LOGE("ADC_BTN", "Button Event - ID: %d, Type: %s", (int)evt->data, key_types[evt->type]);
     ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx); // Ensure we have speaker instance
+    speaker->volume_up();
     if (!speaker) {
         ESP_LOGE("ADC_BTN", "Speaker context is NULL");
         return ESP_FAIL;
