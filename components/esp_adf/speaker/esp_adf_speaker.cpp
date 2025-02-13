@@ -745,7 +745,7 @@ void ESPADFSpeaker::init_adc_buttons() {
 
     ESP_LOGE(TAG, "Manually triggering input key service event...");
     periph_service_event_t test_event = {
-        .data = INPUT_KEY_USER_ID_VOLUP,
+        .data = (void*)INPUT_KEY_USER_ID_VOLUP,
         .type = INPUT_KEY_SERVICE_ACTION_CLICK,
     };
     input_key_service_cb(NULL, &test_event, this);
