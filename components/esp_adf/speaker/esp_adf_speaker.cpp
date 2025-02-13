@@ -716,7 +716,7 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
         ESP_LOGE("ADC_BTN", "Speaker context is NULL");
         return ESP_FAIL;
     }
-    speaker->increase_volume();
+    speaker->volume_up();
     // ✅ Perform actions based on button pressed
     switch ((int)evt->data) {
         case INPUT_KEY_USER_ID_VOLUP:
