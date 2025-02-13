@@ -532,6 +532,43 @@ void ESPADFSpeaker::setup() {
     //}
 
     //init_adc_buttons();
+    ESP_LOGI(TAG, "Initializing ADC Buttons...");
+
+    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+
+    input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
+    input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
+    input_cfg.handle = set;
+    input_cfg.based_cfg.task_stack = 4 * 1024;
+
+    periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
+    if (input_ser == NULL) {
+        ESP_LOGE(TAG, "Failed to create Input Key Service");
+    } else {
+        ESP_LOGE(TAG, "Input Key Service created successfully");
+    }
+    input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
+
+    // Set the callback
+    esp_err_t cb_status = periph_service_set_callback(input_ser, input_key_service_cb, this);
+    if (cb_status != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set input key callback");
+    } else {
+        ESP_LOGE(TAG, "Input Key callback registered successfully");
+    }
+
+    
+    // ✅ Let audio_board_key_init handle everything
+    esp_err_t ret = audio_board_key_init(set);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize audio board keys");
+        this->mark_failed();
+        return;
+    } else {
+        ESP_LOGE(TAG, "Audio board keys initialized successfully");
+    }
+
     // Set initial volume
     this->set_volume(volume_); // Set initial volume to 50%
 
@@ -749,7 +786,7 @@ void ESPADFSpeaker::init_adc_buttons() {
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
-        init_adc_buttons();
+        //init_adc_buttons();
         // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
         audio_pipeline_wait_for_stop(this->pipeline_);
