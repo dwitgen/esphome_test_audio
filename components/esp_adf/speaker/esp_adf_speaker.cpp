@@ -692,6 +692,9 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
 void ESPADFSpeaker::init_adc_buttons() {
     ESP_LOGI(TAG, "Initializing ADC Buttons...");
 
+    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+
     input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
     input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
     input_cfg.handle = set;
@@ -713,9 +716,7 @@ void ESPADFSpeaker::init_adc_buttons() {
         ESP_LOGE(TAG, "Input Key callback registered successfully");
     }
 
-    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
-
+    
     // ✅ Let audio_board_key_init handle everything
     esp_err_t ret = audio_board_key_init(set);
     if (ret != ESP_OK) {
