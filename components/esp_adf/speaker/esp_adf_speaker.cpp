@@ -743,12 +743,15 @@ void ESPADFSpeaker::init_adc_buttons() {
         ESP_LOGE(TAG, "Audio board keys initialized successfully");
     }
 
-    //ESP_LOGE(TAG, "Manually triggering input key service event...");
-    //periph_service_event_t test_event = {
-    //    .data = (void*)INPUT_KEY_USER_ID_VOLUP,
-    //    .type = INPUT_KEY_SERVICE_ACTION_CLICK,
-    //};
-    //input_key_service_cb(NULL, &test_event, this);
+    ESP_LOGE(TAG, "Manually triggering input key service event...");
+    periph_service_event_t test_event = {
+        .type = INPUT_KEY_SERVICE_ACTION_CLICK,  // ✅ Matches definition
+        .source = NULL,  // No specific event source
+        .data = (void *)(intptr_t)INPUT_KEY_USER_ID_VOLUP,  // ✅ Cast to `void*`
+        .len = sizeof(INPUT_KEY_USER_ID_VOLUP),  // ✅ Set length properly
+    };
+    input_key_service_cb(NULL, &test_event, this);
+
 }
 
 
