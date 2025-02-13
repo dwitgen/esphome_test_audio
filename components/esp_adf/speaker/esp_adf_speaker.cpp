@@ -711,10 +711,20 @@ void ESPADFSpeaker::init_adc_buttons() {
     input_cfg.based_cfg.task_stack = 4 * 1024;
 
     periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
+    if (input_ser == NULL) {
+        ESP_LOGE(TAG, "Failed to create Input Key Service");
+    } else {
+        ESP_LOGE(TAG, "Input Key Service created successfully");
+    }
     input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
 
     // Set the callback
-    periph_service_set_callback(input_ser, input_key_service_cb, NULL);
+    esp_err_t cb_status = periph_service_set_callback(input_ser, input_key_service_cb, this);
+    if (cb_status != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set input key callback");
+    } else {
+        ESP_LOGE(TAG, "Input Key callback registered successfully");
+    }
 
     ESP_LOGI(TAG, "Checking ADC button states...");
     adc_btn_list *btn_list = adc_btn_create_list(NULL, 0);  // Assuming we have button config elsewhere
