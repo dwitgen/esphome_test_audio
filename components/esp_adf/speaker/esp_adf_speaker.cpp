@@ -531,7 +531,7 @@ void ESPADFSpeaker::setup() {
     //    ESP_LOGE(TAG, "Audio board keys initialized successfully");
     //}
 
-    init_adc_buttons();
+    //init_adc_buttons();
     
     // Set initial volume
     this->set_volume(volume_); // Set initial volume to 50%
@@ -758,7 +758,7 @@ void ESPADFSpeaker::init_adc_buttons() {
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
-        //init_adc_buttons();
+        init_adc_buttons();
         // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
         audio_pipeline_wait_for_stop(this->pipeline_);
