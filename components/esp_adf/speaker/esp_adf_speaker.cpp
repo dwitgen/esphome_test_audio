@@ -531,7 +531,7 @@ void ESPADFSpeaker::setup() {
     //    ESP_LOGE(TAG, "Audio board keys initialized successfully");
     //}
 
-    init_adc_buttons();
+    //init_adc_buttons();
     
     // Set initial volume
     this->set_volume(volume_); // Set initial volume to 50%
@@ -601,7 +601,7 @@ void ESPADFSpeaker::setup() {
         ESP_LOGE(TAG, "Failed to find key for binary sensor record");
     }
 
-    //init_adc_buttons();
+    init_adc_buttons();
     //xTaskCreate(log_forwarding_task, "log_forwarding", 2048, NULL, 5, NULL);
 }
 
