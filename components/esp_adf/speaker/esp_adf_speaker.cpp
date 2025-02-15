@@ -95,6 +95,8 @@ bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t channel
 }
 
 
+
+
 void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press) {
     static std::map<std::string, bool> button_states;  // Track button states
     bool is_pressed = (adc_value >= low_thresh && adc_value <= high_thresh);
@@ -518,20 +520,18 @@ void ESPADFSpeaker::setup() {
         return;
     }
 
-    //esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    //esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
-
-    // ✅ Let audio_board_key_init handle everything
-    //esp_err_t ret = audio_board_key_init(set);
-    //if (ret != ESP_OK) {
-    //    ESP_LOGE(TAG, "Failed to initialize audio board keys");
-    //    this->mark_failed();
-    //    return;
-    //} else {
-    //    ESP_LOGE(TAG, "Audio board keys initialized successfully");
-    //}
-
-    //init_adc_buttons();
+    // Configure ADC for volume control
+    adc_oneshot_unit_init_cfg_t init_config1 = {
+        .unit_id = ADC_UNIT_1,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &this->adc1_handle));
+    adc_oneshot_chan_cfg_t ch_config = {
+        .atten = ADC_ATTEN_DB_12,
+        .bitwidth = ADC_BITWIDTH_12,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &ch_config));
+    adc_cali_handle_t adc1_cali_handle = NULL;
+    bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
     
     // Set initial volume
     this->set_volume(volume_); // Set initial volume to 50%
@@ -601,16 +601,7 @@ void ESPADFSpeaker::setup() {
         ESP_LOGE(TAG, "Failed to find key for binary sensor record");
     }
 
-    //init_adc_buttons();
-    //xTaskCreate(log_forwarding_task, "log_forwarding", 2048, NULL, 5, NULL);
 }
-
-//static void log_forwarding_task(void *params) {
-//    while (1) {
-//        ESP_LOGI("LOG_FORWARD", "🔄 Forwarding ADC logs to console...");
-//        vTaskDelay(pdMS_TO_TICKS(2000));  // Log every 2 seconds
-//    }
-//}
 
 
 void ESPADFSpeaker::set_and_play_url(const std::string &url) {
@@ -659,106 +650,11 @@ void ESPADFSpeaker::play_url(const std::string &url) {
     xQueueSend(this->event_queue_, &event, portMAX_DELAY);
 }
 
-esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
-    const char *key_types[] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
-    ESP_LOGE("ADC_BTN", "Button Event - ID: %d, Type: %s", (int)evt->data, key_types[evt->type]);
-    ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx); // Ensure we have speaker instance
-    speaker->volume_up();
-    if (!speaker) {
-        ESP_LOGE("ADC_BTN", "Speaker context is NULL");
-        return ESP_FAIL;
-    }
-    speaker->volume_up();
-    // ✅ Perform actions based on button pressed
-    switch ((int)evt->data) {
-        case INPUT_KEY_USER_ID_VOLUP:
-            ESP_LOGE("ADC_BTN", "[Vol+] Button Pressed");
-            speaker->volume_up();
-            break;
-        case INPUT_KEY_USER_ID_VOLDOWN:
-            ESP_LOGE("ADC_BTN", "[Vol-] Button Pressed");
-            speaker->volume_down();
-            break;
-        case INPUT_KEY_USER_ID_PLAY:
-            ESP_LOGE("ADC_BTN", "[Play] Button Pressed");
-            break;
-        default:
-            ESP_LOGE("ADC_BTN", "Unknown Button ID: %d", (int)evt->data);
-            break;
-    }
-
-    return ESP_OK;
-}
-
-
-
-void ESPADFSpeaker::init_adc_buttons() {
-    ESP_LOGI(TAG, "Initializing ADC Buttons...");
-
-    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
-
-    input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
-    input_key_service_cfg_t input_cfg = {
-        .based_cfg = {
-            .task_stack = ADC_BUTTON_STACK_SIZE, //4 * 1024, // INPUT_KEY_SERVICE_TASK_STACK_SIZE,
-            .task_prio = ADC_BUTTON_TASK_PRIORITY, //10, //INPUT_KEY_SERVICE_TASK_PRIORITY,
-            .task_core = ADC_BUTTON_TASK_CORE_ID, //INPUT_KEY_SERVICE_TASK_ON_CORE,
-            .task_func = nullptr,
-            .extern_stack = false,
-            .service_start = nullptr,
-            .service_stop = nullptr,
-            .service_destroy = nullptr,
-            .service_ioctl = nullptr,
-            .service_name = nullptr,
-            .user_data = nullptr
-        },
-        .handle = set
-    };
-
-    periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
-    if (input_ser == NULL) {
-        ESP_LOGE(TAG, "Failed to create Input Key Service");
-    } else {
-        ESP_LOGE(TAG, "Input Key Service created successfully");
-    }
-    input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
-
-    // Set the callback
-    esp_err_t cb_status = periph_service_set_callback(input_ser, ESPADFSpeaker::input_key_service_cb, this);
-    if (cb_status != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set input key callback");
-    } else {
-        ESP_LOGE(TAG, "Input Key callback registered successfully");
-    }
-
-    
-    // ✅ Let audio_board_key_init handle everything
-    esp_err_t ret = audio_board_key_init(set);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize audio board keys");
-        this->mark_failed();
-        return;
-    } else {
-        ESP_LOGE(TAG, "Audio board keys initialized successfully");
-    }
-
-    //ESP_LOGE(TAG, "Manually triggering input key service event...");
-    //periph_service_event_t test_event = {
-    //    .type = INPUT_KEY_SERVICE_ACTION_CLICK,  // ✅ Matches definition
-    //    .source = NULL,  // No specific event source
-    //    .data = (void *)(intptr_t)INPUT_KEY_USER_ID_VOLUP,  // ✅ Cast to `void*`
-    //    .len = sizeof(INPUT_KEY_USER_ID_VOLUP),  // ✅ Set length properly
-    //};
-    //input_key_service_cb(NULL, &test_event, this);
-
-}
-
 
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
-        init_adc_buttons();
+        
         // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
         audio_pipeline_wait_for_stop(this->pipeline_);
@@ -957,7 +853,7 @@ void ESPADFSpeaker::watch_() {
 
 void ESPADFSpeaker::loop() {
   this->watch_();
-  //handle_buttons();  // Handle button inputs
+  handle_buttons();  // Handle button inputs
 
   switch (this->state_) {
     case speaker::STATE_STARTING:
