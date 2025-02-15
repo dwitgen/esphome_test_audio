@@ -73,7 +73,7 @@ async def to_code(config):
         name="esp-adf",
         repo="https://github.com/dwitgen/esp-adf",
         path="components",
-        ref="v2.7-dev_testing",
+        ref="v2.7-dev",
         components=["*"],
         submodules=["components/esp-adf-libs", "components/esp-sr"],
     )
