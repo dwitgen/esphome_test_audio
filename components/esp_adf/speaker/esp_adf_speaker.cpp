@@ -904,7 +904,7 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
 
 void ESPADFSpeaker::loop() {
   this->watch_();
-  handle_buttons();  // Handle button inputs
+  //handle_buttons();  // Handle button inputs
 
   switch (this->state_) {
     case speaker::STATE_STARTING:
