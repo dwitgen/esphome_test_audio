@@ -869,7 +869,7 @@ void ESPADFSpeaker::watch_() {
 }
 
 //esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx)
-static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) 
+static esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) 
 {
     ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx);
     ESP_LOGD(TAG, "[ * ] input key id is %d, %d", (int)evt->data, evt->type);
