@@ -874,31 +874,34 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
     ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx);
     ESP_LOGD(TAG, "[ * ] input key id is %d, %d", (int)evt->data, evt->type);
     const char *key_types[INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE + 1] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
-    switch ((int)evt->data) {
-        case INPUT_KEY_USER_ID_REC:
-            ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
-            break;
-        case INPUT_KEY_USER_ID_SET:
-            ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
-            break;
-        case INPUT_KEY_USER_ID_PLAY:
-            ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
-            break;
-        case INPUT_KEY_USER_ID_MODE:
-            ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
-            break;
-        case INPUT_KEY_USER_ID_VOLDOWN:
-            ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
-            speaker->volume_down();
-            break;
-        case INPUT_KEY_USER_ID_VOLUP:
-            ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
-            speaker->volume_up();
-            break;
-        default:
-            ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
-            break;
-    }
+    case INPUT_KEY_SERVICE_ACTION_CLICK:
+    case INPUT_KEY_SERVICE_ACTION_PRESSED: 
+        switch ((int)evt->data) {
+            case INPUT_KEY_USER_ID_REC:
+                ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
+                break;
+            case INPUT_KEY_USER_ID_SET:
+                ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
+                break;
+            case INPUT_KEY_USER_ID_PLAY:
+                ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
+                break;
+            case INPUT_KEY_USER_ID_MODE:
+                ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
+                break;
+            case INPUT_KEY_USER_ID_VOLDOWN:
+                ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
+                speaker->volume_down();
+                break;
+            case INPUT_KEY_USER_ID_VOLUP:
+                ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
+                speaker->volume_up();
+                break;
+            default:
+                ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
+                break;
+        }
+        break;
 
     return ESP_OK;
 }
