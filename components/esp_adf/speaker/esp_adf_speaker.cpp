@@ -868,7 +868,7 @@ void ESPADFSpeaker::watch_() {
   }
 }
 
-static esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx)
+esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt) //, void *ctx)
 {
     ESP_LOGD(TAG, "[ * ] input key id is %d, %d", (int)evt->data, evt->type);
     const char *key_types[INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE + 1] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
@@ -887,11 +887,11 @@ static esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t han
             break;
         case INPUT_KEY_USER_ID_VOLDOWN:
             ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
-            //this->volume_down();
+            this->volume_down();
             break;
         case INPUT_KEY_USER_ID_VOLUP:
             ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
-            //this->volume_up();
+            this->volume_up();
             break;
         default:
             ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
