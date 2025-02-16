@@ -520,18 +520,35 @@ void ESPADFSpeaker::setup() {
         return;
     }
 
+    ESP_LOGI(TAG, "[ 1 ] Initialize peripherals");
+    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+
+    ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
+    audio_board_key_init(set);
+
+    ESP_LOGI(TAG, "[ 3 ] Create and start input key service");
+    input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
+    input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
+    input_cfg.handle = set;
+    input_cfg.based_cfg.task_stack = 4 * 1024;
+    periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
+
+    input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
+    periph_service_set_callback(input_ser, input_key_service_cb, NULL);
+
     // Configure ADC for volume control
-    adc_oneshot_unit_init_cfg_t init_config1 = {
-        .unit_id = ADC_UNIT_1,
-    };
-    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &this->adc1_handle));
-    adc_oneshot_chan_cfg_t ch_config = {
-        .atten = ADC_ATTEN_DB_12,
-        .bitwidth = ADC_BITWIDTH_12,
-    };
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &ch_config));
-    adc_cali_handle_t adc1_cali_handle = NULL;
-    bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
+    //adc_oneshot_unit_init_cfg_t init_config1 = {
+    //    .unit_id = ADC_UNIT_1,
+    //};
+    //ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &this->adc1_handle));
+    //adc_oneshot_chan_cfg_t ch_config = {
+    //    .atten = ADC_ATTEN_DB_12,
+    //    .bitwidth = ADC_BITWIDTH_12,
+    //};
+    //ESP_ERROR_CHECK(adc_oneshot_config_channel(this->adc1_handle, ADC_CHANNEL_7, &ch_config));
+    //adc_cali_handle_t adc1_cali_handle = NULL;
+    //bool adc_calibrated = setup_adc_calibration(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12, &this->adc1_cali_handle);
     
     // Set initial volume
     this->set_volume(volume_); // Set initial volume to 50%
@@ -850,6 +867,40 @@ void ESPADFSpeaker::watch_() {
     }
   }
 }
+
+static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx)
+{
+    ESP_LOGD(TAG, "[ * ] input key id is %d, %d", (int)evt->data, evt->type);
+    const char *key_types[INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE + 1] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
+    switch ((int)evt->data) {
+        case INPUT_KEY_USER_ID_REC:
+            ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
+            break;
+        case INPUT_KEY_USER_ID_SET:
+            ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
+            break;
+        case INPUT_KEY_USER_ID_PLAY:
+            ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
+            break;
+        case INPUT_KEY_USER_ID_MODE:
+            ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
+            break;
+        case INPUT_KEY_USER_ID_VOLDOWN:
+            ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
+            this->volume_down();
+            break;
+        case INPUT_KEY_USER_ID_VOLUP:
+            ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
+            this->volume_up();
+            break;
+        default:
+            ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
+            break;
+    }
+
+    return ESP_OK;
+}
+
 
 void ESPADFSpeaker::loop() {
   this->watch_();
