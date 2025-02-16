@@ -535,7 +535,7 @@ void ESPADFSpeaker::setup() {
     periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
 
     input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
-    periph_service_set_callback(input_ser, input_key_service_cb, NULL);
+    periph_service_set_callback(input_ser, input_key_service_cb, this);
 
     // Configure ADC for volume control
     //adc_oneshot_unit_init_cfg_t init_config1 = {
