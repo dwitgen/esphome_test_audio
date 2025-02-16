@@ -887,11 +887,11 @@ static esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t han
             break;
         case INPUT_KEY_USER_ID_VOLDOWN:
             ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
-            this->volume_down();
+            //this->volume_down();
             break;
         case INPUT_KEY_USER_ID_VOLUP:
             ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
-            this->volume_up();
+            //this->volume_up();
             break;
         default:
             ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
