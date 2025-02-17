@@ -521,9 +521,9 @@ void ESPADFSpeaker::setup() {
         return;
     }
 
-    ESPADFButton *button_component = new ESPADFButton();
-    button_component->set_speaker(this);  // ✅ Link button system to speaker
-    button_component->setup();
+    //ESPADFButton *button_component = new ESPADFButton();
+    //button_component->set_speaker(this);  // ✅ Link button system to speaker
+    //button_component->setup();
 
     //ESP_LOGI(TAG, "[ 1 ] Initialize peripherals");
     //esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
