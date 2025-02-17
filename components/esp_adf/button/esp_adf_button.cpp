@@ -36,7 +36,7 @@ esp_err_t ESPADFButton::input_key_service_cb(periph_service_handle_t handle, per
 
     ESP_LOGD(TAG, "[ * ] Button Event: ID=%d, Type=%d", (int)evt->data, evt->type);
 
-    if (evt->type == INPUT_KEY_SERVICE_ACTION_CLICK || evt->type == INPUT_KEY_SERVICE_ACTION_PRESSED) {
+    if (evt->type == INPUT_KEY_SERVICE_ACTION_CLICK || evt->type == INPUT_KEY_SERVICE_ACTION_PRESS) {
         switch ((int)evt->data) {
             case INPUT_KEY_USER_ID_REC:
                 ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
