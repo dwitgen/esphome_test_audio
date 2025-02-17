@@ -6,6 +6,7 @@ from esphome.const import CONF_ID
 from .. import (
     CONF_ESP_ADF_ID,
     ESPADF,
+    ESPADFPipeline,
     esp_adf_ns,
     final_validate_usable_board,
 )
