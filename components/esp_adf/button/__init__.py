@@ -21,6 +21,7 @@ CONFIG_SCHEMA = cv.All(
         {
             cv.GenerateID(): cv.declare_id(ESPADFButton),
             cv.GenerateID(CONF_ESP_ADF_ID): cv.use_id(ESPADF),
+            cv.Optional(CONF_NAME): cv.string,
         }
     ).extend(cv.COMPONENT_SCHEMA),
     cv.only_with_esp_idf,
