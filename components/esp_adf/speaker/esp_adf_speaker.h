@@ -21,7 +21,7 @@ extern "C" {
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
 #include <esp_event.h>
-#include "../button/esp_adf_button.h"
+//#include "../button/esp_adf_button.h"
 
 #ifdef __cplusplus
 }
@@ -33,6 +33,7 @@ extern "C" {
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/text_sensor/text_sensor.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
+#include "../button/esp_adf_button.h"
 
 namespace esphome {
 namespace esp_adf {

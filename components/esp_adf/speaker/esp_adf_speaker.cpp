@@ -30,6 +30,7 @@ extern "C" {
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
+#include "../button/esp_adf_button.h"
 
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
