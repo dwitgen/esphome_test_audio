@@ -874,8 +874,7 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
     ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx);
     ESP_LOGD(TAG, "[ * ] input key id is %d, %d", (int)evt->data, evt->type);
     const char *key_types[INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE + 1] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
-    case INPUT_KEY_SERVICE_ACTION_CLICK:
-    case INPUT_KEY_SERVICE_ACTION_PRESSED: 
+    if (evt->type == INPUT_KEY_SERVICE_ACTION_CLICK || evt->type == INPUT_KEY_SERVICE_ACTION_PRESSED) {
         switch ((int)evt->data) {
             case INPUT_KEY_USER_ID_REC:
                 ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
@@ -901,9 +900,9 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
                 ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
                 break;
         }
-        default:
-            ESP_LOGE(TAG, "Not supported action");
-            break;
+    } else {
+        EAP_LOGE(TAG, "Key event type not supported: %d", evt->type);
+    }    
     return ESP_OK;
 }
 
