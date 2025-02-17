@@ -3,6 +3,7 @@
 #include "../esp_adf.h"
 
 #include "esphome/core/component.h"
+#include "esphome/components/button/button.h"
 #include "esp_peripherals.h"
 #include "periph_adc_button.h"
 #include "input_key_service.h"
