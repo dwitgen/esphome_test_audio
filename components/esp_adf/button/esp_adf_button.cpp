@@ -12,7 +12,7 @@ static const char *TAG = "ESPADFButton";
 static periph_service_handle_t input_ser;
 
 void ESPADFButton::setup() {
-    ESP_LOGI(TAG, "Setting up ESP-ADF Button Component...");
+    ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
 
     esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
     esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
@@ -28,7 +28,7 @@ void ESPADFButton::setup() {
     periph_service_set_callback(input_ser, input_key_service_cb, this);
     periph_service_start(input_ser);
 
-    ESP_LOGI(TAG, "ESP-ADF Button Component Initialized Successfully!");
+    ESP_LOGE(TAG, "ESP-ADF Button Component Initialized Successfully!");
 }
 
 esp_err_t ESPADFButton::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
@@ -45,23 +45,23 @@ esp_err_t ESPADFButton::input_key_service_cb(periph_service_handle_t handle, per
     if (evt->type == INPUT_KEY_SERVICE_ACTION_CLICK || evt->type == INPUT_KEY_SERVICE_ACTION_PRESS) {
         switch ((int)evt->data) {
             case INPUT_KEY_USER_ID_REC:
-                ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
+                ESP_LOGE(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
                 break;
             case INPUT_KEY_USER_ID_SET:
-                ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
+                ESP_LOGE(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
                 break;
             case INPUT_KEY_USER_ID_PLAY:
-                ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
+                ESP_LOGE(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
                 break;
             case INPUT_KEY_USER_ID_MODE:
-                ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
+                ESP_LOGE(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
                 break;
             case INPUT_KEY_USER_ID_VOLDOWN:
-                ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
+                ESP_LOGE(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
                 //speaker->volume_down();
                 break;
             case INPUT_KEY_USER_ID_VOLUP:
-                ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
+                ESP_LOGE(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
                 //speaker->volume_up();
                 break;
             default:
