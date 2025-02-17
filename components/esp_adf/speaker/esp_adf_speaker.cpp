@@ -676,6 +676,16 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
+        ESP_LOGE(TAG, "Checking if ESPADFButton is registered...");
+
+        // Attempt to retrieve the button component from ESPHome's registry
+        auto *button_component = esphome::App.get_component<ESPADFButton>();
+
+        if (button_component) {
+            ESP_LOGE(TAG, "ESPADFButton is registered successfully.");
+        } else {
+            ESP_LOGE(TAG, "ERROR: ESPADFButton is NOT registered!");
+        }
         
         // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);
