@@ -1,6 +1,6 @@
 #include "esp_adf.h"
 #include "esphome/core/defines.h"
-#include "esp_adf_button.h"
+//#include "esp_adf_button.h"
 #include "esphome/core/log.h"
 #include "esp_peripherals.h"
 #include "periph_adc_button.h"
