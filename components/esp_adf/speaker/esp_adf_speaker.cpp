@@ -901,8 +901,9 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
                 ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
                 break;
         }
-        break;
-
+        default:
+            ESP_LOGE(TAG, "Not supported action");
+            break;
     return ESP_OK;
 }
 
