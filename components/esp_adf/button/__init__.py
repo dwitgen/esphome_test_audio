@@ -13,7 +13,7 @@ from .. import (
 AUTO_LOAD = ["esp_adf"]
 DEPENDENCIES = ["esp32"]
 
-ESPADFButton = esp_adf_ns.class_("ESPADFButton", button.Button, cg.Component)
+ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
@@ -32,4 +32,4 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await cg.register_parented(var, config[CONF_ESP_ADF_ID])
-    await button.register_button(var, config)
+    

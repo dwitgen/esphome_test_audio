@@ -5,7 +5,6 @@
 #include "periph_adc_button.h"
 #include "input_key_service.h"
 #include "../speaker/esp_adf_speaker.h"
-#include "esphome/core/parented.h"
 
 namespace esphome {
 namespace esp_adf {
