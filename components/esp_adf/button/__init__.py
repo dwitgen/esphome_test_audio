@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import button
-from esphome.const import CONF_ID
+from esphome.const import CONF_ID, CONF_NAME
 
 from .. import (
     CONF_ESP_ADF_ID,
