@@ -30,7 +30,7 @@ extern "C" {
 #include "esphome/core/application.h"
 #include "esphome/core/hal.h"
 #include "esphome/core/log.h"
-#include "../button/esp_adf_button.h"
+//#include "../button/esp_adf_button.h"
 
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
@@ -676,16 +676,6 @@ void ESPADFSpeaker::play_url(const std::string &url) {
 void ESPADFSpeaker::cleanup_audio_pipeline() {
     if (this->pipeline_ != nullptr) {
         ESP_LOGI(TAG, "Stopping current audio pipeline");
-        ESP_LOGE(TAG, "Checking if ESPADFButton is registered...");
-
-        // Attempt to retrieve the button component from ESPHome's registry
-        auto *button_component = esphome::App.get_component<ESPADFButton>();
-
-        if (button_component) {
-            ESP_LOGE(TAG, "ESPADFButton is registered successfully.");
-        } else {
-            ESP_LOGE(TAG, "ERROR: ESPADFButton is NOT registered!");
-        }
         
         // Stop and terminate the pipeline
         audio_pipeline_stop(this->pipeline_);

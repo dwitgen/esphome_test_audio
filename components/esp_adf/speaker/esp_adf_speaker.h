@@ -33,7 +33,7 @@ extern "C" {
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/text_sensor/text_sensor.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
-#include "../button/esp_adf_button.h"
+//#include "../button/esp_adf_button.h"
 
 namespace esphome {
 namespace esp_adf {
@@ -41,7 +41,6 @@ namespace esp_adf {
 class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Component {
  public:
   float get_setup_priority() const override { return esphome::setup_priority::LATE; }
-  ESPADFButton *button_component_ = nullptr;
   void setup() override;
   void loop() override;
 
