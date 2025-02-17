@@ -4,7 +4,7 @@
 #include "esp_peripherals.h"
 #include "periph_adc_button.h"
 #include "input_key_service.h"
-#include "esp_adf/esp_adf_speaker.h"
+#include "esp_adf/speaker/esp_adf_speaker.h"
 
 namespace esphome {
 namespace esp_adf {
