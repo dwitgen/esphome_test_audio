@@ -6,7 +6,6 @@ from esphome.const import CONF_ID
 from .. import (
     CONF_ESP_ADF_ID,
     ESPADF,
-    ESPADFPipeline,
     esp_adf_ns,
     final_validate_usable_board,
 )
@@ -14,7 +13,7 @@ from .. import (
 AUTO_LOAD = ["esp_adf"]
 DEPENDENCIES = ["esp32"]
 
-ESPADFButton = esp_adf_ns.class_("ESPADFButton", ESPADFPipeline, button.Button, cg.Component)
+ESPADFButton = esp_adf_ns.class_("ESPADFButton", button.Button, cg.Component)
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
