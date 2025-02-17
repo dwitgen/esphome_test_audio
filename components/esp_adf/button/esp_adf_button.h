@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../esp_adf.h"
+
 #include "esphome/core/component.h"
 #include "esp_peripherals.h"
 #include "periph_adc_button.h"
