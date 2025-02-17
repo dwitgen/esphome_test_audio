@@ -32,3 +32,4 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await cg.register_parented(var, config[CONF_ESP_ADF_ID])
+    await button.register_button(var, config)
