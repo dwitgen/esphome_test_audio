@@ -901,7 +901,7 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
                 break;
         }
     } else {
-        EAP_LOGE(TAG, "Key event type not supported: %d", evt->type);
+        ESP_LOGE(TAG, "Key event type not supported: %d", evt->type);
     }    
     return ESP_OK;
 }
