@@ -41,7 +41,7 @@ namespace esp_adf {
 class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Component {
  public:
   float get_setup_priority() const override { return esphome::setup_priority::LATE; }
-
+  ESPADFButton *button_component_ = nullptr;
   void setup() override;
   void loop() override;
 
