@@ -39,7 +39,7 @@ struct DataEvent {
 
 class ESPADF;
 
-class ESPADFPipeline : public Parented<ESPADF> {};
+//class ESPADFPipeline : public Parented<ESPADF> {};
 
 class ESPADF : public Component {
  public:
