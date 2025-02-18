@@ -31,12 +31,13 @@ void ESPADF::setup() {
   audio_board_handle_t board_handle = audio_board_init();
   audio_hal_ctrl_codec(board_handle->audio_hal, AUDIO_HAL_CODEC_MODE_BOTH, AUDIO_HAL_CTRL_START);
 #endif
+init_adc_buttons();
   
 }
 
 float ESPADF::get_setup_priority() const { return setup_priority::HARDWARE; }
-
-ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
+void ESPADF::void init_adc_buttons() {
+  ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
 
   esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
   esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
@@ -53,6 +54,7 @@ ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
   periph_service_start(input_ser);
 
   ESP_LOGE(TAG, "ESP-ADF Button Component Initialized Successfully!");
+}
 
 esp_err_t ESPADF::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
   if (!ctx) {
