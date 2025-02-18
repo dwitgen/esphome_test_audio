@@ -24,14 +24,19 @@ static const char *const TAG = "esp_adf";
 static periph_service_handle_t input_ser;
 
 void ESPADF::setup() {
-  vTaskDelay(2000 / portTICK_PERIOD_MS);
+ 
 #ifdef USE_ESP_ADF_BOARD
 //esp_log_level_set("*", ESP_LOG_DEBUG);
   ESP_LOGI(TAG, "Start codec chip");
-  //audio_board_handle_t board_handle = audio_board_init();
-  //audio_hal_ctrl_codec(board_handle->audio_hal, AUDIO_HAL_CODEC_MODE_BOTH, AUDIO_HAL_CTRL_START);
+  audio_board_handle_t board_handle = audio_board_init();
+  audio_hal_ctrl_codec(board_handle->audio_hal, AUDIO_HAL_CODEC_MODE_BOTH, AUDIO_HAL_CTRL_START);
 #endif
-  ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
+  
+}
+
+float ESPADF::get_setup_priority() const { return setup_priority::HARDWARE; }
+
+ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
 
   esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
   esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
@@ -48,9 +53,6 @@ void ESPADF::setup() {
   periph_service_start(input_ser);
 
   ESP_LOGE(TAG, "ESP-ADF Button Component Initialized Successfully!");
-}
-
-float ESPADF::get_setup_priority() const { return setup_priority::HARDWARE; }
 
 esp_err_t ESPADF::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
   if (!ctx) {
