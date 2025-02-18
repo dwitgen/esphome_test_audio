@@ -36,7 +36,7 @@ init_adc_buttons();
 }
 
 float ESPADF::get_setup_priority() const { return setup_priority::HARDWARE; }
-void ESPADF::void init_adc_buttons() {
+void ESPADF::init_adc_buttons() {
   ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
 
   esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
