@@ -121,8 +121,8 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
         if (strcmp(button_name, "PLAY") == 0 && internal_btn_play)
             internal_btn_play->publish_state(is_pressed);
 
-        if (strcmp(button_name, "MODE") == 0 && internal_btn_mode)
-            internal_btn_mode->publish_state(is_pressed);
+        //if (strcmp(button_name, "MODE") == 0 && internal_btn_mode)
+        //    internal_btn_mode->publish_state(is_pressed);
 
         if (strcmp(button_name, "REC") == 0 && internal_btn_record)
             internal_btn_record->publish_state(is_pressed);
