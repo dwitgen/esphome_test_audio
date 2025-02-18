@@ -24,6 +24,7 @@ static const char *const TAG = "esp_adf";
 static periph_service_handle_t input_ser;
 
 void ESPADF::setup() {
+  delay(3000)
 #ifdef USE_ESP_ADF_BOARD
 esp_log_level_set("*", ESP_LOG_DEBUG);
   ESP_LOGI(TAG, "Start codec chip");
