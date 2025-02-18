@@ -537,6 +537,7 @@ void ESPADFSpeaker::setup() {
     input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
     input_cfg.handle = set;
     input_cfg.based_cfg.task_stack = 4 * 1024;
+    input_cfg.based_cfg.task_core = 0;
     periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
 
     input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
