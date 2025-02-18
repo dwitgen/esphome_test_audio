@@ -526,21 +526,21 @@ void ESPADFSpeaker::setup() {
     //button_component->setup();
 
     //ESP_LOGI(TAG, "[ 1 ] Initialize peripherals");
-    //esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    //esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
 
     //ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
-    //audio_board_key_init(set);
+    audio_board_key_init(set);
 
     //ESP_LOGI(TAG, "[ 3 ] Create and start input key service");
-    //input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
-    //input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
-    //input_cfg.handle = set;
-    //input_cfg.based_cfg.task_stack = 4 * 1024;
-    //periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
+    input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
+    input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
+    input_cfg.handle = set;
+    input_cfg.based_cfg.task_stack = 4 * 1024;
+    periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
 
-    //input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
-    //periph_service_set_callback(input_ser, input_key_service_cb, this);
+    input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
+    periph_service_set_callback(input_ser, input_key_service_cb, this);
 
     // Configure ADC for volume control
     //adc_oneshot_unit_init_cfg_t init_config1 = {

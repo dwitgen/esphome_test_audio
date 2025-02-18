@@ -4,9 +4,6 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
-#include "esp_peripherals.h"
-#include "periph_adc_button.h"
-#include "input_key_service.h"
 
 namespace esphome {
 namespace esp_adf {
@@ -39,14 +36,11 @@ struct DataEvent {
 
 class ESPADF;
 
-//class ESPADFPipeline : public Parented<ESPADF> {};
+class ESPADFPipeline : public Parented<ESPADF> {};
 
 class ESPADF : public Component {
  public:
   void setup() override;
-  void loop() override;
-  static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx);
-  void init_adc_buttons();
 
   float get_setup_priority() const override;
 
@@ -57,7 +51,6 @@ class ESPADF : public Component {
  protected:
   Mutex lock_;
 };
-
 
 }  // namespace esp_adf
 }  // namespace esphome
