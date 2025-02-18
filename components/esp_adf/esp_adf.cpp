@@ -40,17 +40,19 @@ float ESPADF::get_setup_priority() const { return setup_priority::HARDWARE; }
 
 void ESPADF::loop() {
   vTaskDelay(1000 / portTICK_PERIOD_MS); 
-  if (!executed_once) {
-    vTaskDelay(1000 / portTICK_PERIOD_MS); 
-    init_adc_buttons();
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-    ESP_LOGE(TAG, "ESP ADF Loop...");
-    // This block will execute only once
-    vTaskDelay(1000 / portTICK_PERIOD_MS);  // Wait for 1 second
-    init_adc_buttons();  // Initialize the ADC buttons
-    executed_once = true;  // Set the flag to true, preventing this from running again
-    vTaskDelay(1000 / portTICK_PERIOD_MS); 
-  }
+  init_adc_buttons();
+  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  //if (!executed_once) {
+  //  vTaskDelay(1000 / portTICK_PERIOD_MS); 
+  //  init_adc_buttons();
+  //  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  //  ESP_LOGE(TAG, "ESP ADF Loop...");
+  //  // This block will execute only once
+  //  vTaskDelay(1000 / portTICK_PERIOD_MS);  // Wait for 1 second
+  //  init_adc_buttons();  // Initialize the ADC buttons
+  //  executed_once = true;  // Set the flag to true, preventing this from running again
+  //  vTaskDelay(1000 / portTICK_PERIOD_MS); 
+ // }
 
 } 
 void ESPADF::init_adc_buttons() {
