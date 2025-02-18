@@ -42,6 +42,8 @@ void ESPADF::loop() {
   vTaskDelay(1000 / portTICK_PERIOD_MS); 
   if (!executed_once) {
     vTaskDelay(1000 / portTICK_PERIOD_MS); 
+    init_adc_buttons();
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
     ESP_LOGE(TAG, "ESP ADF Loop...");
     // This block will execute only once
     vTaskDelay(1000 / portTICK_PERIOD_MS);  // Wait for 1 second
