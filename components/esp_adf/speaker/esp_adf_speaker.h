@@ -64,7 +64,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   binary_sensor::BinarySensor *internal_btn_vol_down;
   binary_sensor::BinarySensor *internal_btn_set;
   binary_sensor::BinarySensor *internal_btn_play;
-  binary_sensor::BinarySensor *internal_btn_mode;
+  binary_sensor::BinarySensor *btn_mode;
   binary_sensor::BinarySensor *internal_btn_record;
 
   static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx);
