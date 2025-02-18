@@ -39,8 +39,9 @@ init_adc_buttons();
 float ESPADF::get_setup_priority() const { return setup_priority::HARDWARE; }
 
 void ESPADF::loop() {
-  ESP_LOGE(TAG, "ESP ADF Loop...");
+  
   if (!executed_once) {
+    ESP_LOGE(TAG, "ESP ADF Loop...");
     // This block will execute only once
     //vTaskDelay(1000 / portTICK_PERIOD_MS);  // Wait for 1 second
     init_adc_buttons();  // Initialize the ADC buttons
