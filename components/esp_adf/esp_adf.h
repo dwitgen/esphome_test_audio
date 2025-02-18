@@ -44,6 +44,7 @@ class ESPADF;
 class ESPADF : public Component {
  public:
   void setup() override;
+  void loop() override;
   static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx);
   void init_adc_buttons();
 
