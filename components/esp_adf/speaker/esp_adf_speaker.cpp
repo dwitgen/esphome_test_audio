@@ -884,23 +884,29 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
         switch ((int)evt->data) {
             case INPUT_KEY_USER_ID_REC:
                 ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
+                internal_btn_rec->publish_state(is_pressed);
                 break;
             case INPUT_KEY_USER_ID_SET:
                 ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
+                internal_btn_set->publish_state(is_pressed);
                 break;
             case INPUT_KEY_USER_ID_PLAY:
                 ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
+                internal_btn_play->publish_state(is_pressed);
                 break;
             case INPUT_KEY_USER_ID_MODE:
                 ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
+                btn_mode->publish_state(is_pressed);
                 break;
             case INPUT_KEY_USER_ID_VOLDOWN:
                 ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
                 speaker->volume_down();
+                internal_btn_vol_down->publish_state(is_pressed);
                 break;
             case INPUT_KEY_USER_ID_VOLUP:
                 ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
                 speaker->volume_up();
+                internal_btn_vol_up->publish_state(is_pressed);
                 break;
             default:
                 ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
