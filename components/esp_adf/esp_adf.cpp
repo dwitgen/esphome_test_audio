@@ -33,15 +33,16 @@ void ESPADF::setup() {
   audio_hal_ctrl_codec(board_handle->audio_hal, AUDIO_HAL_CODEC_MODE_BOTH, AUDIO_HAL_CTRL_START);
 #endif
 init_adc_buttons();
+vTaskDelay(2000 / portTICK_PERIOD_MS);
   
 }
 
 float ESPADF::get_setup_priority() const { return setup_priority::HARDWARE; }
 
 void ESPADF::loop() {
-  vTaskDelay(1000 / portTICK_PERIOD_MS); 
-  init_adc_buttons();
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  //vTaskDelay(1000 / portTICK_PERIOD_MS); 
+  //init_adc_buttons();
+  //vTaskDelay(1000 / portTICK_PERIOD_MS);
   //if (!executed_once) {
   //  vTaskDelay(1000 / portTICK_PERIOD_MS); 
   //  init_adc_buttons();
