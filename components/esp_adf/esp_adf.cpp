@@ -22,6 +22,7 @@ namespace esp_adf {
 
 static const char *const TAG = "esp_adf";
 static periph_service_handle_t input_ser;
+static bool executed_once = false;
 
 void ESPADF::setup() {
  
@@ -39,9 +40,13 @@ float ESPADF::get_setup_priority() const { return setup_priority::HARDWARE; }
 
 void ESPADF::loop() {
   ESP_LOGE(TAG, "ESP ADF Loop...");
-  vTaskDelay(1000 / portTICK_PERIOD_MS);
-  init_adc_buttons();
-  return;
+  if (!executed_once) {
+    // This block will execute only once
+    //vTaskDelay(1000 / portTICK_PERIOD_MS);  // Wait for 1 second
+    init_adc_buttons();  // Initialize the ADC buttons
+    executed_once = true;  // Set the flag to true, preventing this from running again
+  }
+
 } 
 void ESPADF::init_adc_buttons() {
   ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
