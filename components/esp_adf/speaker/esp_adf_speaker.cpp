@@ -527,7 +527,7 @@ void ESPADFSpeaker::setup() {
 
     //ESP_LOGI(TAG, "[ 1 ] Initialize peripherals");
     esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG()
-    periphh_cfg.task_core = 1;
+    periph_cfg.task_core = 1;
     esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
 
     //ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
