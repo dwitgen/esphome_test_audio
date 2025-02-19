@@ -121,8 +121,8 @@ void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thres
         if (strcmp(button_name, "PLAY") == 0 && internal_btn_play)
             internal_btn_play->publish_state(is_pressed);
 
-        //if (strcmp(button_name, "MODE") == 0 && internal_btn_mode)
-        //    internal_btn_mode->publish_state(is_pressed);
+        if (strcmp(button_name, "MODE") == 0 && internal_btn_mode)
+            internal_btn_mode->publish_state(is_pressed);
 
         if (strcmp(button_name, "REC") == 0 && internal_btn_record)
             internal_btn_record->publish_state(is_pressed);
@@ -875,52 +875,61 @@ void ESPADFSpeaker::watch_() {
   }
 }
 
-//esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx)
-esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) 
-{
+esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
     ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx);
     ESP_LOGD(TAG, "[ * ] input key id is %d, %d", (int)evt->data, evt->type);
-    const char *key_types[INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE + 1] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
-    if (evt->type == INPUT_KEY_SERVICE_ACTION_CLICK || evt->type == INPUT_KEY_SERVICE_ACTION_PRESS) {
-        bool is_pressed = true;
-        switch ((int)evt->data) {
-            case INPUT_KEY_USER_ID_REC:
-                ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
-                speaker->internal_btn_record->publish_state(is_pressed);
-                break;
-            case INPUT_KEY_USER_ID_SET:
-                ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
-                speaker->internal_btn_set->publish_state(is_pressed);
-                break;
-            case INPUT_KEY_USER_ID_PLAY:
-                ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
-                speaker->internal_btn_play->publish_state(is_pressed);
-                break;
-            case INPUT_KEY_USER_ID_MODE:
-                ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
-                speaker->internal_btn_mode->publish_state(is_pressed);
-                break;
-            case INPUT_KEY_USER_ID_VOLDOWN:
-                ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
-                speaker->volume_down();
-                speaker->internal_btn_vol_down->publish_state(is_pressed);
-                break;
-            case INPUT_KEY_USER_ID_VOLUP:
-                ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
-                speaker->volume_up();
-                speaker->internal_btn_vol_up->publish_state(is_pressed);
-                break;
-            default:
-                ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
-                break;
+    const char *key_types[INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE + 1] = {
+      "UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"
+    };
+  
+    // Determine the sensor state: true for press events, false otherwise.
+    bool is_pressed = (evt->type == INPUT_KEY_SERVICE_ACTION_PRESS || evt->type == INPUT_KEY_SERVICE_ACTION_CLICK);
+  
+    switch ((int)evt->data) {
+      case INPUT_KEY_USER_ID_REC:
+        ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
+        speaker->internal_btn_record->publish_state(is_pressed);
+        break;
+        
+      case INPUT_KEY_USER_ID_SET:
+        ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
+        speaker->internal_btn_set->publish_state(is_pressed);
+        break;
+        
+      case INPUT_KEY_USER_ID_PLAY:
+        ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
+        speaker->internal_btn_play->publish_state(is_pressed);
+        break;
+        
+      case INPUT_KEY_USER_ID_MODE:
+        ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
+        speaker->internal_btn_mode->publish_state(is_pressed);
+        break;
+        
+      case INPUT_KEY_USER_ID_VOLDOWN:
+        ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
+        speaker->internal_btn_vol_down->publish_state(is_pressed);
+        // Only trigger on press (true) to avoid double actions
+        if (is_pressed) {
+          speaker->volume_down();
         }
-    } else {
-        //ESP_LOGE(TAG, "Key event type not supported: %d", evt->type);
-        bool is_pressed = false;
-    }    
+        break;
+        
+      case INPUT_KEY_USER_ID_VOLUP:
+        ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
+        speaker->internal_btn_vol_up->publish_state(is_pressed);
+        // Only trigger on press (true)
+        if (is_pressed) {
+          speaker->volume_up();
+        }
+        break;
+        
+      default:
+        ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
+        break;
+    }
     return ESP_OK;
-}
-
+  }
 
 void ESPADFSpeaker::loop() {
   this->watch_();
