@@ -192,7 +192,7 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
         .volume = 9,                               // Initial volume
         .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE, // Ring buffer size
         .task_stack = I2S_STREAM_TASK_STACK,       // Task stack size
-        .task_core = 1,                            // Run on core 1
+        .task_core = 0,                            // Run on core 1
         .task_prio = I2S_STREAM_TASK_PRIO,         // Task priority
         .stack_in_ext = false,                     // Do not allocate stack in external memory
         .multi_out_num = 0,                        // Single output
@@ -250,7 +250,7 @@ esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *re
         .type = AUDIO_STREAM_READER,
         .out_rb_size = HTTP_STREAM_RINGBUFFER_SIZE,  // Ring buffer size
         .task_stack = HTTP_STREAM_TASK_STACK,
-        .task_core = 1, //HTTP_STREAM_TASK_CORE,
+        .task_core = HTTP_STREAM_TASK_CORE,
         .task_prio = HTTP_STREAM_TASK_PRIO,
         .stack_in_ext = false,
         .event_handle = NULL, //ESPADFSpeaker::http_stream_event_handler,
@@ -289,7 +289,7 @@ esp_err_t ESPADFSpeaker::configure_resample_filter(audio_element_handle_t *filte
         .prefer_flag = ESP_RSP_PREFER_TYPE_SPEED,
         .out_rb_size = RSP_FILTER_RINGBUFFER_SIZE,
         .task_stack = RSP_FILTER_TASK_STACK,
-        .task_core = 1, //RSP_FILTER_TASK_CORE,
+        .task_core = RSP_FILTER_TASK_CORE,
         .task_prio = RSP_FILTER_TASK_PRIO,
         .stack_in_ext = true,
     };
@@ -526,7 +526,8 @@ void ESPADFSpeaker::setup() {
     //button_component->setup();
 
     //ESP_LOGI(TAG, "[ 1 ] Initialize peripherals");
-    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG()
+    periphh_cfg.task_core = 1;
     esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
 
     //ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
@@ -536,7 +537,7 @@ void ESPADFSpeaker::setup() {
     input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
     input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
     input_cfg.handle = set;
-    input_cfg.based_cfg.task_stack = 4 * 1024;
+    //input_cfg.based_cfg.task_stack = 4 * 1024;
     input_cfg.based_cfg.task_core = 1;
     periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
 
@@ -881,7 +882,7 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
     ESP_LOGD(TAG, "[ * ] input key id is %d, %d", (int)evt->data, evt->type);
     const char *key_types[INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE + 1] = {"UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"};
     if (evt->type == INPUT_KEY_SERVICE_ACTION_CLICK || evt->type == INPUT_KEY_SERVICE_ACTION_PRESS) {
-        bool is_pressed = (evt->type == INPUT_KEY_SERVICE_ACTION_CLICK || evt->type == INPUT_KEY_SERVICE_ACTION_PRESS);
+        bool is_pressed = true;
         switch ((int)evt->data) {
             case INPUT_KEY_USER_ID_REC:
                 ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
@@ -913,9 +914,10 @@ esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, pe
                 ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
                 break;
         }
-    } //else {
+    } else {
         //ESP_LOGE(TAG, "Key event type not supported: %d", evt->type);
-    //}    
+        bool is_pressed = false;
+    }    
     return ESP_OK;
 }
 
