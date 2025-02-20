@@ -532,7 +532,7 @@ void ESPADFSpeaker::setup() {
 
     // ✅ Manually configure the event queue size
     audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
-    evt_cfg.queue_set_size = 16;  // Increase queue size (try 16 or more)
+    evt_cfg.queue_set_size = 32;  // Increase queue size (try 16 or more)
     audio_event_iface_handle_t iface = audio_event_iface_init(&evt_cfg);
 
     //ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
@@ -885,6 +885,7 @@ void ESPADFSpeaker::watch_() {
 esp_err_t ESPADFSpeaker::my_button_handler(audio_event_iface_msg_t *event, void *ctx)
 {
     ESP_LOGI(TAG, "Button Event Received!");
+    ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx);
     ESP_LOGI(TAG, "Event Source: %d, Event Command: %d", event->source, event->cmd);
     // ✅ Log raw event structure to see all available data
     ESP_LOGI("esp_adf.speaker", "Event Struct - CMD: %d, SOURCE: %p, DATA: %p, DATA_LEN: %d",
@@ -892,12 +893,62 @@ esp_err_t ESPADFSpeaker::my_button_handler(audio_event_iface_msg_t *event, void 
     // ✅ Extract button ID & ADC value from the event
     //int btn_id = (int)event->source;  // Button ID
     int btn_id = reinterpret_cast<int>(event->data); 
-    int adc_val = event->cmd;         // ADC Value
+    //int adc_val = event->cmd;         // ADC Value
 
     ESP_LOGI(TAG, "Button Press Detected: ID=%d, ADC Value=%d", btn_id, adc_val);
 
     // ✅ Process button event
-    //process_button_event(btn_id, adc_val);
+    bool is_pressed = ((int)event->cmd == 1);
+    switch ((int)btn_id) {
+         case BUTTON_REC_ID:
+            //ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
+            speaker->internal_btn_record->publish_state(is_pressed);
+            break;
+            
+          case BUTTON_SET_ID :
+            //ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
+            speaker->internal_btn_set->publish_state(is_pressed);
+            break;
+          
+          case BUTTON_PLAY_ID:
+            //ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
+            speaker->internal_btn_play->publish_state(is_pressed);
+            break;
+            
+          case BUTTON_MODE_ID:
+            //ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
+            speaker->internal_btn_mode->publish_state(is_pressed);
+            break;
+            
+          case BUTTON_VOLDOWN_ID:
+            //ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
+            speaker->internal_btn_vol_down->publish_state(is_pressed);
+            // Only trigger on press (true) to avoid double actions
+            if (is_pressed) {
+              speaker->volume_down();
+            }
+            break;
+            
+          case BUTTON_VOLUP_ID:
+            //ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
+            speaker->internal_btn_vol_up->publish_state(is_pressed);
+            // Only trigger on press (true)
+            if (is_pressed) {
+              speaker->volume_up();
+            }
+            break;
+            
+          default:
+            ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
+            break;
+        }
+    #define INPUT_KEY_NUM               6
+#define BUTTON_VOLUP_ID             0
+#define BUTTON_VOLDOWN_ID           1
+#define BUTTON_SET_ID               2
+#define BUTTON_PLAY_ID              3
+#define BUTTON_MODE_ID              4
+#define BUTTON_REC_ID               5
     
 
     return ESP_OK;
