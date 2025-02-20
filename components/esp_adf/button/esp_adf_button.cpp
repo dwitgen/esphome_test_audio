@@ -114,6 +114,21 @@ void ESPADFButton::setup() {
         ESP_LOGE(TAG, "Failed to find key for binary sensor record");
     }
 
+    // Initialize the audio board and store the handle
+    this->board_handle_ = audio_board_init();
+    if (this->board_handle_ == nullptr) {
+        ESP_LOGE(TAG, "Failed to initialize audio board");
+        this->mark_failed();
+        return;
+    }
+
+    // Set initial volume
+    this->set_volume(volume_); // Set initial volume to 50%
+
+    // Read and set initial volume
+    int initial_volume = this->get_current_volume();
+    this->set_volume(initial_volume);
+
 }
 
 //Volume controls for buttons again speaker may mot be the correct location for this
@@ -140,12 +155,6 @@ void ESPADFButton::set_volume(int volume) {
       ESP_LOGE(TAG, "Volume sensor is not initialized");
     }
 
-    // Set initial volume
-    this->set_volume(volume_); // Set initial volume to 50%
-
-    // Read and set initial volume
-    int initial_volume = this->get_current_volume();
-    this->set_volume(initial_volume);
 }
 int ESPADFButton::get_current_volume() {
   

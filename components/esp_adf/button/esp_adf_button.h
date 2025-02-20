@@ -2,6 +2,7 @@
 
 #include "../esp_adf.h"
 
+#include <audio_hal.h>
 #include "esphome/core/component.h"
 #include "esphome/components/button/button.h"
 #include "esp_peripherals.h"
@@ -48,6 +49,9 @@ class ESPADFButton : public Component {
  private:
   int volume_ = 50;
   //ESPADFSpeaker *speaker_ = nullptr; 
+
+ protected:
+  audio_board_handle_t board_handle_ = nullptr;
 };
 
 }  // namespace esp_adf
