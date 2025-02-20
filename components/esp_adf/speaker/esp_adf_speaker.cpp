@@ -530,6 +530,11 @@ void ESPADFSpeaker::setup() {
     periph_cfg.task_core = 1;
     esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
 
+    // ✅ Manually configure the event queue size
+    audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
+    evt_cfg.queue_size = 16;  // Increase queue size (try 16 or more)
+    audio_event_iface_handle_t iface = audio_event_iface_init(&evt_cfg);
+
     //ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
     audio_board_key_init(set);
 
@@ -881,9 +886,12 @@ esp_err_t ESPADFSpeaker::my_button_handler(audio_event_iface_msg_t *event, void 
 {
     ESP_LOGI(TAG, "Button Event Received!");
     ESP_LOGI(TAG, "Event Source: %d, Event Command: %d", event->source, event->cmd);
-
+    // ✅ Log raw event structure to see all available data
+    ESP_LOGI("esp_adf.speaker", "Event Struct - CMD: %d, SOURCE: %p, DATA: %p, DATA_LEN: %d",
+        event->cmd, event->source, event->data, event->data_len);
     // ✅ Extract button ID & ADC value from the event
-    int btn_id = (int)event->source;  // Button ID
+    //int btn_id = (int)event->source;  // Button ID
+    int btn_id = reinterpret_cast<int>(event->data); 
     int adc_val = event->cmd;         // ADC Value
 
     ESP_LOGI(TAG, "Button Press Detected: ID=%d, ADC Value=%d", btn_id, adc_val);
