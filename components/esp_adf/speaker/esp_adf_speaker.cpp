@@ -533,7 +533,7 @@ void ESPADFSpeaker::setup() {
     //ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
     audio_board_key_init(set);
 
-    esp_periph_set_callback(set, my_button_cb, NULL);
+    esp_periph_set_register_callback(set, my_button_cb, NULL);
 
     ////ESP_LOGI(TAG, "[ 3 ] Create and start input key service");
     //input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
