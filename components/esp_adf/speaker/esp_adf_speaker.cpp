@@ -895,11 +895,11 @@ esp_err_t ESPADFSpeaker::my_button_handler(audio_event_iface_msg_t *event, void 
     int btn_id = reinterpret_cast<int>(event->data); 
     //int adc_val = event->cmd;         // ADC Value
 
-    ESP_LOGI(TAG, "Button Press Detected: ID=%d, ADC Value=%d", btn_id, adc_val);
+    //ESP_LOGI(TAG, "Button Press Detected: ID=%d, ADC Value=%d", btn_id, adc_val);
 
     // ✅ Process button event
     bool is_pressed = ((int)event->cmd == 1);
-    switch ((int)btn_id) {
+    switch (btn_id) {
          case BUTTON_REC_ID:
             //ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
             speaker->internal_btn_record->publish_state(is_pressed);
@@ -939,7 +939,7 @@ esp_err_t ESPADFSpeaker::my_button_handler(audio_event_iface_msg_t *event, void 
             break;
             
           default:
-            ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
+            ESP_LOGE(TAG, "User Key ID[%d] does not support", btn_id);
             break;
         }
     #define INPUT_KEY_NUM               6
