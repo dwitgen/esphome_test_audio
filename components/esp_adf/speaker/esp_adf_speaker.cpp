@@ -533,16 +533,18 @@ void ESPADFSpeaker::setup() {
     //ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
     audio_board_key_init(set);
 
-    //ESP_LOGI(TAG, "[ 3 ] Create and start input key service");
-    input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
-    input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
-    input_cfg.handle = set;
-    //input_cfg.based_cfg.task_stack = 4 * 1024;
-    input_cfg.based_cfg.task_core = 1;
-    periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
+    esp_periph_set_callback(set, my_button_cb, NULL);
 
-    input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
-    periph_service_set_callback(input_ser, input_key_service_cb, this);
+    ////ESP_LOGI(TAG, "[ 3 ] Create and start input key service");
+    //input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
+    //input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
+    //input_cfg.handle = set;
+    ////input_cfg.based_cfg.task_stack = 4 * 1024;
+    //input_cfg.based_cfg.task_core = 1;
+    //periph_service_handle_t input_ser = input_key_service_create(&input_cfg);
+
+    //input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);
+    //periph_service_set_callback(input_ser, input_key_service_cb, this);
 
     // Configure ADC for volume control
     //adc_oneshot_unit_init_cfg_t init_config1 = {
@@ -875,61 +877,82 @@ void ESPADFSpeaker::watch_() {
   }
 }
 
-esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
-    ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx);
-    ESP_LOGD(TAG, "[ * ] input key id is %d, %d", (int)evt->data, evt->type);
-    const char *key_types[INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE + 1] = {
-      "UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"
-    };
-  
-    // Determine the sensor state: true for press events, false otherwise.
-    bool is_pressed = (evt->type == INPUT_KEY_SERVICE_ACTION_PRESS || evt->type == INPUT_KEY_SERVICE_ACTION_CLICK);
-  
-    switch ((int)evt->data) {
-      case INPUT_KEY_USER_ID_REC:
-        ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_record->publish_state(is_pressed);
-        break;
-        
-      case INPUT_KEY_USER_ID_SET:
-        ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_set->publish_state(is_pressed);
-        break;
-        
-      case INPUT_KEY_USER_ID_PLAY:
-        ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_play->publish_state(is_pressed);
-        break;
-        
-      case INPUT_KEY_USER_ID_MODE:
-        ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_mode->publish_state(is_pressed);
-        break;
-        
-      case INPUT_KEY_USER_ID_VOLDOWN:
-        ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_vol_down->publish_state(is_pressed);
-        // Only trigger on press (true) to avoid double actions
-        if (is_pressed) {
-          speaker->volume_down();
-        }
-        break;
-        
-      case INPUT_KEY_USER_ID_VOLUP:
-        ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_vol_up->publish_state(is_pressed);
-        // Only trigger on press (true)
-        if (is_pressed) {
-          speaker->volume_up();
-        }
-        break;
-        
-      default:
-        ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
-        break;
+static esp_err_t my_button_cb(esp_periph_handle_t handle, periph_event_t *evt, void *ctx)
+{
+    // evt->data contains the button id and evt->type is the ADC value in this case.
+    int btn_id = (int)evt->data;
+    int adc_val = evt->type; // Depending on how you use evt fields in btn_cb
+    ESP_LOGI(TAG, "Button event: Btn=%d, ADC=%d", btn_id, adc_val);
+
+    // Process events directly. For example, update speaker state.
+    // You can add your own mapping from button id to your application action here.
+    switch (btn_id) {
+        case INPUT_KEY_USER_ID_REC:
+            // Process record key
+            break;
+        // handle other button ids...
+        default:
+            ESP_LOGW("MY_APP", "Unknown button id %d", btn_id);
+            break;
     }
     return ESP_OK;
-  }
+}
+
+//esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
+//    ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx);
+//    ESP_LOGD(TAG, "[ * ] input key id is %d, %d", (int)evt->data, evt->type);
+//    const char *key_types[INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE + 1] = {
+//      "UNKNOWN", "CLICKED", "CLICK RELEASED", "PRESSED", "PRESS RELEASED"
+//    };
+  
+    // Determine the sensor state: true for press events, false otherwise.
+    //bool is_pressed = (evt->type == INPUT_KEY_SERVICE_ACTION_PRESS || evt->type == INPUT_KEY_SERVICE_ACTION_CLICK);
+  
+    //switch ((int)evt->data) {
+    // case INPUT_KEY_USER_ID_REC:
+    //    ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
+    //    speaker->internal_btn_record->publish_state(is_pressed);
+    //    break;
+        
+    //  case INPUT_KEY_USER_ID_SET:
+    //    ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
+    //    speaker->internal_btn_set->publish_state(is_pressed);
+    //    break;
+        
+    //  case INPUT_KEY_USER_ID_PLAY:
+    //    ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
+    //    speaker->internal_btn_play->publish_state(is_pressed);
+    //    break;
+    //    
+    //  case INPUT_KEY_USER_ID_MODE:
+    //    ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
+    //    speaker->internal_btn_mode->publish_state(is_pressed);
+    //    break;
+        
+    //  case INPUT_KEY_USER_ID_VOLDOWN:
+    //    ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
+    //    speaker->internal_btn_vol_down->publish_state(is_pressed);
+    //    // Only trigger on press (true) to avoid double actions
+    //    if (is_pressed) {
+    //      speaker->volume_down();
+    //    }
+    //    break;
+        
+    //  case INPUT_KEY_USER_ID_VOLUP:
+    //    ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
+    //    speaker->internal_btn_vol_up->publish_state(is_pressed);
+    //    // Only trigger on press (true)
+    //    if (is_pressed) {
+    //      speaker->volume_up();
+    //    }
+    //    break;
+    //    
+    //  default:
+    //    ESP_LOGE(TAG, "User Key ID[%d] does not support", (int)evt->data);
+    //    break;
+    //}
+    //return ESP_OK;
+ // }
 
 void ESPADFSpeaker::loop() {
   this->watch_();
