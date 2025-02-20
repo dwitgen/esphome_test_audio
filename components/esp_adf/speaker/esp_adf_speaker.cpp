@@ -877,7 +877,7 @@ void ESPADFSpeaker::watch_() {
   }
 }
 
-static esp_err_t my_button_handler(audio_event_iface_msg_t *event, void *ctx)
+esp_err_t ESPADFSpeaker::my_button_handler(audio_event_iface_msg_t *event, void *ctx)
 {
     ESP_LOGI("MY_APP", "Button Event Received!");
 
