@@ -44,7 +44,8 @@ class ESPADFButton : public Component {
 
   //void set_speaker(ESPADFSpeaker *speaker) { this->speaker_ = speaker; }  // ✅ Store speaker reference
   
- //private:
+ private:
+  int volume_ = 50;
   //ESPADFSpeaker *speaker_ = nullptr; 
 };
 
