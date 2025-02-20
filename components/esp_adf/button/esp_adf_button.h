@@ -39,6 +39,7 @@ class ESPADFButton : public Component {
   binary_sensor::BinarySensor *internal_btn_play;
   binary_sensor::BinarySensor *internal_btn_mode;
   binary_sensor::BinarySensor *internal_btn_record;
+  sensor::Sensor *volume_sensor = nullptr;
 
   
 
