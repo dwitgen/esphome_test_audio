@@ -877,19 +877,22 @@ void ESPADFSpeaker::watch_() {
   }
 }
 
-static esp_err_t my_button_handler(esp_periph_handle_t handle, esp_periph_event_t *evt, void *ctx)
+static esp_err_t my_button_handler(audio_event_iface_msg_t *event, void *ctx)
 {
-    // ✅ Extract button ID and ADC value from the event
-    int btn_id = (int)evt->data;  // Button ID
-    int adc_val = evt->type;      // ADC value
+    ESP_LOGI("MY_APP", "Button Event Received!");
+
+    // ✅ Extract button ID & ADC value from the event
+    int btn_id = (int)event->source;  // Button ID
+    int adc_val = event->cmd;         // ADC Value
 
     ESP_LOGI("MY_APP", "Button Press Detected: ID=%d, ADC Value=%d", btn_id, adc_val);
 
-    // ✅ Process the button press event
+    // ✅ Process button event
     //process_button_event(btn_id, adc_val);
 
     return ESP_OK;
 }
+
 
 
 //esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
