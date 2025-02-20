@@ -532,7 +532,7 @@ void ESPADFSpeaker::setup() {
 
     // ✅ Manually configure the event queue size
     audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
-    evt_cfg.queue_size = 16;  // Increase queue size (try 16 or more)
+    evt_cfg.queue_set_size = 16;  // Increase queue size (try 16 or more)
     audio_event_iface_handle_t iface = audio_event_iface_init(&evt_cfg);
 
     //ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
