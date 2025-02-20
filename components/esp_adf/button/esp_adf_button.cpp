@@ -193,17 +193,17 @@ esp_err_t ESPADFButton::input_key_service_cb(periph_service_handle_t handle, per
     switch ((int)evt->data) {
       case INPUT_KEY_USER_ID_REC:
         ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_record->publish_state(is_pressed);
+        button->internal_btn_record->publish_state(is_pressed);
         break;
         
       case INPUT_KEY_USER_ID_SET:
         ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_set->publish_state(is_pressed);
+        button->internal_btn_set->publish_state(is_pressed);
         break;
         
       case INPUT_KEY_USER_ID_PLAY:
         ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_play->publish_state(is_pressed);
+        button->internal_btn_play->publish_state(is_pressed);
         break;
         
       case INPUT_KEY_USER_ID_MODE:
@@ -216,16 +216,16 @@ esp_err_t ESPADFButton::input_key_service_cb(periph_service_handle_t handle, per
         button->internal_btn_vol_down->publish_state(is_pressed);
         // Only trigger on press (true) to avoid double actions
         if (is_pressed) {
-          speaker->volume_down();
+          button->volume_down();
         }
         break;
         
       case INPUT_KEY_USER_ID_VOLUP:
         ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
-        speaker->internal_btn_vol_up->publish_state(is_pressed);
+        button->internal_btn_vol_up->publish_state(is_pressed);
         // Only trigger on press (true)
         if (is_pressed) {
-          speaker->volume_up();
+          button->volume_up();
         }
         break;
         
