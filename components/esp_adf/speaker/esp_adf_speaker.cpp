@@ -942,14 +942,6 @@ esp_err_t ESPADFSpeaker::my_button_handler(audio_event_iface_msg_t *event, void 
             ESP_LOGE(TAG, "User Key ID[%d] does not support", btn_id);
             break;
         }
-    #define INPUT_KEY_NUM               6
-#define BUTTON_VOLUP_ID             0
-#define BUTTON_VOLDOWN_ID           1
-#define BUTTON_SET_ID               2
-#define BUTTON_PLAY_ID              3
-#define BUTTON_MODE_ID              4
-#define BUTTON_REC_ID               5
-    
 
     return ESP_OK;
 }

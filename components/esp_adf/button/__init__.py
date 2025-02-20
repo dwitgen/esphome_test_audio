@@ -6,7 +6,6 @@ from esphome.const import CONF_ID #, CONF_NAME, CONF_DISABLED_BY_DEFAULT
 from .. import (
     CONF_ESP_ADF_ID,
     ESPADF,
-    ESPADFPipeline,
     esp_adf_ns,
     final_validate_usable_board,
 )
