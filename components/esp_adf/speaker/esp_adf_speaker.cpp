@@ -533,7 +533,7 @@ void ESPADFSpeaker::setup() {
     //ESP_LOGI(TAG, "[ 2 ] Initialize Button peripheral with board init");
     audio_board_key_init(set);
 
-    esp_periph_set_register_callback(set, my_button_cb, NULL);
+    esp_periph_set_register_callback(set, my_button_handler, this);
 
     ////ESP_LOGI(TAG, "[ 3 ] Create and start input key service");
     //input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
@@ -877,26 +877,20 @@ void ESPADFSpeaker::watch_() {
   }
 }
 
-static esp_err_t my_button_cb(esp_periph_handle_t handle, esp_periph_event_t *evt, void *ctx)
+static esp_err_t my_button_handler(esp_periph_handle_t handle, esp_periph_event_t *evt, void *ctx)
 {
-    // evt->data contains the button id and evt->type is the ADC value in this case.
-    int btn_id = (int)evt->data;
-    int adc_val = evt->type; // Depending on how you use evt fields in btn_cb
-    ESP_LOGI(TAG, "Button event: Btn=%d, ADC=%d", btn_id, adc_val);
+    // ✅ Extract button ID and ADC value from the event
+    int btn_id = (int)evt->data;  // Button ID
+    int adc_val = evt->type;      // ADC value
 
-    // Process events directly. For example, update speaker state.
-    // You can add your own mapping from button id to your application action here.
-    switch (btn_id) {
-        case INPUT_KEY_USER_ID_REC:
-            // Process record key
-            break;
-        // handle other button ids...
-        default:
-            ESP_LOGW("MY_APP", "Unknown button id %d", btn_id);
-            break;
-    }
+    ESP_LOGI("MY_APP", "Button Press Detected: ID=%d, ADC Value=%d", btn_id, adc_val);
+
+    // ✅ Process the button press event
+    //process_button_event(btn_id, adc_val);
+
     return ESP_OK;
 }
+
 
 //esp_err_t ESPADFSpeaker::input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx) {
 //    ESPADFSpeaker *speaker = static_cast<ESPADFSpeaker *>(ctx);
