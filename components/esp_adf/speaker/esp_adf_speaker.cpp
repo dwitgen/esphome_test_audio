@@ -877,7 +877,7 @@ void ESPADFSpeaker::watch_() {
   }
 }
 
-static esp_err_t my_button_cb(esp_periph_handle_t handle, periph_event_t *evt, void *ctx)
+static esp_err_t my_button_cb(esp_periph_handle_t handle, esp_periph_event_t *evt, void *ctx)
 {
     // evt->data contains the button id and evt->type is the ADC value in this case.
     int btn_id = (int)evt->data;
