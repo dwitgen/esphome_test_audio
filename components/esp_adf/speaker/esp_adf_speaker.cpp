@@ -879,16 +879,18 @@ void ESPADFSpeaker::watch_() {
 
 esp_err_t ESPADFSpeaker::my_button_handler(audio_event_iface_msg_t *event, void *ctx)
 {
-    ESP_LOGI("MY_APP", "Button Event Received!");
+    ESP_LOGI(TAG, "Button Event Received!");
+    ESP_LOGI(TAG, "Event Source: %d, Event Command: %d", event->source, event->cmd);
 
     // ✅ Extract button ID & ADC value from the event
     int btn_id = (int)event->source;  // Button ID
     int adc_val = event->cmd;         // ADC Value
 
-    ESP_LOGI("MY_APP", "Button Press Detected: ID=%d, ADC Value=%d", btn_id, adc_val);
+    ESP_LOGI(TAG, "Button Press Detected: ID=%d, ADC Value=%d", btn_id, adc_val);
 
     // ✅ Process button event
     //process_button_event(btn_id, adc_val);
+    
 
     return ESP_OK;
 }
