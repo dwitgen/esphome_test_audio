@@ -19,6 +19,7 @@ void ESPADFButton::setup() {
     ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
 
     esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
+    periph_cfg.task_core = 1;
     esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
 
     input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
