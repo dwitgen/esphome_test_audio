@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import binary_sensor, button
+from esphome.components import binary_sensor #, button
 from esphome.const import CONF_ID
 
 from .. import (
@@ -13,7 +13,7 @@ from .. import (
 AUTO_LOAD = ["esp_adf"]
 DEPENDENCIES = ["esp32"]
 
-ESPADFButton = esp_adf_ns.class_("ESPADFButton", button.Button, cg.Component)
+ESPADFButton = esp_adf_ns.class_("ESPADFButton",  cg.Component) # button.Button, cg.Component)
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
