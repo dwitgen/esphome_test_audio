@@ -42,7 +42,7 @@ async def to_code(config):
         "btn_record": "Record",
     }
 
-     for button_id, button_name in buttons.items():
+    for button_id, button_name in buttons.items():
         sensor_config = {
             CONF_ID: f"{config[CONF_ID]}_{button_id}", 
             "name": button_name,
