@@ -43,10 +43,15 @@ async def to_code(config):
     }
 
     for button_id, button_name in buttons.items():
-        sensor = cg.new_Pvariable(binary_sensor.BinarySensor, config[CONF_ID])
-        await binary_sensor.register_binary_sensor(sensor, config)
+        # ✅ Step 1: Create the binary sensor instance
+        sensor = cg.new_Pvariable(cg.new_id(), binary_sensor.BinarySensor.new())
+
+        # ✅ Step 2: Register the binary sensor with ESPHome
+        await binary_sensor.register_binary_sensor(sensor, {})
+
+        # ✅ Step 3: Set the name and link to our component
         cg.add(sensor.set_name(button_name))
-        setattr(var, button_id, sensor)
+        setattr(var, button_id, sensor) 
     #for button_id, button_name in buttons.items():
     #    btn = await binary_sensor.new_binary_sensor(
     #        {
