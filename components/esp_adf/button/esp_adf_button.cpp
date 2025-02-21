@@ -1,11 +1,24 @@
 #include "esp_adf_button.h"
-#include "esphome/core/application.h"
-#include "esphome/core/log.h"
+
+#ifdef USE_ESP_IDF
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "esp_peripherals.h"
 #include "periph_adc_button.h"
 #include "input_key_service.h"
 #include <audio_hal.h>
 #include "board.h"
+
+#ifdef __cplusplus
+}
+#endif
+
+#include "esphome/core/application.h"
+#include "esphome/core/hal.h"
+#include "esphome/core/log.h"
 
 namespace esphome {
 namespace esp_adf {
@@ -21,6 +34,8 @@ void ESPADFButton::setup() {
     esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
     periph_cfg.task_core = 1;
     esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
+
+    audio_board_key_init(set);
 
     input_key_service_info_t input_key_info[] = INPUT_KEY_DEFAULT_INFO();
     input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
@@ -239,3 +254,5 @@ esp_err_t ESPADFButton::input_key_service_cb(periph_service_handle_t handle, per
 
 }  // namespace esp_adf
 }  // namespace esphome
+
+#endif  // USE_ESP_IDF
