@@ -119,8 +119,8 @@ void ESPADFButton::set_volume(int volume) {
     }
 
     // Update the volume sensor
-    if (this->volume_sensor != nullptr) {
-      this->volume_sensor->publish_state(this->volume_);
+    if (this->volume_sensor_ != nullptr) {
+      this->volume_sensor_->publish_state(this->volume_);
     } else {
       ESP_LOGE(TAG, "Volume sensor is not initialized");
     }
