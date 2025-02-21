@@ -42,11 +42,13 @@ async def to_code(config):
         "btn_record": "Record",
     }
 
-    for button_id, button_name in buttons.items():
-        sensor = binary_sensor.BinarySensor.new()
-        cg.add(sensor.set_name(button_name))
-        await binary_sensor.register_binary_sensor(sensor, {})
-        setattr(var, button_id, sensor)
+     for button_id, button_name in buttons.items():
+        sensor_config = {
+            CONF_ID: f"{config[CONF_ID]}_{button_id}", 
+            "name": button_name,
+        }
+        sensor = await binary_sensor.new_binary_sensor(sensor_config)
+        cg.add(getattr(var, button_id), sensor) 
     #for button_id, button_name in buttons.items():
     #    btn = await binary_sensor.new_binary_sensor(
     #        {
