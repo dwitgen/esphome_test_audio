@@ -56,12 +56,12 @@ class ESPADFButton : public Component {
   void set_btn_record(binary_sensor::BinarySensor *sensor) { btn_record_ = sensor; }
 
  // Public binary sensor pointers
- binary_sensor::BinarySensor *btn_vol_up{nullptr};
- binary_sensor::BinarySensor *btn_vol_down{nullptr};
- binary_sensor::BinarySensor *btn_set{nullptr};
- binary_sensor::BinarySensor *btn_play{nullptr};
- binary_sensor::BinarySensor *btn_mode{nullptr};
- binary_sensor::BinarySensor *btn_record{nullptr};
+ binary_sensor::BinarySensor *btn_vol_up_{nullptr};
+ binary_sensor::BinarySensor *btn_vol_down_{nullptr};
+ binary_sensor::BinarySensor *btn_set_{nullptr};
+ binary_sensor::BinarySensor *btn_play_{nullptr};
+ binary_sensor::BinarySensor *btn_mode_{nullptr};
+ binary_sensor::BinarySensor *btn_record_{nullptr};
 
  // Volume sensor
  sensor::Sensor *volume_sensor{nullptr};
