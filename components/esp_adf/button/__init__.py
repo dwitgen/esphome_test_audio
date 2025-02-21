@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor, sensor
-from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT,  CONF_UNIT_OF_MEASUREMENT, CONF_ICON
+from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -13,7 +13,7 @@ from .. import (
 AUTO_LOAD = ["esp_adf"]
 DEPENDENCIES = ["esp32"]
 
-ESPADFButton = esp_adf_ns.class_("ESPADFButton",  cg.Component) # button.Button, cg.Component)
+ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
@@ -27,7 +27,6 @@ CONFIG_SCHEMA = cv.All(
 
 FINAL_VALIDATE_SCHEMA = final_validate_usable_board("button")
 
-
 async def to_code(config):
     # Register the main component
     var = cg.new_Pvariable(config[CONF_ID])
@@ -37,17 +36,16 @@ async def to_code(config):
     esp_adf = await cg.get_variable(config[CONF_ESP_ADF_ID])
     cg.add(var.set_esp_adf(esp_adf))
 
-
     # Create and configure the volume sensor
     volume_sensor_id = cv.declare_id(sensor.Sensor)(f"{config[CONF_ID]}_volume_level")
-    volume_sensor = cg.new_Pvariable(volume_sensor_id)
+    volume_sensor = cg.new_Pvariable(volume_sensor_id, sensor.Sensor())
     cg.add(volume_sensor.set_name("Volume Level"))
     cg.add(volume_sensor.set_unit_of_measurement("%"))
     cg.add(volume_sensor.set_icon("mdi:volume-high"))
     cg.add(volume_sensor.set_disabled_by_default(False))
     cg.add(var.set_volume_sensor(volume_sensor))
 
-    # ✅ Define buttons as binary sensors
+    # Define buttons as binary sensors
     buttons = {
         "btn_vol_up": "Volume Up",
         "btn_vol_down": "Volume Down",
@@ -57,22 +55,14 @@ async def to_code(config):
         "btn_record": "Record",
     }
 
-     # Create and register binary sensors for each button
+    # Create and register binary sensors for each button
     for button_id, button_name in buttons.items():
-        # Step 1: Create a unique ID for the binary sensor
         sensor_id = cv.declare_id(binary_sensor.BinarySensor)(f"{config[CONF_ID]}_{button_id}")
-
-        # Step 2: Configure and create the binary sensor
         sensor_config = {
             CONF_ID: sensor_id,
-            CONF_NAME: f"{button_name}",
-            CONF_DISABLED_BY_DEFAULT: False
-           # "internal": False,  # Make it visible in Home Assistant
+            CONF_NAME: cv.valid_name(button_name),
+            CONF_DISABLED_BY_DEFAULT: False,
+            # "internal": False,  # Commented out, defaults to False
         }
-        sensor = await binary_sensor.new_binary_sensor(sensor_config)
-
-        # Step 3: Store the sensor in the component (setter method)
-        cg.add(getattr(var, f"set_{button_id}")(sensor))
-    
-    
-    
+        sensor_obj = await binary_sensor.new_binary_sensor(sensor_config)
+        cg.add(getattr(var, f"set_{button_id}")(sensor_obj))
