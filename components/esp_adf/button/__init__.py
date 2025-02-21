@@ -37,6 +37,16 @@ async def to_code(config):
     esp_adf = await cg.get_variable(config[CONF_ESP_ADF_ID])
     cg.add(var.set_esp_adf(esp_adf))
 
+
+    # Create and configure the volume sensor
+    volume_sensor_id = cv.declare_id(sensor.Sensor)(f"{config[CONF_ID]}_volume_level")
+    volume_sensor = cg.new_Pvariable(volume_sensor_id)
+    cg.add(volume_sensor.set_name("Volume Level"))
+    cg.add(volume_sensor.set_unit_of_measurement("%"))
+    cg.add(volume_sensor.set_icon("mdi:volume-high"))
+    cg.add(volume_sensor.set_disabled_by_default(False))
+    cg.add(var.set_volume_sensor(volume_sensor))
+
     # ✅ Define buttons as binary sensors
     buttons = {
         "btn_vol_up": "Volume Up",
@@ -65,12 +75,4 @@ async def to_code(config):
         cg.add(getattr(var, f"set_{button_id}")(sensor))
     
     
-    # Create and configure the volume sensor
-    volume_sensor_id = cv.declare_id(sensor.Sensor)(f"{config[CONF_ID]}_volume_level")
-    volume_sensor = cg.new_Pvariable(volume_sensor_id)
-    cg.add(volume_sensor.set_name("Volume Level"))
-    cg.add(volume_sensor.set_unit_of_measurement("%"))
-    cg.add(volume_sensor.set_icon("mdi:volume-high"))
-    cg.add(volume_sensor.set_disabled_by_default(False))
-    cg.add(var.set_volume_sensor(volume_sensor))
     
