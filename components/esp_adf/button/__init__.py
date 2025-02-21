@@ -43,9 +43,12 @@ async def to_code(config):
     }
 
     for button_id, button_name in buttons.items():
-        sensor = cg.new_Pvariable(binary_sensor.BinarySensor.new())
-        cg.add(sensor.set_name(button_name))
-        await binary_sensor.register_binary_sensor(sensor, config)
+        sensor = await binary_sensor.new_binary_sensor(
+            {
+                CONF_ID: button_id,
+                "name": button_name,
+            }
+        )
         cg.add(getattr(var, button_id), sensor)
     #for button_id, button_name in buttons.items():
     #    btn = await binary_sensor.new_binary_sensor(
