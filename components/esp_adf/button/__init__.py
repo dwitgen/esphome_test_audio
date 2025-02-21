@@ -74,6 +74,6 @@ async def to_code(config):
         CONF_ICON: "mdi:volume-high",
         CONF_DISABLED_BY_DEFAULT: False,
     }
-    volume_sensor = await sensor.new_sensor(volume_sensor_config)
+    #volume_sensor = await sensor.new_sensor(volume_sensor_config)
     cg.add(var.set_volume_sensor(volume_sensor))
     
