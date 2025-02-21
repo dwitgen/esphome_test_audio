@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor #, button
-from esphome.const import CONF_ID
+from esphome.const import CONF_ID, CONF_NAME
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -43,16 +43,19 @@ async def to_code(config):
     }
 
     for button_id, button_name in buttons.items():
-        # ✅ Step 1: Create the binary sensor **correctly**
-        sensor = await binary_sensor.new_binary_sensor(
-            {
-                CONF_ID: f"{config[CONF_ID]}_{button_id}",  # Create a unique ID
-                "name": button_name,
-            }
-        )
+        # Step 1: Create a unique ID for the binary sensor
+        sensor_id = cg.new_Pvariable(f"{config[CONF_ID]}_{button_id}")
 
-        # ✅ Step 2: Store the sensor reference in the ESPADFButton class
-        setattr(var, button_id, sensor)
+        # Step 2: Configure the binary sensor
+        sensor_config = {
+            CONF_ID: sensor_id,
+            CONF_NAME: button_name,
+            "internal": False,  # Make it visible in Home Assistant
+        }
+        sensor = await binary_sensor.new_binary_sensor(sensor_config)
+
+        # Step 3: Store the sensor in the component (setter method)
+        cg.add(getattr(var, f"set_{button_id}")(sensor))
     #for button_id, button_name in buttons.items():
     #    btn = await binary_sensor.new_binary_sensor(
     #        {
