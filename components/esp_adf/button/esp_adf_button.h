@@ -47,12 +47,12 @@ class ESPADFButton : public Component {
   // Declare a method to get the current volume from the device
   int get_current_volume();
 
-  binary_sensor::BinarySensor *btn_vol_up;
-  binary_sensor::BinarySensor *btn_vol_down;
-  binary_sensor::BinarySensor *btn_set;
-  binary_sensor::BinarySensor *btn_play;
-  binary_sensor::BinarySensor *btn_mode;
-  binary_sensor::BinarySensor *btn_record;
+  binary_sensor::BinarySensor *internal_btn_vol_up;
+  binary_sensor::BinarySensor *internal_btn_vol_down;
+  binary_sensor::BinarySensor *internal_btn_set;
+  binary_sensor::BinarySensor *internal_btn_play;
+  binary_sensor::BinarySensor *internal_btn_mode;
+  binary_sensor::BinarySensor *internal_btn_record;
   sensor::Sensor *volume_sensor = nullptr;
 
   
