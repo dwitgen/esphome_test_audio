@@ -43,12 +43,16 @@ async def to_code(config):
     }
 
     for button_id, button_name in buttons.items():
-        btn = await binary_sensor.new_binary_sensor(
-            {
-                "id": button_id,
-                "name": f"{button_name}",
-                "internal": False,  # Ensure it is visible in Home Assistant
-            }
-        )
-        cg.add(getattr(var, button_id), btn)
+        sensor = cg.new_Pvariable(cg.declare_id(binary_sensor.BinarySensor), button_name)
+        await binary_sensor.register_binary_sensor(sensor, {})
+        cg.add(getattr(var, button_id), sensor)
+    #for button_id, button_name in buttons.items():
+    #    btn = await binary_sensor.new_binary_sensor(
+    #        {
+    #            "id": button_id,
+    #            "name": f"{button_name}",
+    #            "internal": False,  # Ensure it is visible in Home Assistant
+    #        }
+    #    )
+    #    cg.add(getattr(var, button_id), btn)
     
