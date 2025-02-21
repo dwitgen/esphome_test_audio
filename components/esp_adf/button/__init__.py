@@ -44,19 +44,19 @@ async def to_code(config):
 
      # Create and register binary sensors for each button
     for button_id, button_name in buttons.items():
-        # Create a unique ID for the binary sensor
+        # Step 1: Create a unique ID for the binary sensor
         sensor_id = cv.declare_id(binary_sensor.BinarySensor)(f"{config[CONF_ID]}_{button_id}")
 
-        # Configure and create the binary sensor
+        # Step 2: Configure and create the binary sensor
         sensor_config = {
             CONF_ID: sensor_id,
-            CONF_NAME: cv.valid_name(button_name),
-            "internal": False,
-            CONF_DISABLED_BY_DEFAULT: False,
+            CONF_NAME: f"{button_name}",
+            CONF_DISABLED_BY_DEFAULT: False
+           # "internal": False,  # Make it visible in Home Assistant
         }
         sensor = await binary_sensor.new_binary_sensor(sensor_config)
 
-        # Assign the sensor directly to the component's member variable
+        # Step 3: Store the sensor in the component (setter method)
         cg.add(setattr(var, button_id, sensor))
     #for button_id, button_name in buttons.items():
     #    btn = await binary_sensor.new_binary_sensor(
