@@ -81,4 +81,14 @@ async def to_code(config):
         sensor_obj = await binary_sensor.new_binary_sensor(sensor_config)
         cg.add(getattr(var, f"set_{button_id}")(sensor_obj))
 
+        if button_id in config:
+            button_config = config[button_id]
+            if CONF_ON_PRESS in button_config:
+                cg.add(sensor.add_on_press(await automation.build_automation(
+                    sensor.get_press_trigger(), [], button_config[CONF_ON_PRESS]
+                )))
+            if CONF_ON_RELEASE in button_config:
+                cg.add(sensor.add_on_release(await automation.build_automation(
+                    sensor.get_release_trigger(), [], button_config[CONF_ON_RELEASE]
+                )))
        
