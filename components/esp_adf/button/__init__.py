@@ -43,10 +43,16 @@ async def to_code(config):
     }
 
     for button_id, button_name in buttons.items():
-        sensor = cg.new_Pvariable(binary_sensor.BinarySensor())
-        cg.add(sensor.set_name(button_name))
-        await binary_sensor.register_binary_sensor(sensor, {"id": f"{config[CONF_ID]}_{button_id}"})
-        setattr(var, button_id, sensor) 
+        # ✅ Step 1: Create the binary sensor instance properly
+        sensor = await binary_sensor.new_binary_sensor(
+            {
+                CONF_ID: f"{config[CONF_ID]}_{button_id}",  # Unique ID
+                "name": button_name,
+            }
+        )
+
+        # ✅ Step 2: Store reference inside ESPADFButton class
+        setattr(var, button_id, sensor)
     #for button_id, button_name in buttons.items():
     #    btn = await binary_sensor.new_binary_sensor(
     #        {
