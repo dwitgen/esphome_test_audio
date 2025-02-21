@@ -72,6 +72,6 @@ async def to_code(config):
     cg.add(volume_sensor.set_unit_of_measurement("%"))
     cg.add(volume_sensor.set_icon("mdi:volume-high"))
     cg.add(volume_sensor.set_disabled_by_default(False))
-    await sensor.register_sensor(volume_sensor, {})  # Register as a sensor, not a component
+    #await sensor.register_sensor(volume_sensor, {})  # Register as a sensor, not a component
     cg.add(var.set_volume_sensor(volume_sensor)) 
     
