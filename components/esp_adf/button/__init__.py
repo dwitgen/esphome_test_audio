@@ -64,16 +64,14 @@ async def to_code(config):
         # Step 3: Store the sensor in the component (setter method)
         cg.add(getattr(var, f"set_{button_id}")(sensor))
     
-    # Create and register the volume sensor
+    
+  # Create and configure the volume sensor
     volume_sensor_id = cv.declare_id(sensor.Sensor)(f"{config[CONF_ID]}_volume_sensor")
     volume_sensor = cg.new_Pvariable(volume_sensor_id)
-    volume_sensor_config = {
-        CONF_ID: volume_sensor_id,
-        CONF_NAME: "Volume",
-        CONF_UNIT_OF_MEASUREMENT: "%",
-        CONF_ICON: "mdi:volume-high",
-        CONF_DISABLED_BY_DEFAULT: False,
-    }
-    await sensor.register_sensor(volume_sensor, volume_sensor_config)
-    cg.add(var.set_volume_sensor(volume_sensor))
+    cg.add(volume_sensor.set_name("Volume"))
+    cg.add(volume_sensor.set_unit_of_measurement("%"))
+    cg.add(volume_sensor.set_icon("mdi:volume-high"))
+    cg.add(volume_sensor.set_disabled_by_default(False))
+    await cg.register_component(volume_sensor, {})  # Empty config since properties are set manually
+    cg.add(var.set_volume_sensor(volume_sensor)) 
     
