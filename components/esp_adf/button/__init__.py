@@ -57,7 +57,7 @@ async def to_code(config):
         sensor = await binary_sensor.new_binary_sensor(sensor_config)
 
         # Step 3: Store the sensor in the component (setter method)
-        cg.add(getattr(var, f"set_{button_id}")(sensor))
+        cg.add(getattr(var, f"{button_id}")(sensor))
     #for button_id, button_name in buttons.items():
     #    btn = await binary_sensor.new_binary_sensor(
     #        {
