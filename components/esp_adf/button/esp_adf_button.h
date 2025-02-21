@@ -47,24 +47,26 @@ class ESPADFButton : public Component {
   // Declare a method to get the current volume from the device
   int get_current_volume();
 
-  binary_sensor::BinarySensor *btn_vol_up;
-  binary_sensor::BinarySensor *btn_vol_down;
-  binary_sensor::BinarySensor *btn_set;
-  binary_sensor::BinarySensor *btn_play;
-  binary_sensor::BinarySensor *btn_mode;
-  binary_sensor::BinarySensor *btn_record;
-  sensor::Sensor *volume_sensor = nullptr;
+ // Public binary sensor pointers
+ binary_sensor::BinarySensor *btn_vol_up{nullptr};
+ binary_sensor::BinarySensor *btn_vol_down{nullptr};
+ binary_sensor::BinarySensor *btn_set{nullptr};
+ binary_sensor::BinarySensor *btn_play{nullptr};
+ binary_sensor::BinarySensor *btn_mode{nullptr};
+ binary_sensor::BinarySensor *btn_record{nullptr};
+
+ // Volume sensor
+ sensor::Sensor *volume_sensor{nullptr};
+
+ // Setter for ESPADF
+ void set_esp_adf(ESPADF *adf) { esp_adf_ = adf; }
+
+protected:
+ audio_board_handle_t board_handle_{nullptr};
+ ESPADF *esp_adf_{nullptr};
+ int volume_{50};  // Moved from private to protected to match .cpp
 
   
-
-  //void set_speaker(ESPADFSpeaker *speaker) { this->speaker_ = speaker; }  // ✅ Store speaker reference
-  
- private:
-  int volume_ = 50;
-  //ESPADFSpeaker *speaker_ = nullptr; 
-
- protected:
-  audio_board_handle_t board_handle_ = nullptr;
 };
 
 }  // namespace esp_adf
