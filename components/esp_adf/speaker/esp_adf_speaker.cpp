@@ -98,68 +98,68 @@ bool ESPADFSpeaker::setup_adc_calibration(adc_unit_t unit, adc_channel_t channel
 
 
 
-void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press) {
-    static std::map<std::string, bool> button_states;  // Track button states
-    bool is_pressed = (adc_value >= low_thresh && adc_value <= high_thresh);
-    bool was_pressed = button_states[button_name];
+//void ESPADFSpeaker::process_button(int adc_value, int low_thresh, int high_thresh, const char* button_name, std::function<void()> on_press) {
+//    static std::map<std::string, bool> button_states;  // Track button states
+//    bool is_pressed = (adc_value >= low_thresh && adc_value <= high_thresh);
+//    bool was_pressed = button_states[button_name];
 
     
-    if (is_pressed != was_pressed) {
-        button_states[button_name] = is_pressed;
-        ESP_LOGI(TAG, "Button %s %s", button_name, is_pressed ? "PRESSED" : "RELEASED");
+//    if (is_pressed != was_pressed) {
+//        button_states[button_name] = is_pressed;
+//        ESP_LOGI(TAG, "Button %s %s", button_name, is_pressed ? "PRESSED" : "RELEASED");
         
         // Publish the state to Home Assistant via ESPHome
-        if (strcmp(button_name, "VOL_UP") == 0 && internal_btn_vol_up)
-            internal_btn_vol_up->publish_state(is_pressed);
+//        if (strcmp(button_name, "VOL_UP") == 0 && internal_btn_vol_up)
+//            internal_btn_vol_up->publish_state(is_pressed);
 
-        if (strcmp(button_name, "VOL_DOWN") == 0 && internal_btn_vol_down)
-            internal_btn_vol_down->publish_state(is_pressed);
+//        if (strcmp(button_name, "VOL_DOWN") == 0 && internal_btn_vol_down)
+//            internal_btn_vol_down->publish_state(is_pressed);
 
-        if (strcmp(button_name, "SET") == 0 && internal_btn_set)
-            internal_btn_set->publish_state(is_pressed);
+//        if (strcmp(button_name, "SET") == 0 && internal_btn_set)
+//            internal_btn_set->publish_state(is_pressed);
 
-        if (strcmp(button_name, "PLAY") == 0 && internal_btn_play)
-            internal_btn_play->publish_state(is_pressed);
+//        if (strcmp(button_name, "PLAY") == 0 && internal_btn_play)
+//            internal_btn_play->publish_state(is_pressed);
 
-        if (strcmp(button_name, "MODE") == 0 && internal_btn_mode)
-            internal_btn_mode->publish_state(is_pressed);
+//        if (strcmp(button_name, "MODE") == 0 && internal_btn_mode)
+//            internal_btn_mode->publish_state(is_pressed);
 
-        if (strcmp(button_name, "REC") == 0 && internal_btn_record)
-            internal_btn_record->publish_state(is_pressed);
+//        if (strcmp(button_name, "REC") == 0 && internal_btn_record)
+//            internal_btn_record->publish_state(is_pressed);
 
-        if (is_pressed && on_press) {
-            on_press();  // Trigger action on button press
-        }
+//        if (is_pressed && on_press) {
+//            on_press();  // Trigger action on button press
+//        }
 
         
-    }
-}
+//    }
+//}
 
-void ESPADFSpeaker::handle_buttons() {
-    static uint32_t last_check_time = 0;
-    const uint32_t debounce_interval = 50;  // 100 ms debounce interval
+//void ESPADFSpeaker::handle_buttons() {
+//    static uint32_t last_check_time = 0;
+//    const uint32_t debounce_interval = 50;  // 100 ms debounce interval
 
     // Check if debounce interval has passed
-    if (millis() - last_check_time >= debounce_interval) {
-        last_check_time = millis();  // Update the timestamp
+//    if (millis() - last_check_time >= debounce_interval) {
+//        last_check_time = millis();  // Update the timestamp
 
-        int adc_raw = 0;
-        esp_err_t ret = adc_oneshot_read(adc1_handle, INPUT_BUTOP_ID, &adc_raw);
+//        int adc_raw = 0;
+//        esp_err_t ret = adc_oneshot_read(adc1_handle, INPUT_BUTOP_ID, &adc_raw);
         
-        if (ret == ESP_OK) {
-            ESP_LOGV(TAG, "ADC Raw Value: %d", adc_raw);
+//        if (ret == ESP_OK) {
+//            ESP_LOGV(TAG, "ADC Raw Value: %d", adc_raw);
 
-            process_button(adc_raw, VOL_UP_THRESHOLD_LOW, VOL_UP_THRESHOLD_HIGH, "VOL_UP", [this]() { this->volume_up(); });
-            process_button(adc_raw, VOL_DOWN_THRESHOLD_LOW, VOL_DOWN_THRESHOLD_HIGH, "VOL_DOWN", [this]() { this->volume_down(); });
-            process_button(adc_raw, SET_THRESHOLD_LOW, SET_THRESHOLD_HIGH, "SET", []() { ESP_LOGI(TAG, "SET Button Pressed"); });
-            process_button(adc_raw, PLAY_THRESHOLD_LOW, PLAY_THRESHOLD_HIGH, "PLAY", []() { ESP_LOGI(TAG, "PLAY Button Pressed"); });
-            process_button(adc_raw, MODE_THRESHOLD_LOW, MODE_THRESHOLD_HIGH, "MODE", []() { ESP_LOGI(TAG, "MODE Button Pressed"); });
-            process_button(adc_raw, REC_THRESHOLD_LOW, REC_THRESHOLD_HIGH, "REC", []() { ESP_LOGI(TAG, "REC Button Pressed"); });
-        } else {
-            ESP_LOGE(TAG, "ADC Read Failed: %s", esp_err_to_name(ret));
-        }
-    }
-}
+//            process_button(adc_raw, VOL_UP_THRESHOLD_LOW, VOL_UP_THRESHOLD_HIGH, "VOL_UP", [this]() { this->volume_up(); });
+//            process_button(adc_raw, VOL_DOWN_THRESHOLD_LOW, VOL_DOWN_THRESHOLD_HIGH, "VOL_DOWN", [this]() { this->volume_down(); });
+//            process_button(adc_raw, SET_THRESHOLD_LOW, SET_THRESHOLD_HIGH, "SET", []() { ESP_LOGI(TAG, "SET Button Pressed"); });
+//            process_button(adc_raw, PLAY_THRESHOLD_LOW, PLAY_THRESHOLD_HIGH, "PLAY", []() { ESP_LOGI(TAG, "PLAY Button Pressed"); });
+//            process_button(adc_raw, MODE_THRESHOLD_LOW, MODE_THRESHOLD_HIGH, "MODE", []() { ESP_LOGI(TAG, "MODE Button Pressed"); });
+//            process_button(adc_raw, REC_THRESHOLD_LOW, REC_THRESHOLD_HIGH, "REC", []() { ESP_LOGI(TAG, "REC Button Pressed"); });
+//        } else {
+//            ESP_LOGE(TAG, "ADC Read Failed: %s", esp_err_to_name(ret));
+//        }
+//    }
+//}
 
 
 // Helper to configure I2S stream with dynamic sample rate
