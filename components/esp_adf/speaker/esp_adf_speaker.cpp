@@ -310,52 +310,52 @@ esp_err_t ESPADFSpeaker::configure_resample_filter(audio_element_handle_t *filte
 //#define ADC_ATTEN        ADC_ATTEN_DB_12
 
 //Volume controls for buttons again speaker may mot be the correct location for this
-void ESPADFSpeaker::set_volume(int volume) {
-    ESP_LOGI(TAG, "Setting volume to %d", volume);
+//void ESPADFSpeaker::set_volume(int volume) {
+//    ESP_LOGI(TAG, "Setting volume to %d", volume);
     
     // Ensure the volume is within the range 0-100
-    if (volume < 0) volume = 0;
-    if (volume > 100) volume = 100;
-    this->volume_ = volume;
+//    if (volume < 0) volume = 0;
+//    if (volume > 100) volume = 100;
+//    this->volume_ = volume;
 
     // Set volume using HAL
     
     //audio_board_handle_t board_handle = audio_board_init();
-    esp_err_t err = audio_hal_set_volume(board_handle_->audio_hal, volume);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Error setting volume: %s", esp_err_to_name(err));
-    }
+//    esp_err_t err = audio_hal_set_volume(board_handle_->audio_hal, volume);
+//    if (err != ESP_OK) {
+//        ESP_LOGE(TAG, "Error setting volume: %s", esp_err_to_name(err));
+//    }
 
     // Update the volume sensor
-    if (this->volume_sensor != nullptr) {
-      this->volume_sensor->publish_state(this->volume_);
-    } else {
-      ESP_LOGE(TAG, "Volume sensor is not initialized");
-    }
-}
-int ESPADFSpeaker::get_current_volume() {
+//    if (this->volume_sensor != nullptr) {
+//      this->volume_sensor->publish_state(this->volume_);
+//    } else {
+//      ESP_LOGE(TAG, "Volume sensor is not initialized");
+//    }
+//}
+//int ESPADFSpeaker::get_current_volume() {
   
-  int current_volume = 0;
-  esp_err_t read_err = audio_hal_get_volume(board_handle_->audio_hal, &current_volume);
-  if (read_err == ESP_OK) {
-    ESP_LOGI(TAG, "Current device volume: %d", current_volume);
-  } else {
-    ESP_LOGE(TAG, "Error reading current volume: %s", esp_err_to_name(read_err));
-  }
+//  int current_volume = 0;
+//  esp_err_t read_err = audio_hal_get_volume(board_handle_->audio_hal, &current_volume);
+//  if (read_err == ESP_OK) {
+//    ESP_LOGI(TAG, "Current device volume: %d", current_volume);
+//  } else {
+//    ESP_LOGE(TAG, "Error reading current volume: %s", esp_err_to_name(read_err));
+//  }
 
-  return current_volume;
-}
-void ESPADFSpeaker::volume_up() {
-    ESP_LOGI(TAG, "Volume up button pressed");
-    int current_volume = this->get_current_volume();
-    this->set_volume(current_volume + 10);
-}
+//  return current_volume;
+//}
+//void ESPADFSpeaker::volume_up() {
+//    ESP_LOGI(TAG, "Volume up button pressed");
+//    int current_volume = this->get_current_volume();
+//    this->set_volume(current_volume + 10);
+//}
 
-void ESPADFSpeaker::volume_down() {
-    ESP_LOGI(TAG, "Volume down button pressed");
-    int current_volume = this->get_current_volume();
-    this->set_volume(current_volume - 10);
-}
+//void ESPADFSpeaker::volume_down() {
+//    ESP_LOGI(TAG, "Volume down button pressed");
+//    int current_volume = this->get_current_volume();
+//    this->set_volume(current_volume - 10);
+//}
 
 audio_pipeline_handle_t ESPADFSpeaker::initialize_audio_pipeline(bool is_http_stream) {
     esp_err_t ret;
