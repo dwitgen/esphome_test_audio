@@ -50,6 +50,7 @@ async def to_code(config):
         # Step 2: Configure and create the binary sensor
         sensor_config = {
             CONF_ID: sensor_id,
+            CONF_NAME: f"{button_name}",
             CONF_DISABLED_BY_DEFAULT: False
            # "internal": False,  # Make it visible in Home Assistant
         }
