@@ -42,11 +42,12 @@ async def to_code(config):
         "btn_record": "Record",
     }
 
+     # Create and register binary sensors for each button
     for button_id, button_name in buttons.items():
         # Step 1: Create a unique ID for the binary sensor
-        sensor_id = cg.new_Pvariable(f"{config[CONF_ID]}_{button_id}")
+        sensor_id = cv.declare_id(binary_sensor.BinarySensor)(f"{config[CONF_ID]}_{button_id}")
 
-        # Step 2: Configure the binary sensor
+        # Step 2: Configure and create the binary sensor
         sensor_config = {
             CONF_ID: sensor_id,
             CONF_NAME: button_name,
