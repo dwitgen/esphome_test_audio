@@ -53,23 +53,23 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   bool has_buffered_data() const override;
 
   // Declare methods for volume control
-  void set_volume(int volume);
-  void volume_up();
-  void volume_down();
+  //void set_volume(int volume);
+  //void volume_up();
+  //void volume_down();
   // Declare a method to get the current volume from the device
-  int get_current_volume();
+  //int get_current_volume();
   //void update_playback_state(int state);
   void update_playback_state(const char *state);
 
-  binary_sensor::BinarySensor *internal_btn_vol_up;
-  binary_sensor::BinarySensor *internal_btn_vol_down;
-  binary_sensor::BinarySensor *internal_btn_set;
-  binary_sensor::BinarySensor *internal_btn_play;
-  binary_sensor::BinarySensor *internal_btn_mode;
-  binary_sensor::BinarySensor *internal_btn_record;
+  //binary_sensor::BinarySensor *internal_btn_vol_up;
+  //binary_sensor::BinarySensor *internal_btn_vol_down;
+  //binary_sensor::BinarySensor *internal_btn_set;
+  //binary_sensor::BinarySensor *internal_btn_play;
+  //binary_sensor::BinarySensor *internal_btn_mode;
+  //binary_sensor::BinarySensor *internal_btn_record;
 
-  static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx);
-  static esp_err_t my_button_handler(audio_event_iface_msg_t *event, void *ctx);
+  //static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx);
+  //static esp_err_t my_button_handler(audio_event_iface_msg_t *event, void *ctx);
   void handle_set_button();
   void handle_play_button();
   void handle_mode_button();
@@ -92,7 +92,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   };
 
   // Declare a sensor for volume level
-  sensor::Sensor *volume_sensor = nullptr;
+  //sensor::Sensor *volume_sensor = nullptr;
   sensor::Sensor *playback_sensor = nullptr;
   text_sensor::TextSensor *playback_state_text_sensor = nullptr;
 
@@ -106,9 +106,9 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
   void watch_();
   
   static void player_task(void *params);
-  audio_board_handle_t board_handle_ = nullptr;
-  static void button_event_handler(void *handler_args, esp_event_base_t base, int32_t id, void *event_data);
-  void handle_button_event(int32_t id, int32_t event_type);
+  //audio_board_handle_t board_handle_ = nullptr;
+  //static void button_event_handler(void *handler_args, esp_event_base_t base, int32_t id, void *event_data);
+  //void handle_button_event(int32_t id, int32_t event_type);
 
   TaskHandle_t player_task_handle_{nullptr};
    struct {
@@ -123,7 +123,7 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
 
   
  private:
-   int volume_ = 50;  // Default volume level
+   //int volume_ = 50;  // Default volume level
    bool is_http_stream_;
    audio_pipeline_handle_t pipeline_;
    audio_element_handle_t i2s_stream_writer_;
