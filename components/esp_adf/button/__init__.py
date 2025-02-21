@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor, sensor, automation
-from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE,CONF_ON_PRESS, CONF_ON_RELEASE
+from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE, CONF_ON_PRESS, CONF_ON_RELEASE
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -81,14 +81,4 @@ async def to_code(config):
         sensor_obj = await binary_sensor.new_binary_sensor(sensor_config)
         cg.add(getattr(var, f"set_{button_id}")(sensor_obj))
 
-        # Add triggers from YAML config if specified
-        if button_id in config:
-            button_config = config[button_id]
-            if CONF_ON_PRESS in button_config:
-                cg.add(sensor.add_on_press(await automation.build_automation(
-                    sensor.get_press_trigger(), [], button_config[CONF_ON_PRESS]
-                )))
-            if CONF_ON_RELEASE in button_config:
-                cg.add(sensor.add_on_release(await automation.build_automation(
-                    sensor.get_release_trigger(), [], button_config[CONF_ON_RELEASE]
-                )))
+       
