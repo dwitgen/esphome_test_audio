@@ -54,28 +54,34 @@ class ESPADFButton : public Component {
     void set_btn_play(binary_sensor::BinarySensor *sensor) { btn_play_ = sensor; }
     void set_btn_mode(binary_sensor::BinarySensor *sensor) { btn_mode_ = sensor; }
     void set_btn_record(binary_sensor::BinarySensor *sensor) { btn_record_ = sensor; }
-  
-    // Setter for volume sensor
     void set_volume_sensor(sensor::Sensor *sensor) { volume_sensor_ = sensor; }
+    void set_esp_adf(ESPADF *adf) { esp_adf_ = adf; }
 
     // Public binary sensor pointers
+    //binary_sensor::BinarySensor *btn_vol_up_{nullptr};
+    //binary_sensor::BinarySensor *btn_vol_down_{nullptr};
+    //binary_sensor::BinarySensor *btn_set_{nullptr};
+    //binary_sensor::BinarySensor *btn_play_{nullptr};
+    //binary_sensor::BinarySensor *btn_mode_{nullptr};
+    //binary_sensor::BinarySensor *btn_record_{nullptr};
+
+    // Volume sensor pointer (renamed for consistency)
+    //sensor::Sensor *volume_sensor_{nullptr};
+
+    
+
+  protected:
+    audio_board_handle_t board_handle_{nullptr};
+    ESPADF *esp_adf_{nullptr};
+    int volume_{50};  // Moved from private to protected to match .cpp
+
     binary_sensor::BinarySensor *btn_vol_up_{nullptr};
     binary_sensor::BinarySensor *btn_vol_down_{nullptr};
     binary_sensor::BinarySensor *btn_set_{nullptr};
     binary_sensor::BinarySensor *btn_play_{nullptr};
     binary_sensor::BinarySensor *btn_mode_{nullptr};
     binary_sensor::BinarySensor *btn_record_{nullptr};
-
-    // Volume sensor pointer (renamed for consistency)
     sensor::Sensor *volume_sensor_{nullptr};
-
-    // Setter for ESPADF
-    void set_esp_adf(ESPADF *adf) { esp_adf_ = adf; }
-
-  protected:
-    audio_board_handle_t board_handle_{nullptr};
-    ESPADF *esp_adf_{nullptr};
-    int volume_{50};  // Moved from private to protected to match .cpp
 
   
 };
