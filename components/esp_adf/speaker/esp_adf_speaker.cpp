@@ -514,12 +514,12 @@ void ESPADFSpeaker::setup() {
     //}
 
     // Initialize the audio board and store the handle
-    this->board_handle_ = audio_board_init();
-    if (this->board_handle_ == nullptr) {
-        ESP_LOGE(TAG, "Failed to initialize audio board");
-        this->mark_failed();
-        return;
-    }
+    //this->board_handle_ = audio_board_init();
+    //if (this->board_handle_ == nullptr) {
+    //    ESP_LOGE(TAG, "Failed to initialize audio board");
+    //    this->mark_failed();
+    //    return;
+    //}
 
     //ESPADFButton *button_component = new ESPADFButton();
     //button_component->set_speaker(this);  // ✅ Link button system to speaker
