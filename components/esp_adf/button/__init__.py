@@ -66,7 +66,7 @@ async def to_code(config):
     
     
    # Create and configure the volume sensor
-    volume_sensor_id = cv.declare_id(sensor.Sensor)(f"{config[CONF_ID]}_volume_sensor")
+    volume_sensor_id = cv.declare_id(sensor.Sensor)(f"{config[CONF_ID]}_volume")
     volume_sensor = cg.new_Pvariable(volume_sensor_id)
     cg.add(volume_sensor.set_name("Volume Level"))
     cg.add(volume_sensor.set_unit_of_measurement("%"))
