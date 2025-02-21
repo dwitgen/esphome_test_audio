@@ -72,67 +72,6 @@ void ESPADFButton::setup() {
     }
 
 
-     // Link YAML binary sensors
-    // Find the key for the button sensors
-    uint32_t volup_sensor_key = 0;
-    uint32_t voldown_sensor_key = 0;
-    uint32_t set_sensor_key = 0;
-    uint32_t play_sensor_key = 0;
-    uint32_t mode_sensor_key = 0;
-    uint32_t record_sensor_key = 0;
-    for (auto *binary_sensor : App.get_binary_sensors()) {
-        if (binary_sensor->get_name() == "internal_btn_vol_up") {
-            volup_sensor_key = binary_sensor->get_object_id_hash();
-        } else if (binary_sensor->get_name() == "internal_btn_vol_down") {
-            voldown_sensor_key = binary_sensor->get_object_id_hash();
-        } else if (binary_sensor->get_name() == "internal_btn_set") {
-            set_sensor_key = binary_sensor->get_object_id_hash();
-        } else if (binary_sensor->get_name() == "internal_btn_play") {
-            play_sensor_key = binary_sensor->get_object_id_hash();
-        } else if (binary_sensor->get_name() == "internal_btn_mode") {
-            mode_sensor_key = binary_sensor->get_object_id_hash();
-        } else if (binary_sensor->get_name() == "internal_btn_record") {
-            record_sensor_key = binary_sensor->get_object_id_hash();
-        }
-    }
-
-    if (volup_sensor_key != 0) {
-        this->internal_btn_vol_up = App.get_binary_sensor_by_key(volup_sensor_key, true);
-        ESP_LOGI(TAG, "Binary sensor for volume up initialized successfully: %s", this->internal_btn_vol_up->get_name().c_str());
-    } else {
-        ESP_LOGE(TAG, "Failed to find key for binary sensor volume up");
-    }
-    if (voldown_sensor_key != 0) {
-        this->internal_btn_vol_down = App.get_binary_sensor_by_key(voldown_sensor_key, true);
-        ESP_LOGI(TAG, "Binary sensor for volume down initialized successfully: %s", this->internal_btn_vol_down->get_name().c_str());
-    } else {
-        ESP_LOGE(TAG, "Failed to find key for binary sensor volume down");
-    }
-    if (set_sensor_key != 0) {
-        this->internal_btn_set = App.get_binary_sensor_by_key(set_sensor_key, true);
-        ESP_LOGI(TAG, "Binary sensor for set initialized successfully: %s", this->internal_btn_set->get_name().c_str());
-    } else {
-        ESP_LOGE(TAG, "Failed to find key for binary sensor set");
-    }
-    if (play_sensor_key != 0) {
-        this->internal_btn_play = App.get_binary_sensor_by_key(play_sensor_key, true);
-        ESP_LOGI(TAG, "Binary sensor for play initialized successfully: %s", this->internal_btn_play->get_name().c_str());
-    } else {
-        ESP_LOGE(TAG, "Failed to find key for binary sensor play");
-    }
-    if (mode_sensor_key != 0) {
-        this->internal_btn_mode = App.get_binary_sensor_by_key(mode_sensor_key, true);
-        ESP_LOGI(TAG, "Binary sensor for mode initialized successfully: %s", this->internal_btn_mode->get_name().c_str());
-    } else {
-        ESP_LOGE(TAG, "Failed to find key for binary sensor mode");
-    }
-    if (record_sensor_key != 0) {
-        this->internal_btn_record = App.get_binary_sensor_by_key(record_sensor_key, true);
-        ESP_LOGI(TAG, "Binary sensor for record initialized successfully: %s", this->internal_btn_record->get_name().c_str());
-    } else {
-        ESP_LOGE(TAG, "Failed to find key for binary sensor record");
-    }
-
     // Initialize the audio board and store the handle
     this->board_handle_ = audio_board_init();
     if (this->board_handle_ == nullptr) {
@@ -212,27 +151,27 @@ esp_err_t ESPADFButton::input_key_service_cb(periph_service_handle_t handle, per
     switch ((int)evt->data) {
       case INPUT_KEY_USER_ID_REC:
         ESP_LOGI(TAG, "[ * ] [Rec] KEY %s", key_types[evt->type]);
-        button->internal_btn_record->publish_state(is_pressed);
+        button->btn_record->publish_state(is_pressed);
         break;
         
       case INPUT_KEY_USER_ID_SET:
         ESP_LOGI(TAG, "[ * ] [SET] KEY %s", key_types[evt->type]);
-        button->internal_btn_set->publish_state(is_pressed);
+        button->btn_set->publish_state(is_pressed);
         break;
         
       case INPUT_KEY_USER_ID_PLAY:
         ESP_LOGI(TAG, "[ * ] [Play] KEY %s", key_types[evt->type]);
-        button->internal_btn_play->publish_state(is_pressed);
+        button->btn_play->publish_state(is_pressed);
         break;
         
       case INPUT_KEY_USER_ID_MODE:
         ESP_LOGI(TAG, "[ * ] [MODE] KEY %s", key_types[evt->type]);
-        button->internal_btn_mode->publish_state(is_pressed);
+        button->btn_mode->publish_state(is_pressed);
         break;
         
       case INPUT_KEY_USER_ID_VOLDOWN:
         ESP_LOGI(TAG, "[ * ] [Vol-] KEY %s", key_types[evt->type]);
-        button->internal_btn_vol_down->publish_state(is_pressed);
+        button->btn_vol_down->publish_state(is_pressed);
         // Only trigger on press (true) to avoid double actions
         if (is_pressed) {
           button->volume_down();
@@ -241,7 +180,7 @@ esp_err_t ESPADFButton::input_key_service_cb(periph_service_handle_t handle, per
         
       case INPUT_KEY_USER_ID_VOLUP:
         ESP_LOGI(TAG, "[ * ] [Vol+] KEY %s", key_types[evt->type]);
-        button->internal_btn_vol_up->publish_state(is_pressed);
+        button->btn_vol_up->publish_state(is_pressed);
         // Only trigger on press (true)
         if (is_pressed) {
           button->volume_up();
