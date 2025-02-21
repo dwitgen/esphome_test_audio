@@ -33,23 +33,23 @@ async def to_code(config):
     await cg.register_component(var, config)
 
     # ✅ Define buttons as binary sensors
-    buttons = {
-        "btn_vol_up": "Volume Up",
-        "btn_vol_down": "Volume Down",
-        "btn_set": "Set",
-        "btn_play": "Play",
-        "btn_mode": "Mode",
-        "btn_record": "Record",
-    }
+   #buttons = {
+   #     "btn_vol_up": "Volume Up",
+   #     "btn_vol_down": "Volume Down",
+   #     "btn_set": "Set",
+   #     "btn_play": "Play",
+   #     "btn_mode": "Mode",
+   #     "btn_record": "Record",
+   #}
 
-    for button_id, button_name in buttons.items():
-        sensor = await binary_sensor.new_binary_sensor(
-            {
-                CONF_ID: button_id,
-                "name": button_name,
-            }
-        )
-        cg.add(getattr(var, button_id), sensor)
+    #for button_id, button_name in buttons.items():
+    #    sensor = await binary_sensor.new_binary_sensor(
+    #        {
+    #            CONF_ID: button_id,
+    #            "name": button_name,
+    #        }
+    #    )
+    #    cg.add(getattr(var, button_id), sensor)
     #for button_id, button_name in buttons.items():
     #    btn = await binary_sensor.new_binary_sensor(
     #        {
