@@ -43,15 +43,15 @@ async def to_code(config):
     }
 
     for button_id, button_name in buttons.items():
-        # ✅ Step 1: Create the binary sensor instance properly
+        # ✅ Step 1: Create the binary sensor **correctly**
         sensor = await binary_sensor.new_binary_sensor(
             {
-                CONF_ID: f"{config[CONF_ID]}_{button_id}",  # Unique ID
+                CONF_ID: f"{config[CONF_ID]}_{button_id}",  # Create a unique ID
                 "name": button_name,
             }
         )
 
-        # ✅ Step 2: Store reference inside ESPADFButton class
+        # ✅ Step 2: Store the sensor reference in the ESPADFButton class
         setattr(var, button_id, sensor)
     #for button_id, button_name in buttons.items():
     #    btn = await binary_sensor.new_binary_sensor(
