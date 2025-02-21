@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor #, button
-from esphome.const import CONF_ID, CONF_NAME
+from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -50,8 +50,8 @@ async def to_code(config):
         # Step 2: Configure and create the binary sensor
         sensor_config = {
             CONF_ID: sensor_id,
-            CONF_NAME: button_name,
-            "internal": False,  # Make it visible in Home Assistant
+            CONF_DISABLED_BY_DEFAULT: False
+           # "internal": False,  # Make it visible in Home Assistant
         }
         sensor = await binary_sensor.new_binary_sensor(sensor_config)
 
