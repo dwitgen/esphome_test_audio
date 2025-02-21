@@ -60,7 +60,7 @@ async def to_code(config):
         sensor_id = cv.declare_id(binary_sensor.BinarySensor)(f"{config[CONF_ID]}_{button_id}")
         sensor_config = {
             CONF_ID: sensor_id,
-            CONF_NAME: cv.valid_name(button_name),
+            CONF_NAME: f"{button_name}",
             CONF_DISABLED_BY_DEFAULT: False,
             # "internal": False,  # Commented out, defaults to False
         }
