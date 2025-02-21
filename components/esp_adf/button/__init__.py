@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.components import binary_sensor #, button
-from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT
+from esphome.components import binary_sensor, sensor
+from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT,  CONF_UNIT_OF_MEASUREMENT, CONF_ICON
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -29,8 +29,13 @@ FINAL_VALIDATE_SCHEMA = final_validate_usable_board("button")
 
 
 async def to_code(config):
+    # Register the main component
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
+
+    # Link to the ESPADF instance
+    esp_adf = await cg.get_variable(config[CONF_ESP_ADF_ID])
+    cg.add(var.set_esp_adf(esp_adf))
 
     # ✅ Define buttons as binary sensors
     buttons = {
@@ -58,14 +63,16 @@ async def to_code(config):
 
         # Step 3: Store the sensor in the component (setter method)
         cg.add(getattr(var, f"set_{button_id}")(sensor))
-        #cg.add(setattr(var, button_id, sensor))
-    #for button_id, button_name in buttons.items():
-    #    btn = await binary_sensor.new_binary_sensor(
-    #        {
-    #            "id": button_id,
-    #            "name": f"{button_name}",
-    #            "internal": False,  # Ensure it is visible in Home Assistant
-    #        }
-    #    )
-    #    cg.add(getattr(var, button_id), btn)
+    
+    # Create and register the volume sensor
+    volume_sensor_id = cv.declare_id(sensor.Sensor)(f"{config[CONF_ID]}_volume_sensor")
+    volume_sensor_config = {
+        CONF_ID: volume_sensor_id,
+        CONF_NAME: "Volume Level",
+        CONF_UNIT_OF_MEASUREMENT: "%",  # Assuming volume is a percentage
+        CONF_ICON: "mdi:volume-high",   # Optional: Adds a volume icon in HA
+        CONF_DISABLED_BY_DEFAULT: False,
+    }
+    volume_sensor = await sensor.new_sensor(volume_sensor_config)
+    cg.add(var.set_volume_sensor(volume_sensor))
     

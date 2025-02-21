@@ -55,21 +55,21 @@ void ESPADFButton::setup() {
 
     // Adding initial setup for volume controls for the speaker
     // Find the key for the generic volume sensor
-    uint32_t volume_sensor_key = 0;
-    for (auto *sensor : App.get_sensors()) {
-        if (sensor->get_name() == "generic_volume_sensor") {
-            volume_sensor_key = sensor->get_object_id_hash();
-            break;
-        }
-    }
+    //uint32_t volume_sensor_key = 0;
+    //for (auto *sensor : App.get_sensors()) {
+    //    if (sensor->get_name() == "generic_volume_sensor") {
+    //        volume_sensor_key = sensor->get_object_id_hash();
+    //        break;
+    //    }
+    //}
 
     // Use the key to get the sensor
-    if (volume_sensor_key != 0) {
-        this->volume_sensor = App.get_sensor_by_key(volume_sensor_key, true);
-        ESP_LOGI(TAG, "Internal generic volume sensor initialized successfully: %s", this->volume_sensor->get_name().c_str());
-    } else {
-        ESP_LOGE(TAG, "Failed to find key for internal generic volume sensor");
-    }
+    //if (volume_sensor_key != 0) {
+    //    this->volume_sensor = App.get_sensor_by_key(volume_sensor_key, true);
+    //    ESP_LOGI(TAG, "Internal generic volume sensor initialized successfully: %s", this->volume_sensor->get_name().c_str());
+    //} else {
+    //    ESP_LOGE(TAG, "Failed to find key for internal generic volume sensor");
+    //}
 
 
     // Initialize the audio board and store the handle
@@ -86,7 +86,19 @@ void ESPADFButton::setup() {
     // Read and set initial volume
     int initial_volume = this->get_current_volume();
     this->set_volume(initial_volume);
+  
+    // Publish initial states for binary sensors
+    if (btn_vol_up_) btn_vol_up_->publish_initial_state(false);
+    if (btn_vol_down_) btn_vol_down_->publish_initial_state(false);
+    if (btn_set_) btn_set_->publish_initial_state(false);
+    if (btn_play_) btn_play_->publish_initial_state(false);
+    if (btn_mode_) btn_mode_->publish_initial_state(false);
+    if (btn_record_) btn_record_->publish_initial_state(false);
 
+    // Publish initial state for volume sensor (if already set)
+    if (volume_sensor_) volume_sensor_->publish_initial_state(initial_volume);
+
+   
 }
 
 //Volume controls for buttons again speaker may mot be the correct location for this
