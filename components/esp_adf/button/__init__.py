@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor, sensor
-from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON
+from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -44,6 +44,7 @@ async def to_code(config):
         CONF_UNIT_OF_MEASUREMENT: "%",
         CONF_ICON: "mdi:volume-high",
         CONF_DISABLED_BY_DEFAULT: False,
+        CONF_FORCE_UPDATE: False,
         "internal": False,  # Ensure visibility in Home Assistant
     }
     volume_sensor = await sensor.new_sensor(volume_sensor_config)
