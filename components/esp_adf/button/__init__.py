@@ -66,13 +66,14 @@ async def to_code(config):
     
     # Create and register the volume sensor
     volume_sensor_id = cv.declare_id(sensor.Sensor)(f"{config[CONF_ID]}_volume_sensor")
+    volume_sensor = cg.new_Pvariable(volume_sensor_id)
     volume_sensor_config = {
         CONF_ID: volume_sensor_id,
-        CONF_NAME: "Volume Level",
-        CONF_UNIT_OF_MEASUREMENT: "%",  # Assuming volume is a percentage
-        CONF_ICON: "mdi:volume-high",   # Optional: Adds a volume icon in HA
+        CONF_NAME: "Volume",
+        CONF_UNIT_OF_MEASUREMENT: "%",
+        CONF_ICON: "mdi:volume-high",
         CONF_DISABLED_BY_DEFAULT: False,
     }
-    volume_sensor = await sensor.new_sensor(volume_sensor_config)
+    await sensor.register_sensor(volume_sensor, volume_sensor_config)
     cg.add(var.set_volume_sensor(volume_sensor))
     
