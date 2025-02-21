@@ -96,7 +96,7 @@ void ESPADFButton::setup() {
     if (btn_record_) btn_record_->publish_initial_state(false);
 
     // Publish initial state for volume sensor (if already set)
-    if (volume_sensor_) volume_sensor_->publish_initial_state(initial_volume);
+    //if (volume_sensor_) volume_sensor_->publish_state(initial_volume);
 
    
 }
