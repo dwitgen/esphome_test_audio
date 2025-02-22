@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor, sensor
-from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE, CONF_ON_STATE
+from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE, CONF_ON_PRESS, CONF_ON_RELEASE
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -16,7 +16,8 @@ DEPENDENCIES = ["esp32"]
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 BUTTON_SCHEMA = cv.Schema({
-    cv.Optional(CONF_ON_STATE): list,  # Accept a list of actions for state changes
+    cv.Optional(CONF_ON_PRESS): list,  
+    cv.Optional(CONF_ON_RELEASE): list,
 })
 
 CONFIG_SCHEMA = cv.All(
@@ -93,8 +94,12 @@ async def to_code(config):
 
         if button_id in config:
             button_config = config[button_id]
-            if CONF_ON_STATE in button_config:
-                cg.add(sensor.add_on_state(await automation.build_automation(
-                    sensor.get_state_trigger(), [(bool, "state")], button_config[CONF_ON_STATE]
+            if CONF_ON_PRESS in button_config:
+                cg.add(sensor.add_on_press(await automation.build_automation(
+                    sensor.get_press_trigger(), [], button_config[CONF_ON_PRESS]
+                )))
+            if CONF_ON_RELEASE in button_config:
+                cg.add(sensor.add_on_release(await automation.build_automation(
+                    sensor.get_release_trigger(), [], button_config[CONF_ON_RELEASE]
                 )))
        
