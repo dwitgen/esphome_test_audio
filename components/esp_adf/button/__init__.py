@@ -89,8 +89,9 @@ async def to_code(config):
         # Register the button with its configuration
         await button.register_button(button_var, {
             CONF_ID: button_id_obj,
-            CONF_NAME: button_name}
-            )
+            CONF_NAME: button_name,
+            CONF_DISABLED_BY_DEFAULT: False,
+            })
         # Set the button in ESPADFButton
         cg.add(getattr(var, f"set_{button_id}")(button_var))
 
