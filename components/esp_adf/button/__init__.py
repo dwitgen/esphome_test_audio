@@ -101,6 +101,6 @@ async def to_code(config):
             if CONF_ON_PRESS in button_config and button_config[CONF_ON_PRESS]:
                 await automation.build_automation(
                     button_var,  # The component receiving the automation
-                    button_config[CONF_ON_PRESS],
-                    config,  # The automation action
+                    [(CONF_ON_PRESS, button_config[CONF_ON_PRESS])],
+                    config  # The automation action
                 )
