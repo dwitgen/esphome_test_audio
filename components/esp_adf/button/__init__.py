@@ -96,7 +96,7 @@ async def to_code(config):
             button_config = config[button_id]
             if CONF_ON_STATE in button_config and button_config[CONF_ON_STATE]:
                 # Manually create a state callback using lambda
-                cg.add(sensor.add_on_state_callback(cg.Lambda(
+                cg.add(binary_sensor.add_on_state_callback(cg.Lambda(
                     "[](bool state) {\n" +
                     "\n".join(f"  {action}" for action in cg.build_lambda_lines(button_config[CONF_ON_STATE], [(bool, "state")])) +
                     "\n}"
