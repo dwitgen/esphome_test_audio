@@ -57,7 +57,7 @@ class ESPADFButton : public Component {
     void set_volume_sensor(sensor::Sensor *sensor) { volume_sensor_ = sensor; }
     void set_esp_adf(esp_adf::ESPADF *adf) { esp_adf_ = adf; }
 
-    void add_on_press_btn_play(std::function<void()>&& callback) { btn_play_->add_on_press(std::move(callback)); }
+    //void add_on_press_btn_play(std::function<void()>&& callback) { btn_play_->add_on_press(std::move(callback)); }
 
     // Public binary sensor pointers
     //binary_sensor::BinarySensor *btn_vol_up_{nullptr};
