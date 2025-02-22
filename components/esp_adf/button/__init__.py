@@ -105,9 +105,11 @@ async def to_code(config):
         if button_id in config:
             button_config = config[button_id]
             if CONF_ON_PRESS in button_config and button_config[CONF_ON_PRESS]:
-                automation_id = cg.new_Pvariable(config[CONF_ID], automation.Automation)  # Correct way to create automation
+                # Retrieve the existing automation ID instead of re-registering
+                automation_id = await cg.get_variable(config[CONF_ID])
+                
                 await automation.build_automation(
                     button_var,
                     [(CONF_ON_PRESS, button_config[CONF_ON_PRESS])],
-                    {CONF_AUTOMATION_ID: automation_id}  # Use the created automation ID
+                    {CONF_AUTOMATION_ID: automation_id}  # Use the existing ID
                 )
