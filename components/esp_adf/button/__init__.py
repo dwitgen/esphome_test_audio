@@ -83,7 +83,7 @@ async def to_code(config):
     # Create and register binary sensors for each button
     for button_id, button_name in buttons.items():
         # Create an ID object for the button with type button.Button
-        button_id_obj = cg.new_variable_id(
+        button_id_obj = cg.new_variable(
             cg.ID(f"{config[CONF_ID]}_{button_id}", is_declaration=True, type=button.Button)
         )
         # Instantiate the Button variable
