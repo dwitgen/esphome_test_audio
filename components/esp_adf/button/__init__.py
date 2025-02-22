@@ -18,9 +18,12 @@ DEPENDENCIES = ["esp32"]
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 BUTTON_SCHEMA = cv.Schema({
-    cv.Optional(CONF_ON_PRESS): automation.validate_automation({
-        CONF_ID: cv.declare_id(automation.Automation),  # Ensure automation ID is generated
-    })
+    cv.Optional(CONF_ON_PRESS): automation.validate_automation(
+        cv.Schema({
+            cv.Optional(CONF_ID): cv.declare_id(automation.Automation),  # Wrap it properly
+        })
+    )
+
 })
 
 
