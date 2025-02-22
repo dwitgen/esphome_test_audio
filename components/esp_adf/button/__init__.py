@@ -102,11 +102,4 @@ async def to_code(config):
         # Set the button in ESPADFButton
         cg.add(getattr(var, f"set_{button_id}")(button_var))
 
-        if button_id in config:
-            button_config = config[button_id]
-            if CONF_ON_PRESS in button_config and button_config[CONF_ON_PRESS]:
-                await automation.build_automation(
-                    button_var, 
-                    button_config[CONF_ON_PRESS],  # Use the correct action list directly
-                    button_var  # Pass the button instance instead of a mock ID
-                )
+        
