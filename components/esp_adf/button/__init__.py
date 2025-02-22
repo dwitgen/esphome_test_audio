@@ -82,7 +82,8 @@ async def to_code(config):
 
     for button_id, button_name in buttons.items():
         # Define the button ID with type button.Button
-        button_id_obj = cg.ID(f"{config[CONF_ID]}_{button_id}", is_declaration=True, type=button.Button)
+        #button_id_obj = cg.ID(f"{config[CONF_ID]}_{button_id}", is_declaration=True, type=button.Button)
+        button_id_obj =  cv.declare_id(button.Button)(f"{config[CONF_ID]}_{button_id}")
         # Create the Button variable
         button_var = cg.new_variable(button_id_obj, button_name)
         # Register the button with its configuration
