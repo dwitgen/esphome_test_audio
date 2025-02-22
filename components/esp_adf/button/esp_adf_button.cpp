@@ -32,8 +32,8 @@ void ESPADFButton::setup() {
     ESP_LOGE(TAG, "Setting up ESP-ADF Button Component...");
 
     esp_periph_config_t periph_cfg = DEFAULT_ESP_PERIPH_SET_CONFIG();
-    periph_cfg.task_core = 1;
-    periph_cfg.task_prio = 6;
+    periph_cfg.task_core = 0;
+    periph_cfg.task_prio = 10;
     esp_periph_set_handle_t set = esp_periph_set_init(&periph_cfg);
 
     audio_board_key_init(set);
@@ -42,8 +42,8 @@ void ESPADFButton::setup() {
     input_key_service_cfg_t input_cfg = INPUT_KEY_SERVICE_DEFAULT_CONFIG();
     input_cfg.handle = set;
     //input_cfg.based_cfg.task_stack = 4 * 1024;
-    input_cfg.based_cfg.task_core = 1;
-    input_cfg.based_cfg.task_prio = 7;
+    input_cfg.based_cfg.task_core = 0;
+    input_cfg.based_cfg.task_prio = 9;
 
     input_ser = input_key_service_create(&input_cfg);
     input_key_service_add_key(input_ser, input_key_info, INPUT_KEY_NUM);

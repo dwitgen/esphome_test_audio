@@ -119,7 +119,7 @@ void ESPADFMicrophone::read_task(void *params) {
       .volume = 0,                               // Initial volume
       .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE, // Ring buffer size
       .task_stack = I2S_STREAM_TASK_STACK,       // Task stack size
-      .task_core = 1,                            // Run on core 1
+      .task_core = 0,                            // Run on core 1
       .task_prio = I2S_STREAM_TASK_PRIO,         // Task priority
       .stack_in_ext = false,                     // Do not allocate stack in external memory
       .multi_out_num = 0,                        // Single output

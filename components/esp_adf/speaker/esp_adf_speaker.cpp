@@ -192,7 +192,7 @@ esp_err_t ESPADFSpeaker::configure_i2s_stream(audio_element_handle_t *i2s_stream
         .volume = 9,                               // Initial volume
         .out_rb_size = I2S_STREAM_RINGBUFFER_SIZE, // Ring buffer size
         .task_stack = I2S_STREAM_TASK_STACK,       // Task stack size
-        .task_core = 0,                            // Run on core 1
+        .task_core = 1,                            // Run on core 1
         .task_prio = I2S_STREAM_TASK_PRIO,         // Task priority
         .stack_in_ext = false,                     // Do not allocate stack in external memory
         .multi_out_num = 0,                        // Single output
@@ -250,7 +250,7 @@ esp_err_t ESPADFSpeaker::configure_http_stream_reader(audio_element_handle_t *re
         .type = AUDIO_STREAM_READER,
         .out_rb_size = HTTP_STREAM_RINGBUFFER_SIZE,  // Ring buffer size
         .task_stack = HTTP_STREAM_TASK_STACK,
-        .task_core = HTTP_STREAM_TASK_CORE,
+        .task_core = 1, //HTTP_STREAM_TASK_CORE,
         .task_prio = HTTP_STREAM_TASK_PRIO,
         .stack_in_ext = false,
         .event_handle = NULL, //ESPADFSpeaker::http_stream_event_handler,
@@ -289,7 +289,7 @@ esp_err_t ESPADFSpeaker::configure_resample_filter(audio_element_handle_t *filte
         .prefer_flag = ESP_RSP_PREFER_TYPE_SPEED,
         .out_rb_size = RSP_FILTER_RINGBUFFER_SIZE,
         .task_stack = RSP_FILTER_TASK_STACK,
-        .task_core = RSP_FILTER_TASK_CORE,
+        .task_core = 1, //RSP_FILTER_TASK_CORE,
         .task_prio = RSP_FILTER_TASK_PRIO,
         .stack_in_ext = true,
     };
