@@ -1,8 +1,8 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
-from esphome.components import binary_sensor, sensor
-from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE, CONF_ON_STATE
+from esphome.components import button, sensor
+from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE, CONF_ON_PRESS
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -17,7 +17,7 @@ DEPENDENCIES = ["esp32"]
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 BUTTON_SCHEMA = cv.Schema({
-    cv.Optional(CONF_ON_STATE): list,  # Accept a list of actions for state changes
+    cv.Optional(CONF_ON_PRESS): cv.ensure_list(cv.Any(cv.Schema({}), cv.Schema([]))),
 })
 
 CONFIG_SCHEMA = cv.All(
@@ -82,23 +82,16 @@ async def to_code(config):
 
     # Create and register binary sensors for each button
     for button_id, button_name in buttons.items():
-        sensor_id = cv.declare_id(binary_sensor.BinarySensor)(f"{config[CONF_ID]}_{button_id}")
-        sensor_config = {
-            CONF_ID: sensor_id,
-            CONF_NAME: f"{button_name}",
-            CONF_DISABLED_BY_DEFAULT: False,
-            # "internal": False,  # Commented out, defaults to False
-        }
-        sensor_obj = await binary_sensor.new_binary_sensor(sensor_config)
-        cg.add(getattr(var, f"set_{button_id}")(sensor_obj))
+        button_var = cg.new_Pvariable(f"{config[CONF_ID]}_{button_id}", button_name)
+        await button.register_button(button_var, {CONF_NAME: button_name})
+        cg.add(getattr(var, f"set_{button_id}")(button_var))
 
         if button_id in config:
             button_config = config[button_id]
-            if CONF_ON_STATE in button_config and button_config[CONF_ON_STATE]:
-                # Manually create a state callback using lambda
-                cg.add(binary_sensor.add_on_state_callback(cg.Lambda(
-                    "[](bool state) {\n" +
-                    "\n".join(f"  {action}" for action in cg.build_lambda_lines(button_config[CONF_ON_STATE], [(bool, "state")])) +
+            if CONF_ON_PRESS in button_config and button_config[CONF_ON_PRESS]:
+                cg.add(button_var.add_on_press_callback(cg.Lambda(
+                    "[]() {\n" +
+                    "\n".join(f"  {action}" for action in cg.build_lambda_lines(button_config[CONF_ON_PRESS], [])) +
                     "\n}"
                 )))
        

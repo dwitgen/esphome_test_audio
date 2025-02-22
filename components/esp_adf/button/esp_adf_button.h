@@ -47,15 +47,15 @@ class ESPADFButton : public Component {
     // Declare a method to get the current volume from the device
     int get_current_volume();
 
-    // Setter methods for binary sensors
-    void set_btn_vol_up(binary_sensor::BinarySensor *sensor) { btn_vol_up_ = sensor; }
-    void set_btn_vol_down(binary_sensor::BinarySensor *sensor) { btn_vol_down_ = sensor; }
-    void set_btn_set(binary_sensor::BinarySensor *sensor) { btn_set_ = sensor; }
-    void set_btn_play(binary_sensor::BinarySensor *sensor) { btn_play_ = sensor; }
-    void set_btn_mode(binary_sensor::BinarySensor *sensor) { btn_mode_ = sensor; }
-    void set_btn_record(binary_sensor::BinarySensor *sensor) { btn_record_ = sensor; }
+     // Setter methods for buttons (updated from BinarySensor to Button)
+    void set_btn_vol_up(button::Button *button) { btn_vol_up_ = button; }
+    void set_btn_vol_down(button::Button *button) { btn_vol_down_ = button; }
+    void set_btn_set(button::Button *button) { btn_set_ = button; }
+    void set_btn_play(button::Button *button) { btn_play_ = button; }
+    void set_btn_mode(button::Button *button) { btn_mode_ = button; }
+    void set_btn_record(button::Button *button) { btn_record_ = button; }
     void set_volume_sensor(sensor::Sensor *sensor) { volume_sensor_ = sensor; }
-    void set_esp_adf(ESPADF *adf) { esp_adf_ = adf; }
+    void set_esp_adf(esp_adf::ESPADF *adf) { esp_adf_ = adf; }
 
     void add_on_press_btn_play(std::function<void()>&& callback) { btn_play_->add_on_press(std::move(callback)); }
 
@@ -76,14 +76,15 @@ class ESPADFButton : public Component {
     audio_board_handle_t board_handle_{nullptr};
     ESPADF *esp_adf_{nullptr};
     int volume_{50};  // Moved from private to protected to match .cpp
-
-    binary_sensor::BinarySensor *btn_vol_up_{nullptr};
-    binary_sensor::BinarySensor *btn_vol_down_{nullptr};
-    binary_sensor::BinarySensor *btn_set_{nullptr};
-    binary_sensor::BinarySensor *btn_play_{nullptr};
-    binary_sensor::BinarySensor *btn_mode_{nullptr};
-    binary_sensor::BinarySensor *btn_record_{nullptr};
+   
+    button::Button *btn_vol_up_{nullptr};
+    button::Button *btn_vol_down_{nullptr};
+    button::Button *btn_set_{nullptr};
+    button::Button *btn_play_{nullptr};
+    button::Button *btn_mode_{nullptr};
+    button::Button *btn_record_{nullptr};
     sensor::Sensor *volume_sensor_{nullptr};
+    
 
   
 };
