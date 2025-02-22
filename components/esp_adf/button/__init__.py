@@ -1,9 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome import automation
-from esphome.core import Lambda
-from esphome.components import button, sensor
-from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE, CONF_ON_PRESS, CONF_AUTOMATION_ID
+from esphome.components import binary_sensor, sensor
+from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -17,27 +15,11 @@ DEPENDENCIES = ["esp32"]
 
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
-BUTTON_SCHEMA = cv.Schema({
-    cv.Optional(CONF_ON_PRESS): automation.validate_automation(
-        cv.Schema({
-            cv.Optional(CONF_ID): cv.declare_id(automation.Automation),  # Wrap it properly
-        })
-    )
-
-})
-
-
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(ESPADFButton),
             cv.GenerateID(CONF_ESP_ADF_ID): cv.use_id(ESPADF),
-            cv.Optional("btn_vol_up"): BUTTON_SCHEMA,
-            cv.Optional("btn_vol_down"): BUTTON_SCHEMA,
-            cv.Optional("btn_set"): BUTTON_SCHEMA,
-            cv.Optional("btn_play"): BUTTON_SCHEMA,
-            cv.Optional("btn_mode"): BUTTON_SCHEMA,
-            cv.Optional("btn_record"): BUTTON_SCHEMA,
         }
     ).extend(cv.COMPONENT_SCHEMA),
     cv.only_with_esp_idf,
@@ -87,19 +69,14 @@ async def to_code(config):
         "btn_record": "Record",
     }
 
+    # Create and register binary sensors for each button
     for button_id, button_name in buttons.items():
-        # Define the button ID with type button.Button
-        #button_id_obj = cg.ID(f"{config[CONF_ID]}_{button_id}", is_declaration=True, type=button.Button)
-        button_id_obj = cv.declare_id(button.Button)(f"{config[CONF_ID]}_{button_id}")
-        # Create the Button variable
-        button_var = cg.new_variable(button_id_obj, button_name)
-        # Register the button with its configuration
-        await button.register_button(button_var, {
-            CONF_ID: button_id_obj,
-            CONF_NAME: button_name,
+        sensor_id = cv.declare_id(binary_sensor.BinarySensor)(f"{config[CONF_ID]}_{button_id}")
+        sensor_config = {
+            CONF_ID: sensor_id,
+            CONF_NAME: f"{button_name}",
             CONF_DISABLED_BY_DEFAULT: False,
-            })
-        # Set the button in ESPADFButton
-        cg.add(getattr(var, f"set_{button_id}")(button_var))
-
-        
+            # "internal": False,  # Commented out, defaults to False
+        }
+        sensor_obj = await binary_sensor.new_binary_sensor(sensor_config)
+        cg.add(getattr(var, f"set_{button_id}")(sensor_obj))
