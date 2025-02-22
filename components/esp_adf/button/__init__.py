@@ -94,7 +94,10 @@ async def to_code(config):
         if button_id in config:
             button_config = config[button_id]
             if CONF_ON_STATE in button_config:
-                cg.add(sensor.add_on_state(await automation.build_automation(
-                    sensor.get_state_trigger(), [(bool, "state")], button_config[CONF_ON_STATE]
-                )))
+                # Create a BinarySensorStateTrigger
+                trigger = await automation.build_automation(
+                    binary_sensor.BinarySensorStateTrigger(sensor),
+                    [(bool, "state")],
+                    button_config[CONF_ON_STATE]
+                )
        
