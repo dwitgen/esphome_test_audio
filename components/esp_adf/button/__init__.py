@@ -18,11 +18,15 @@ ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 BUTTON_SCHEMA = cv.Schema(
     {
-        cv.Optional("on_press"): automation.maybe_simple_id(
-            binary_sensor.PressTrigger
+        cv.Optional("on_press"): automation.validate_automation(
+            {
+                cv.GenerateID(): cv.declare_id(binary_sensor.PressTrigger),
+            }
         ),
-        cv.Optional("on_release"): automation.maybe_simple_id(
-            binary_sensor.ReleaseTrigger
+        cv.Optional("on_release"): automation.validate_automation(
+            {
+                cv.GenerateID(): cv.declare_id(binary_sensor.ReleaseTrigger),
+            }
         ),
     }
 )
@@ -99,12 +103,22 @@ async def to_code(config):
         sensor_obj = await binary_sensor.new_binary_sensor(sensor_config)
         cg.add(getattr(var, f"set_{button_id}")(sensor_obj))
         
+        # Handle actions (on_press / on_release)
         if "on_press" in sensor_config:
-                await automation.build_automation(
-                    sensor_obj.add_on_state_callback, sensor_config["on_press"]
-                )
+            await automation.build_automation(
+                sensor_obj, sensor_config["on_press"], cg.RawExpression("state")
+            )
 
         if "on_release" in sensor_config:
             await automation.build_automation(
-                sensor_obj.add_on_state_callback, sensor_config["on_release"]
+                sensor_obj, sensor_config["on_release"], cg.RawExpression("!state")
             )
+        #if "on_press" in sensor_config:
+        #        await automation.build_automation(
+        #            sensor_obj.add_on_state_callback, sensor_config["on_press"]
+        #        )
+
+        #if "on_release" in sensor_config:
+        #    await automation.build_automation(
+        #        sensor_obj.add_on_state_callback, sensor_config["on_release"]
+        #    )
