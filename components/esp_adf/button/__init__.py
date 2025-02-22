@@ -17,7 +17,10 @@ DEPENDENCIES = ["esp32"]
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 BUTTON_SCHEMA = cv.Schema({
-    cv.Optional(CONF_ON_PRESS): cv.ensure_list(cv.Any(cv.Schema({}), cv.Schema([]))),
+    cv.Optional(CONF_ON_PRESS): cv.ensure_list(cv.Any(
+        cv.Schema({}),  # Empty action
+        cv.is_action,   # Built-in validator for ESPHome actions (lambda, if, etc.)
+    )),
 })
 
 CONFIG_SCHEMA = cv.All(
