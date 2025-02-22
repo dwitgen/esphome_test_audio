@@ -80,14 +80,11 @@ async def to_code(config):
         "btn_record": "Record",
     }
 
-    # Create and register binary sensors for each button
     for button_id, button_name in buttons.items():
-        # Create an ID object for the button with type button.Button
-        button_id_obj = cg.new_variable_id(
-            cg.ID(f"{config[CONF_ID]}_{button_id}", is_declaration=True, type=button.Button)
-        )
-        # Instantiate the Button variable
-        button_var = cg.new_Pvariable(button_id_obj)
+        # Define the button ID with type button.Button
+        button_id_obj = cg.ID(f"{config[CONF_ID]}_{button_id}", is_declaration=True, type=button.Button)
+        # Create the Button variable
+        button_var = cg.new_variable(button_id_obj, button_name)
         # Register the button with its configuration
         await button.register_button(button_var, {CONF_NAME: button_name})
         # Set the button in ESPADFButton
