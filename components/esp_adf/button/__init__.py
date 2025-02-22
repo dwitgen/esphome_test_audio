@@ -2,6 +2,7 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor, sensor
 from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE
+from esphome import automation
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -15,11 +16,28 @@ DEPENDENCIES = ["esp32"]
 
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
+BUTTON_SCHEMA = cv.Schema(
+    {
+        cv.Optional("on_press"): automation.maybe_simple_id(
+            binary_sensor.PressTrigger
+        ),
+        cv.Optional("on_release"): automation.maybe_simple_id(
+            binary_sensor.ReleaseTrigger
+        ),
+    }
+)
+
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(ESPADFButton),
             cv.GenerateID(CONF_ESP_ADF_ID): cv.use_id(ESPADF),
+            cv.Optional("btn_vol_up"): BUTTON_SCHEMA,
+            cv.Optional("btn_vol_down"): BUTTON_SCHEMA,
+            cv.Optional("btn_set"): BUTTON_SCHEMA,
+            cv.Optional("btn_play"): BUTTON_SCHEMA,
+            cv.Optional("btn_mode"): BUTTON_SCHEMA,
+            cv.Optional("btn_record"): BUTTON_SCHEMA,
         }
     ).extend(cv.COMPONENT_SCHEMA),
     cv.only_with_esp_idf,
