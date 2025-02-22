@@ -83,11 +83,14 @@ async def to_code(config):
     for button_id, button_name in buttons.items():
         # Define the button ID with type button.Button
         #button_id_obj = cg.ID(f"{config[CONF_ID]}_{button_id}", is_declaration=True, type=button.Button)
-        button_id_obj =  cv.declare_id(button.Button)(f"{config[CONF_ID]}_{button_id}")
+        button_id_obj = cv.declare_id(button.Button)(f"{config[CONF_ID]}_{button_id}")
         # Create the Button variable
         button_var = cg.new_variable(button_id_obj, button_name)
         # Register the button with its configuration
-        await button.register_button(button_var, {CONF_NAME: button_name})
+        await button.register_button(button_var, {
+            CONF_ID: button_id_obj,
+            CONF_NAME: button_name}
+            )
         # Set the button in ESPADFButton
         cg.add(getattr(var, f"set_{button_id}")(button_var))
 
