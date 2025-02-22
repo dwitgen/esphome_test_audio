@@ -105,7 +105,7 @@ async def to_code(config):
         if button_id in config:
             button_config = config[button_id]
             if CONF_ON_PRESS in button_config and button_config[CONF_ON_PRESS]:
-                automation_id = cg.new_id(f"{config[CONF_ID]}_{button_id}_automation")  # Create automation ID
+                automation_id = cv.declare_id(f"{config[CONF_ID]}_{button_id}_automation")  # Create automation ID
                 await automation.build_automation(
                     button_var,
                     [(CONF_ON_PRESS, button_config[CONF_ON_PRESS])],
