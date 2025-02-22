@@ -17,7 +17,7 @@ DEPENDENCIES = ["esp32"]
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 BUTTON_SCHEMA = cv.Schema({
-    cv.Optional(CONF_ON_STATE): list,  # Accept a list of actions for state changes
+    cv.Optional(CONF_ON_STATE): cv.ensure_list(cv.Any(cv.Schema({}), cv.Schema([]))),
 })
 
 CONFIG_SCHEMA = cv.All(
@@ -94,11 +94,11 @@ async def to_code(config):
 
         if button_id in config:
             button_config = config[button_id]
-            if CONF_ON_STATE in button_config:
-                # Use BinarySensorStateTrigger directly
-                await automation.build_automation(
-                    binary_sensor.BinarySensorStateTrigger(sensor),
-                    [(bool, "state")],
-                    button_config[CONF_ON_STATE]
-                )
+            if CONF_ON_STATE in button_config and button_config[CONF_ON_STATE]:
+                # Manually create a state callback using lambda
+                cg.add(sensor.add_on_state_callback(cg.Lambda(
+                    "[](bool state) {\n" +
+                    "\n".join(f"  {action}" for action in cg.build_lambda_lines(button_config[CONF_ON_STATE], [(bool, "state")])) +
+                    "\n}"
+                )))
        
