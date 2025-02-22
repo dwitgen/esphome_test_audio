@@ -3,7 +3,7 @@ import esphome.config_validation as cv
 from esphome import automation
 from esphome.core import Lambda
 from esphome.components import button, sensor
-from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE, CONF_ON_PRESS
+from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE, CONF_ON_PRESS, CONF_AUTOMATION_ID
 
 from .. import (
     CONF_ESP_ADF_ID,
@@ -18,8 +18,11 @@ DEPENDENCIES = ["esp32"]
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 BUTTON_SCHEMA = cv.Schema({
-    cv.Optional(CONF_ON_PRESS): list,  # Accept a list of actions for state changes
+    cv.Optional(CONF_ON_PRESS): automation.validate_automation({
+        CONF_ID: cv.declare_id(automation.Automation),  # Ensure automation ID is generated
+    })
 })
+
 
 CONFIG_SCHEMA = cv.All(
     cv.Schema(
@@ -99,8 +102,9 @@ async def to_code(config):
         if button_id in config:
             button_config = config[button_id]
             if CONF_ON_PRESS in button_config and button_config[CONF_ON_PRESS]:
+                automation_id = cg.new_id(f"{config[CONF_ID]}_{button_id}_automation")  # Create automation ID
                 await automation.build_automation(
-                    button_var,  # The component receiving the automation
+                    button_var,
                     [(CONF_ON_PRESS, button_config[CONF_ON_PRESS])],
-                    config  # The automation action
+                    {CONF_AUTOMATION_ID: automation_id}  # Pass the automation ID
                 )
