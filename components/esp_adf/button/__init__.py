@@ -1,6 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import automation
+from esphome.core import Lambda
 from esphome.components import button, sensor
 from esphome.const import CONF_ID, CONF_NAME, CONF_DISABLED_BY_DEFAULT, CONF_UNIT_OF_MEASUREMENT, CONF_ICON, CONF_FORCE_UPDATE, CONF_ON_PRESS
 
@@ -98,7 +99,7 @@ async def to_code(config):
         if button_id in config:
             button_config = config[button_id]
             if CONF_ON_PRESS in button_config and button_config[CONF_ON_PRESS]:
-                cg.add(button_var.add_on_press_callback(cg.Lambda(
+                cg.add(button_var.add_on_press_callback(Lambda(
                     "[]() {\n" +
                     "\n".join(f"  {action}" for action in cg.build_lambda_lines(button_config[CONF_ON_PRESS], [])) +
                     "\n}"
