@@ -99,8 +99,4 @@ async def to_code(config):
         if button_id in config:
             button_config = config[button_id]
             if CONF_ON_PRESS in button_config and button_config[CONF_ON_PRESS]:
-                cg.add(button_var.add_on_press_callback(Lambda(
-                    "[]() {\n" +
-                    "\n".join(f"  {action}" for action in cg.build_lambda_lines(button_config[CONF_ON_PRESS], [])) +
-                    "\n}"
-                )))
+               await automation.build_automation(button_var, [(CONF_ON_PRESS, button_config[CONF_ON_PRESS])])
