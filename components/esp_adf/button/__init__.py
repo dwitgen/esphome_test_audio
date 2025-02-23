@@ -129,23 +129,19 @@ async def to_code(config):
 
         if button_id in config:
 
-            # Register on_press automation if present
+            # Debug state changes
+            cg.add(sensor_obj.add_on_state_callback(
+                cg.RawExpression(f'[](bool state) {{ ESP_LOGD("DEBUG", "{button_name} state: %d", state); }}')
+            ))
+
             if CONF_ON_PRESS in config[button_id]:
-                for automation_config in config[button_id][CONF_ON_PRESS]:
-                    # Create the trigger with its unique ID
-                    trigger_id = automation_config[CONF_TRIGGER_ID]
-                    trigger = cg.new_Pvariable(trigger_id)
-                    # Build the automation actions
-                    await automation.build_automation(trigger, [(bool, "state")], automation_config)
-                    # Hook the trigger to the binary sensor's state callback using RawExpression
-                    callback = cg.RawExpression(
-                        f'[](bool state) {{ '
-                        f'if (state) {{ '
-                        f'ESP_LOGD("DEBUG", "{button_name} pressed, triggering automation"); '
-                        f'{trigger}.trigger(true); '
-                        f'}} }}'
-                    )
-                    cg.add(sensor_obj.add_on_state_callback(callback))
+                for conf in config[button_id][CONF_ON_PRESS]:
+                    trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], sensor_obj)
+                    # Debug when PressTrigger would fire
+                    cg.add(cg.RawExpression(
+                        f'{trigger}.add_on_trigger([]() {{ ESP_LOGD("DEBUG", "{button_name} PressTrigger fired"); }});'
+                    ))
+                    await automation.build_automation(trigger, [], conf)
             
             #if CONF_ON_PRESS in config[button_id]:
             #    for automation_config in config[button_id][CONF_ON_PRESS]:
