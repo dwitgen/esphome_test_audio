@@ -138,9 +138,6 @@ async def to_code(config):
                 for conf in config[button_id][CONF_ON_PRESS]:
                     trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], sensor_obj)
                     # Debug when PressTrigger would fire
-                    cg.add(cg.RawExpression(
-                        f'{trigger}.add_on_trigger([]() {{ ESP_LOGD("DEBUG", "{button_name} PressTrigger fired"); }});'
-                    ))
                     await automation.build_automation(trigger, [], conf)
             
             #if CONF_ON_PRESS in config[button_id]:
