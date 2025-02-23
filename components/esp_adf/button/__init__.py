@@ -131,12 +131,10 @@ async def to_code(config):
             
             if CONF_ON_PRESS in config[button_id]:
                 for automation_config in config[button_id][CONF_ON_PRESS]:
-                    trigger = await automation.build_automation(
-                        sensor_obj.get_press_trigger(),
-                        [],
-                        automation_config,
-                    )
-                    cg.add(sensor_obj.add_on_press(trigger))
+                    # Create a PressTrigger instance for this binary sensor
+                    trigger_id = automation_config[CONF_TRIGGER_ID]
+                    trigger = cg.new_Pvariable(trigger_id, sensor_obj)
+                    await automation.build_automation(trigger, [], automation_config)
 
 
         #if "on_press" in sensor_config:
