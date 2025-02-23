@@ -16,7 +16,7 @@ DEPENDENCIES = ["esp32"]
 
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
-BUTTON_SCHEMA = cv.Schema(
+BINARY_SENSOR_SCHEMA = cv.Schema(
     {
         
         cv.Optional(CONF_ON_PRESS): automation.validate_automation(
@@ -43,12 +43,12 @@ CONFIG_SCHEMA = cv.All(
         {
             cv.GenerateID(): cv.declare_id(ESPADFButton),
             cv.GenerateID(CONF_ESP_ADF_ID): cv.use_id(ESPADF),
-            cv.Optional("btn_vol_up"): BUTTON_SCHEMA,
-            cv.Optional("btn_vol_down"): BUTTON_SCHEMA,
-            cv.Optional("btn_set"): BUTTON_SCHEMA,
-            cv.Optional("btn_play"): BUTTON_SCHEMA,
-            cv.Optional("btn_mode"): BUTTON_SCHEMA,
-            cv.Optional("btn_record"): BUTTON_SCHEMA,
+            cv.Optional("btn_vol_up"): BINARY_SENSOR_SCHEMA,
+            cv.Optional("btn_vol_down"): BINARY_SENSOR_SCHEMA,
+            cv.Optional("btn_set"): BINARY_SENSOR_SCHEMA,
+            cv.Optional("btn_play"): BINARY_SENSOR_SCHEMA,
+            cv.Optional("btn_mode"): BINARY_SENSOR_SCHEMA,
+            cv.Optional("btn_record"): BINARY_SENSOR_SCHEMA,
         }
     ).extend(cv.COMPONENT_SCHEMA),
     cv.only_with_esp_idf,
