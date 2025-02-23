@@ -18,12 +18,12 @@ ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 BUTTON_SCHEMA = cv.Schema(
     {
-        cv.Optional(CONF_ON_PRESS): cv.templatable(cv.ensure_list(cv.maybe_simple_value(cv.ACTIONS))),
-        #cv.Optional(CONF_ON_PRESS): automation.validate_automation(
-        #        {
-        #            cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(binary_sensor.PressTrigger),
-        #        }
-        #    ),
+        #cv.Optional(CONF_ON_PRESS): cv.templatable(cv.ensure_list(cv.maybe_simple_value(cv.ACTIONS))),
+        cv.Optional(CONF_ON_PRESS): automation.validate_automation(
+                {
+                    cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(binary_sensor.PressTrigger),
+                }
+            ),
         #cv.Optional("on_press"): automation.validate_automation(
         #    {
         #        cv.GenerateID(): cv.declare_id(binary_sensor.PressTrigger),
@@ -121,10 +121,18 @@ async def to_code(config):
         #    await automation.build_automation(
         #        sensor_obj, sensor_config["on_release"], cg.RawExpression("false")
         #    )
-        if CONF_ON_PRESS in sensor_config:
-                cg.add(sensor.add_on_press(await automation.build_automation(
-                    sensor.get_press_trigger(), [], sensor_config[CONF_ON_PRESS]
-                )))
+        #if CONF_ON_PRESS in sensor_config:
+        #        cg.add(sensor.add_on_press(await automation.build_automation(
+        #            sensor.get_press_trigger(), [], sensor_config[CONF_ON_PRESS]
+        #        )))
+        if CONF_ON_PRESS in sensor_config[button_id]:
+                trigger = await automation.build_automation(
+                    sensor_obj.get_press_trigger(),
+                    [],
+                    sensor_config[button_id][CONF_ON_PRESS],
+                )
+                cg.add(sensor_obj.add_on_press(trigger))
+
         #if "on_press" in sensor_config:
         #        await automation.build_automation(
         #            sensor_obj.add_on_state_callback, sensor_config[CONF_ON_PRESS]
