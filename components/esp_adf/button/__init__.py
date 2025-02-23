@@ -100,8 +100,6 @@ async def to_code(config):
 
     # Create and register binary sensors for each button
     for button_id, button_name in buttons.items():
-        if button_id not in config:
-            continue
         
         sensor_id = cv.declare_id(binary_sensor.BinarySensor)(f"{config[CONF_ID]}_{button_id}")
         sensor_config = {
@@ -128,13 +126,18 @@ async def to_code(config):
         #        cg.add(sensor.add_on_press(await automation.build_automation(
         #            sensor.get_press_trigger(), [], sensor_config[CONF_ON_PRESS]
         #        )))
-        if CONF_ON_PRESS in config[button_id]:
-                trigger = await automation.build_automation(
-                    sensor_obj.get_press_trigger(),
-                    [],
-                    config[button_id][CONF_ON_PRESS],
-                )
-                cg.add(sensor_obj.add_on_press(trigger))
+
+        if button_id in config:
+            
+            if CONF_ON_PRESS in config[button_id]:
+                for automation_config in config[button_id][CONF_ON_PRESS]:
+                    trigger = await automation.build_automation(
+                        sensor_obj.get_press_trigger(),
+                        [],
+                        automation_config,
+                    )
+                    cg.add(sensor_obj.add_on_press(trigger))
+
 
         #if "on_press" in sensor_config:
         #        await automation.build_automation(
