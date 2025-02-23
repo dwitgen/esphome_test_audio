@@ -131,7 +131,7 @@ async def to_code(config):
 
             # Debug state changes
             cg.add(sensor_obj.add_on_state_callback(
-                cg.RawExpression(f'[](bool state) {{ ESP_LOGD("DEBUG", "{button_name} state: %d", state); }}')
+                cg.RawExpression(f'[](bool state) {{ ESP_LOGD("DEBUG", "My {button_name} state: %d", state); }}')
             ))
 
             if CONF_ON_PRESS in config[button_id]:
