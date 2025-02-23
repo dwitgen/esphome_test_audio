@@ -106,12 +106,12 @@ async def to_code(config):
         # Handle actions (on_press / on_release)
         if "on_press" in sensor_config:
             await automation.build_automation(
-                sensor_obj, sensor_config["on_press"], cg.RawExpression("state")
+                sensor_obj, sensor_config["on_press"], cg.RawExpression("true")
             )
 
         if "on_release" in sensor_config:
             await automation.build_automation(
-                sensor_obj, sensor_config["on_release"], cg.RawExpression("!state")
+                sensor_obj, sensor_config["on_release"], cg.RawExpression("false")
             )
         #if "on_press" in sensor_config:
         #        await automation.build_automation(
