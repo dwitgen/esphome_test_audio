@@ -16,14 +16,14 @@ DEPENDENCIES = ["esp32"]
 
 ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
-BINARY_SENSOR_SCHEMA = cv.Schema(
+BUTTON_SCHEMA = cv.Schema(
     {
-        
-        cv.Optional(CONF_ON_PRESS): automation.validate_automation(
-                {
-                    cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(binary_sensor.PressTrigger),
-                }
-            ),
+        cv.Optional(CONF_ON_PRESS): cv.templatable(cv.ensure_list(cv.maybe_simple_value(cv.ACTIONS))),
+        #cv.Optional(CONF_ON_PRESS): automation.validate_automation(
+        #        {
+        #            cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(binary_sensor.PressTrigger),
+        #        }
+        #    ),
         #cv.Optional("on_press"): automation.validate_automation(
         #    {
         #        cv.GenerateID(): cv.declare_id(binary_sensor.PressTrigger),
@@ -43,12 +43,12 @@ CONFIG_SCHEMA = cv.All(
         {
             cv.GenerateID(): cv.declare_id(ESPADFButton),
             cv.GenerateID(CONF_ESP_ADF_ID): cv.use_id(ESPADF),
-            cv.Optional("btn_vol_up"): BINARY_SENSOR_SCHEMA,
-            cv.Optional("btn_vol_down"): BINARY_SENSOR_SCHEMA,
-            cv.Optional("btn_set"): BINARY_SENSOR_SCHEMA,
-            cv.Optional("btn_play"): BINARY_SENSOR_SCHEMA,
-            cv.Optional("btn_mode"): BINARY_SENSOR_SCHEMA,
-            cv.Optional("btn_record"): BINARY_SENSOR_SCHEMA,
+            cv.Optional("btn_vol_up"): BUTTON_SCHEMA,
+            cv.Optional("btn_vol_down"): BUTTON_SCHEMA,
+            cv.Optional("btn_set"): BUTTON_SCHEMA,
+            cv.Optional("btn_play"): BUTTON_SCHEMA,
+            cv.Optional("btn_mode"): BUTTON_SCHEMA,
+            cv.Optional("btn_record"): BUTTON_SCHEMA,
         }
     ).extend(cv.COMPONENT_SCHEMA),
     cv.only_with_esp_idf,
@@ -121,10 +121,14 @@ async def to_code(config):
         #    await automation.build_automation(
         #        sensor_obj, sensor_config["on_release"], cg.RawExpression("false")
         #    )
-        if "on_press" in sensor_config:
-                await automation.build_automation(
-                    sensor_obj.add_on_state_callback, sensor_config[CONF_ON_PRESS]
-                )
+        if CONF_ON_PRESS in sensor_config:
+                cg.add(sensor.add_on_press(await automation.build_automation(
+                    sensor.get_press_trigger(), [], sensor_config[CONF_ON_PRESS]
+                )))
+        #if "on_press" in sensor_config:
+        #        await automation.build_automation(
+        #            sensor_obj.add_on_state_callback, sensor_config[CONF_ON_PRESS]
+        #        )
 
         #if "on_release" in sensor_config:
         #    await automation.build_automation(
