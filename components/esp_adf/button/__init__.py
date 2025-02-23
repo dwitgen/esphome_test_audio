@@ -18,7 +18,7 @@ ESPADFButton = esp_adf_ns.class_("ESPADFButton", cg.Component)
 
 BUTTON_SCHEMA = cv.Schema(
     {
-        cv.Optional(CONF_ON_PRESS): cv.templatable(cv.ensure_list(cv.maybe_simple_value(cg.ACTIONS))),
+        cv.Optional(CONF_ON_PRESS): cv.templatable(cv.ensure_list(cv.maybe_simple_value(cv.CONF_ACTIONS))),
         #cv.Optional(CONF_ON_PRESS): automation.validate_automation(
         #        {
         #            cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(binary_sensor.PressTrigger),
