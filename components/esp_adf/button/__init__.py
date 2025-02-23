@@ -100,6 +100,9 @@ async def to_code(config):
 
     # Create and register binary sensors for each button
     for button_id, button_name in buttons.items():
+        if button_id not in config:
+            continue
+        
         sensor_id = cv.declare_id(binary_sensor.BinarySensor)(f"{config[CONF_ID]}_{button_id}")
         sensor_config = {
             CONF_ID: sensor_id,
