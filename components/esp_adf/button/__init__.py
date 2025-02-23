@@ -139,7 +139,7 @@ async def to_code(config):
                     await automation.build_automation(trigger, [(bool, "state")], automation_config)
                     # Hook the trigger to the binary sensor's state callback
                     cg.add(sensor_obj.add_on_state_callback(
-                        cg.lambda_(
+                        cg.process_lambda(
                             f'[](bool state) {{ '
                             f'if (state) {{ '
                             f'ESP_LOGD("DEBUG", "{button_name} pressed, triggering automation"); '
