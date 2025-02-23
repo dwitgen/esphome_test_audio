@@ -20,7 +20,7 @@ BUTTON_SCHEMA = cv.Schema(
     {
         cv.Optional("on_press"): automation.validate_automation(
             {
-                #cv.GenerateID(): cv.declare_id(binary_sensor.StateTrigger),
+                cv.GenerateID(): cv.declare_id(binary_sensor.PressTrigger),
                 cv.Optional("on_press"): automation.validate_automation(single=True),
             }
         ),
