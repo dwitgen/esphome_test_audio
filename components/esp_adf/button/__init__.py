@@ -134,6 +134,7 @@ async def to_code(config):
                     # Create a PressTrigger instance for this binary sensor
                     trigger_id = automation_config[CONF_TRIGGER_ID]
                     trigger = cg.new_Pvariable(trigger_id, sensor_obj)
+                    cg.add(cg.RawExpression(f'ESP_LOGD("DEBUG", "PressTrigger created for {button_name}");'))
                     await automation.build_automation(trigger, [], automation_config)
 
 
