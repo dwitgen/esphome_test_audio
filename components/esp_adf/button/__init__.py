@@ -107,7 +107,7 @@ async def to_code(config):
         # Handle actions (on_press / on_release)
         if "on_press" in sensor_config:
             automation_var = await automation.build_automation(
-                sensor_obj, sensor_config["on_press"], cg.RawExpression("true")
+                sensor_obj, sensor_config["on_press"], cg.RawExpression("sensor_obj->state")
             )
             cg.add(sensor_obj.add_on_state_callback(automation_var))
 
