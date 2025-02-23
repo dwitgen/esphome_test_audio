@@ -128,14 +128,33 @@ async def to_code(config):
         #        )))
 
         if button_id in config:
-            
+
+            # Register on_press automation if present
             if CONF_ON_PRESS in config[button_id]:
-                for automation_config in config[button_id][CONF_ON_PRESS]:
-                    # Create a PressTrigger instance for this binary sensor
-                    trigger_id = automation_config[CONF_TRIGGER_ID]
-                    trigger = cg.new_Pvariable(trigger_id, sensor_obj)
-                    cg.add(cg.RawExpression(f'ESP_LOGD("DEBUG", "PressTrigger created for {button_name}");'))
-                    await automation.build_automation(trigger, [], automation_config)
+                # Build the automation actions
+                actions = await automation.build_automation(
+                    cg.new_Pvariable(cg.global_ns.namespace(""), sensor_obj),  # Dummy trigger
+                    [(bool, "state")],  # Expecting a bool argument
+                    config[button_id][CONF_ON_PRESS]
+                )
+                # Hook the actions to the state callback, running only on press (state = true)
+                cg.add(sensor_obj.add_on_state_callback(
+                    cg.Lambda(
+                        f'[](bool state) {{ '
+                        f'if (state) {{ '
+                        f'ESP_LOGD("DEBUG", "{button_name} pressed, running automation"); '
+                        f'{actions}({cg.true}); '
+                        f'}} }}'
+                    )
+                ))
+            
+            #if CONF_ON_PRESS in config[button_id]:
+            #    for automation_config in config[button_id][CONF_ON_PRESS]:
+            #        # Create a PressTrigger instance for this binary sensor
+            #        trigger_id = automation_config[CONF_TRIGGER_ID]
+            #        trigger = cg.new_Pvariable(trigger_id, sensor_obj)
+            #        cg.add(cg.RawExpression(f'ESP_LOGD("DEBUG", "PressTrigger created for {button_name}");'))
+            #        await automation.build_automation(trigger, [], automation_config)
 
 
         #if "on_press" in sensor_config:
