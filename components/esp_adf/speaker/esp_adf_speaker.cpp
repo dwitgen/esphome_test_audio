@@ -767,7 +767,7 @@ void ESPADFSpeaker::player_task(void *params) {
     // Ensure enough heap is available before proceeding
     uint32_t heap_before = esp_get_free_heap_size();
     if (heap_before < 50 * 1024) {  // Example threshold
-        ESP_LOGE(TAG, "Insufficient heap memory: %u bytes available", heap_before);
+        ESP_LOGE(TAG, "Insufficient heap memory: %lu bytes available", heap_before);
         return;
     }
 
