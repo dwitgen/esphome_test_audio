@@ -774,7 +774,7 @@ void ESPADFSpeaker::player_task(void *params) {
     TaskEvent event;
     event.type = TaskEventType::STARTING;
     xQueueSend(this_speaker->event_queue_, &event, portMAX_DELAY);
-    ESP_LOGI(TAG, "Heap before initialize_audio_pipeline: %u bytes", esp_get_free_heap_size());
+    ESP_LOGI(TAG, "Heap before initialize_audio_pipeline: %lu bytes", esp_get_free_heap_size());
     // Initialize the audio pipeline for RAW stream
     this_speaker->initialize_audio_pipeline(false); // RAW stream initialization
 
