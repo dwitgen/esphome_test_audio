@@ -76,7 +76,7 @@ async def to_code(config):
         path="components",
         ref="v2.7",
         components=["*"],
-        submodules=["components/esp-adf-libs"],
+        submodules=["components/esp-sr","components/esp-adf-libs"],
     )
 
             
