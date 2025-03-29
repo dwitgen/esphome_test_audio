@@ -8,7 +8,7 @@ patchflag_path = join(FRAMEWORK_DIR, ".adf-patching-done")
 
 PROJECT_DIR = env.get('PROJECT_DIR')
 
-PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "idf_v4.4_freertos.patch")
+PATCH_FILE = join(PROJECT_DIR, "esp_adf_patches", "idf_v5.1_freertos.patch")
 
 # patch file only if we didn't do it before
 if not isfile(patchflag_path):
