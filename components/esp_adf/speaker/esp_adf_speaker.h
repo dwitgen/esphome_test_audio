@@ -32,6 +32,9 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
  public:
   float get_setup_priority() const override { return esphome::setup_priority::LATE; }
 
+  // adding registry dump 20260206
+  void dump_es8311_registers();
+
   void setup() override;
   void loop() override;
 
@@ -125,3 +128,4 @@ class ESPADFSpeaker : public ESPADFPipeline, public speaker::Speaker, public Com
 }  // namespace esphome
 
 #endif  // USE_ESP_IDF
+
