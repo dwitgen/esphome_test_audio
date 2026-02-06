@@ -21,6 +21,9 @@
 #include <audio_pipeline.h>
 #include <mp3_decoder.h>
 
+// add incude for direct i2c for debugging
+#include <driver/i2c.h>
+
 // Added include for board config to be used with button and other controls
 #ifdef USE_ESP_ADF_BOARD
 #include <board.h>
@@ -28,6 +31,53 @@
 
 namespace esphome {
 namespace esp_adf {
+
+// adding method for registry dump
+void ESPADFSpeaker::dump_es8311_registers() {
+  static const char *TAG2 = "es8311.dump";
+
+  // ES8311 is commonly 0x18 or 0x19 (7-bit). We'll try both.
+  const uint8_t addrs[] = {0x18, 0x19};
+
+  const uint8_t regs[] = {
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+    0x09, 0x0A, 0x0D, 0x0E, 0x0F, 0x12, 0x13, 0x15,
+    0x1C, 0x2F, 0x30, 0x31, 0x32, 0x37, 0x38, 0x44
+  };
+
+  int found = -1;
+  for (int i = 0; i < (int)(sizeof(addrs) / sizeof(addrs[0])); i++) {
+    uint8_t reg = 0x00;
+    uint8_t val = 0x00;
+    esp_err_t err = i2c_master_write_read_device(
+        I2C_NUM_0, addrs[i], &reg, 1, &val, 1, pdMS_TO_TICKS(100));
+    if (err == ESP_OK) {
+      found = i;
+      ESP_LOGI(TAG2, "ES8311 responded at I2C addr 0x%02X", addrs[i]);
+      break;
+    }
+  }
+
+  if (found < 0) {
+    ESP_LOGE(TAG2,
+             "Could not read ES8311 over I2C. (Is I2C driver installed? wrong addr?)");
+    return;
+  }
+
+  const uint8_t addr = addrs[found];
+
+  for (uint8_t reg : regs) {
+    uint8_t value = 0;
+    esp_err_t err = i2c_master_write_read_device(
+        I2C_NUM_0, addr, &reg, 1, &value, 1, pdMS_TO_TICKS(100));
+
+    if (err == ESP_OK) {
+      ESP_LOGI(TAG2, "Reg 0x%02X = 0x%02X", reg, value);
+    } else {
+      ESP_LOGE(TAG2, "Failed reg 0x%02X (err=%s)", reg, esp_err_to_name(err));
+    }
+  }
+}
 
 static const size_t BUFFER_COUNT = 50;
 static const char *const TAG = "esp_adf.speaker";
@@ -696,3 +746,4 @@ bool ESPADFSpeaker::has_buffered_data() const { return uxQueueMessagesWaiting(th
 }  // namespace esphome
 
 #endif  // USE_ESP_IDF
+
